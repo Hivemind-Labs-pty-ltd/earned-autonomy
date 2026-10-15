@@ -191,7 +191,7 @@ elif not capped(k) and s.level < 3
   |---|---|--:|--:|--:|
   | **C1 Low** | internal notes, tagging, FAQ answers; easy to undo | 10% | 85% | 35 |
   | **C2 Moderate** | customer replies, bookings, record updates | 5% | 90% | 73 |
-  | **C3 High** | commitments, small refunds, access changes | 2% | 95% | 183 |
+  | **C3 High** | commitments, small refunds, access changes | 2% | 95% | 189 |
   | **C4 Critical** | releasing money, deleting records, legal or irreversible | never promotes | — | — |
 
   **[default]** values; the AI owner can tighten (never loosen) a type's bar. *Task success* = the share of judged
