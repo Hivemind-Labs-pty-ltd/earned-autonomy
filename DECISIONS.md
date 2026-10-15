@@ -45,3 +45,10 @@ Append-only. Newest at the bottom.
   - Net effect on serious-error rates: good-full 5.4% → 2.0%; sloppy-full 18.0% → 14.4%; good-scoped 1.6% → 0.67%.
 - **Learning loop restarted twice for one consistent method:** (a) first start: rule proposals were silently truncated (no rules added); (b) second start: corrections came from the pre-validation grader for cs/ws. Final run: all six archetypes in parallel, corrections from the final grader including the run-time two-stage commitment judge. DO crashed once on a network reset inside the budget check (now retried) and was rerun from scratch.
 - **Known limitation:** for some longer DO prompts flash spends all 8,000 rule-proposal tokens reasoning and returns nothing three times; those cycles add no rules. Reported as a tooling failure, not as the loop failing to learn.
+
+## 2026-10-15 — all verdicts scored (REPORT.md)
+- 8 PASS · 8 FAIL · 5 MIXED · 1 INCONCLUSIVE. Two-tier hypotheses: PASS/FAIL only if both T2 frozen agents agree, else MIXED.
+- H5 INCONCLUSIVE: with w = 0.5 and ~25 actions per type per cycle, no learning-loop key ever reaches the promotion floor. **Exploratory (not prereg):** w = 1.0 → loop agents promoted on 206/400 key-runs vs frozen 124/400, both at a median of 73 reviews.
+- M1 escapes computed by reweighting the stratified reviewer sample to each frozen agent's real error rate; human miss rate 6% (T1 reviewer).
+- Framework revisions proposed (not applied to the prereg): carry evidence across versions that pass hidden tests; one-level demotion; pooled per-type trust; exploratory peer routing; measure each reviewer agent rather than discounting same-model.
+- Spend: T2 $8.55; T1/T3 $0.
