@@ -80,3 +80,12 @@ Append-only. Newest at the bottom.
 - Pre-registered: C1 MIXED · C2 PASS · C3 FAIL · F1 FAIL · R1 FAIL · K1 FAIL. Spend $0.
 - Exploratory (post-hoc, `analyze_v2_explore.py`): carry-over without "≥ previous" passes K1 on T1 and keeps 142/400 promotions (125/125 deserved, 0 escapes) on the T2 loop; reviewer trust with clean second checks + 5% canaries sorts reviewers correctly (−18% escapes, +20% minutes); a 60-day re-entry step-down cuts drift escapes 17% at zero cost; consequence bars without the success gate beat flat on T1.
 - Recommended SPEC changes listed in REPORT-v2.md; exploratory fixes need a pre-registered confirmation round before being marked [tested].
+
+## 2026-10-16 — v3 operationalisations (after prereg-v3 tag, before any scored v3 result)
+- Engine: `gym/engine_v3.py` (`EngineV3` subclasses `EngineV2`); each fix's logic moved unchanged from `analyze_v2_explore.py`, behind its own switch (`carry_no_prev`, `reentry_gap`, `rev_clean`). Adds a decision ledger: one row per auto-executed action, snapshotted at decision time (level, n, err, upper, ε, consequence, version, checks, policy version).
+- **K1' calibration (seeds 59 000–59 049 only):** grid σ 0.04→0.40 step 0.01; pooled Spearman ρ fell monotonically from −0.974 (σ 0.04) to −0.829 at **σ = 0.38**, the first value inside −0.80 ± 0.03. **σ fixed at 0.38** for the calibrated model. Model (a) keeps σ 0.04 (as v2).
+- K1' arms all run on the base v3 policy (consequence bars, success OFF, canaries 5%, no fading), single complacency reviewer `rev(seed)`; only `version_mode` / `carry_no_prev` differ.
+- R1': "C ever reaches R2" = its trust level is ≥ R2 at any point (tracked in `_rev_observe`); "A at R2 at end" = level ≥ 2 after the last action. No-trust arm = same pool, `reviewer_trust=False` (no canaries, no second checks).
+- F1': main-portfolio automation from a separate run on the world without agent agX (same seed), as in v2.
+- Combined run: T1 uses the single complacency reviewer (no pool), so reviewer trust is inactive there; T1 main worlds have one version per agent, and T2 frozen streams one version, so carry-over is a no-op in the reference numbers; T2 streams carry no calendar day, so the re-entry rule is a no-op on T2. The reference numbers therefore measure the v3 base policy + whatever fixes can act on each stream; the fixes themselves are measured in K1'/R1'/F1'.
+- T2 H1 uses the key's consequence ε; promotions with < 50 following rows are skipped (as v0).
