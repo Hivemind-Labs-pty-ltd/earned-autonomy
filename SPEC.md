@@ -61,7 +61,9 @@ Components: **Tagger**, **Checks**, **Trust engine** (decide + update), **Trust 
   **[default]**
 - **Granularity rule: split a task type when the consequence of a mistake differs materially**, not when the
   wording differs. "Refund ≤ $50" and "refund > $50" are separate types if a wrong large refund costs more.
-  **[OPEN]** Who maintains the catalogue? Recommendation: the policy owner, with the tagger proposing new types.
+- **Catalogue owner (decided 2026-10-16):** the **AI owner** for that area of the business (a team lead, department
+  head or similar) maintains its task types and assigns each a consequence level (§7). The tagger proposes new
+  types; the AI owner accepts or rejects them.
 - **Tagger:** a classifier (rules first, model second) returns `{task_type, confidence}` for every proposed action.
   - **Confidence < 0.8** → treat the action as **L1** (held), whatever the type's level. **[default]**
   - **Unknown type** → held, and logged as a candidate new type. **[default]**
@@ -182,8 +184,22 @@ elif not capped(k) and s.level < 3
   | 0.03 | 125 | 185 |
 
   **[tested]**: 92–96% of promotions were deserved; regressions were demoted in a median of 11–14 actions.
-- **Setting ε:** from the measured error rate and the cost of a mistake for that type, **not** from a risk label.
-  **[tested]**: "low-risk" types had the highest error rates in testing.
+- **Consequence levels set the bar (decided 2026-10-16).** Every task type gets a consequence level from its AI
+  owner. The level sets how accurate and successful the agent must prove to be before it's promoted on that task.
+
+  | Consequence | Typical actions | Max serious-error rate (ε) | Min task success | Judged actions before first promotion (0 errors) |
+  |---|---|--:|--:|--:|
+  | **C1 Low** | internal notes, tagging, FAQ answers; easy to undo | 10% | 85% | 35 |
+  | **C2 Moderate** | customer replies, bookings, record updates | 5% | 90% | 73 |
+  | **C3 High** | commitments, small refunds, access changes | 2% | 95% | 183 |
+  | **C4 Critical** | releasing money, deleting records, legal or irreversible | never promotes | — | — |
+
+  **[default]** values; the AI owner can tighten (never loosen) a type's bar. *Task success* = the share of judged
+  actions approved as-is or with cosmetic edits only; promotion needs its Wilson **lower** bound ≥ the minimum, as
+  well as the error bound ≤ ε.
+- **The label sets the bar; measured errors decide whether the agent meets it.** **[tested]**: in testing,
+  "low-risk" types had the *highest* error rates, so consequence must never be used to predict accuracy, only to
+  set how much accuracy is required.
 - **Evidence expiry:** **[OPEN]** Recommendation: no hard expiry; demotion handles drift. Re-test with an
   exponential decay (half-life ~90 days) before adopting.
 - **Concurrency:** state updates are serialised per trust key (optimistic concurrency on `state_version`).
@@ -195,8 +211,9 @@ elif not capped(k) and s.level < 3
 ## 8. Agent versions and the learning loop
 
 - **A new version** is any change to: system prompt or instructions, model, tools or tool scope, rules, checks,
-  or knowledge the agent is told to follow. **[OPEN]** Recommendation: count knowledge-base content edits (facts,
-  prices) as data, not a new version, *unless* they change policy. The policy owner decides borderline cases.
+  **or knowledge**. **Decided 2026-10-16: every knowledge edit is a new version**, because knowledge changes what
+  the agent does. Consequence: versions change often, so the hidden suites must run automatically and cheaply on
+  every edit, or every knowledge update will cost the agent half its record.
 - **Correction step:** every serious outcome produces a draft **rule** and a draft **test** (the human's corrected
   action is the expected result). A person approves both. **[tested]** (errors fell to ~0% within 2–3 cycles in 5
   of 6 archetypes; synthetic).
@@ -218,9 +235,16 @@ elif not capped(k) and s.level < 3
 - **Review queue:** held actions show the proposed action, the checks result, the task type and level, and why it
   was held. The reviewer must choose a label and, for edits and rejections, a reason code. **[default]**
 - **Spot-checks:** the same screen, after the fact, for sampled autonomous actions.
-- **Canaries:** `canary_rate` of review items are known-bad seeded actions. They measure each reviewer's catch
-  rate. **[tested in simulation only]**: −15% missed errors. **[OPEN]** What happens to a reviewer whose catch
-  rate is low? Recommendation: alert the policy owner; don't auto-discount their judgements yet.
+- **Canaries:** `canary_rate` of review items are known-bad seeded actions. **[tested in simulation only]**: −15%
+  missed errors.
+- **Reviewers earn trust too (decided 2026-10-16).** A human reviewer follows the same framework as an agent.
+  Each reviewer has a trust key `(org, reviewer_id, review.<task_type>)`. Their evidence comes from canaries (did
+  they catch the planted error?) and audits (does a second reviewer or a later incident agree with their call?).
+  - **R1 New reviewer:** their approvals are second-checked on a sample of 25%.
+  - **R2 Trusted reviewer:** single review; 5% second-checked.
+  - **Stepping down:** a reviewer who misses canaries or whose approvals lead to incidents steps down one level,
+    and the AI owner is told.
+  - **[default]** values. Same maths as §7, with "missed a serious error" as the error.
 - **Incident button** on every executed action: "this was wrong" → incident event.
 - **Pause:** per agent or per task type. Pausing holds all new and not-yet-executed actions. It doesn't undo
   executed ones. **[default]**
@@ -233,7 +257,8 @@ elif not capped(k) and s.level < 3
 ## 10. Governance
 
 **Roles**
-- **Agent owner:** accountable for the agent.
+- **AI owner:** the business person accountable for agents in an area (a team lead, department head or similar).
+  Owns the agent, its task-type catalogue and each type's consequence level.
 - **Policy owner:** sets ε, caps, tools per type and sample rates; approves L3 promotions where the policy requires
   it.
 - **Reviewer:** labels outcomes.
@@ -248,8 +273,13 @@ elif not capped(k) and s.level < 3
 - The trust record is append-only for everyone.
 - **Policy changes take effect immediately.** Lowering ε re-evaluates every affected key at once (demote if the
   bound no longer holds). Raising ε promotes only on the next outcome. **[default]**
-- **Retention:** the trust record and decisions are kept for the organisation's audit period, at least 12 months.
-  **[OPEN]** Recommendation: align with the client's record-keeping obligations.
+- **Retention: forever (decided 2026-10-16).** The trust record and every decision are kept permanently; it's the
+  agent's (and reviewer's) whole employment history.
+  - **Privacy catch:** privacy law (in Australia, APP 11.2) requires personal information to be destroyed or
+    de-identified once it's no longer needed. So the permanent record holds **references and labels, not
+    content**: `action_id`, task type, outcome, reason code, versions, actor ids, a hash of the payload. Customer
+    content (messages, names, amounts) lives in the source system under its normal retention. When it's deleted, the
+    trust record keeps its evidence and loses nothing it needs. **[default]**
 
 ## 11. Multi-agent (preview; least proven)
 
@@ -310,16 +340,19 @@ A customer service agent proposes a $49 refund. Task type `cs.refund.issue`, ε 
    **step down to L1** automatically. A correction becomes a rule and a test; the new version passes its hidden
    tests (0.9 ≥ 0.8), so it keeps its evidence and climbs back once the bound holds.
 
-## 15. Open decisions (for the policy owner / framework owner)
+## 15. Decisions
 
-1. **Task-type catalogue:** who maintains it, and the exact split rule (§4).
-2. **What counts as a new version** for knowledge edits (§8).
-3. **Evidence expiry:** none, or decay (§7).
-4. **Low-catch reviewers:** what happens to their judgements (§9).
-5. **Record retention period** (§10).
-6. **Default ε per domain** for the published reference policy.
-7. **Lowering the evidence floor** for low-consequence types, the main lever on review savings (currently capped at
-   ~30–40%). Needs a test before adoption.
+**Decided 2026-10-16 (Jake)**
+1. **Task-type catalogue:** the AI owner (team lead, department head) maintains it (§4).
+2. **Knowledge edits** are always a new version (§8).
+3. **Reviewers** follow the same trust framework as agents (§9).
+4. **Retention:** forever, holding references and labels, not customer content (§10).
+5. **Consequence levels** set the bar for each task type (§7).
+
+**Still open**
+1. **Evidence expiry:** should a review from a year ago count as much as one from last week? (§7)
+2. **The C1–C3 values:** the default ε and success bars per consequence level need a Trust Gym run before
+   publishing. In particular, C1's lower floor (35 judged actions) is the main lever on review savings.
 
 ## Evidence
 
