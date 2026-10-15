@@ -1,6 +1,6 @@
 # Earned Autonomy Framework: build spec
 
-**Version 0.1 (preview), 2026-10-16.** Companion to the explainer (the loop, the ladder, the five stages). This
+**Version 0.2 (preview), 2026-10-16.** Companion to the explainer (the loop, the ladder, the five stages). This
 document is for the engineer or AI agent building it. It is product-neutral: any agent platform can implement it.
 
 Every rule carries a status:
@@ -204,8 +204,8 @@ elif not capped(k) and s.level < 3
   set how much accuracy is required.
 - **Evidence expiry: none.** **[tested v2]**: fading at 90 or 180 days cost 4–6 points of automation and punished
   Senior task types, because only 5% of their actions are judged.
-  - **Re-entry rule:** a task type that returns after a gap of more than 60 days steps down one level. It cut drift
-    escapes 17% at no cost. **[exploratory: confirmation pending]**
+  - **Re-entry rule:** a task type that returns after a gap of more than 60 days steps down one level.
+    **[tested v3]**: −17% escapes after drift, at zero automation cost.
 - **Concurrency:** state updates are serialised per trust key (optimistic concurrency on `state_version`).
   Decisions read the latest committed state. TrustState must be rebuildable by replaying the trust record.
   **[default]**
@@ -227,10 +227,11 @@ elif not capped(k) and s.level < 3
 - **Minimum hidden suite:** ≥ 10 hidden tests per task type before carry-over can apply. **[default]**
 - **Publishing a new version:** run training and hidden suites on the candidate before it goes live.
   - **Carry-over rule:** if `hidden_pass ≥ carry_hidden_min (0.8)` for that task type → the trust key keeps all its
-    evidence. **[exploratory v2: confirmation pending]**: the earlier extra clause "≥ the previous version's score"
-    discarded good versions when versions change often. Without it, 87% of the automation of always-keeping was
-    retained, at the same escapes as always-discounting. On real learning-loop data it gave the same 142/400
-    promotions, all deserved.
+    evidence; otherwise the discount below applies. **[tested v3: safe; effectiveness depends on hidden-test
+    quality]**: escapes stay at the always-discount level. With sharp hidden tests it keeps ~90% of the autonomy;
+    with tests as informative as those measured on real agents, ~50%. **The hidden suite is the lever:** make it
+    large and sharp per task type.
+    - The earlier clause "≥ the previous version's score" is removed: it added noise without safety.
   - **Batch knowledge edits** (e.g. a weekly release), so each small edit doesn't force a re-test. **[default]**
   - **Otherwise:** `n` and `err` are multiplied by `version_discount (0.5)`, and if the upper bound now exceeds ε,
     the key drops to L1. **[tested]**
@@ -253,9 +254,11 @@ elif not capped(k) and s.level < 3
     and the AI owner is told.
   - **Evidence:** canaries, plus every second check (clean or not). Same maths as §7, ε_rev = 10%, n_min = 30.
     Canary rate for reviewers: **5%**.
-  - **[exploratory v2: confirmation pending]**: it reliably sorts reviewers (good ones trusted, a poor one
-    never). It's quality control, not the main way to cut errors: −18% escapes for +20% review time. Counting only
-    canaries and disagreements (the pre-registered design) never trusted anyone.
+  - **[tested v3]**: it sorts reviewers correctly. A poor reviewer (60% catch) was ever trusted in 9% of worlds,
+    and a good one (95%) ended trusted in 100%. It's quality control rather than the main way to cut errors: −15%
+    escapes for +21% review time.
+  - **Limit:** a *slowly* degrading reviewer is caught slowly (a median of ~189 reviews). A rolling canary check is
+    a candidate fix (untested).
 - **Incident button** on every executed action: "this was wrong" → incident event.
 - **Pause:** per agent or per task type. Pausing holds all new and not-yet-executed actions. It doesn't undo
   executed ones. **[default]**
@@ -364,13 +367,24 @@ A customer service agent proposes a $49 refund. Task type `cs.refund.issue`, ε 
 6. **No evidence fading** (§7).
 7. **Consequence ε values confirmed;** success minimums are alerts, not gates (§7).
 
-**Pending one confirmation run (v3)**
-1. Carry-over without the "≥ previous" clause (§8).
-2. Reviewer trust counting second checks, with 5% canaries (§9).
-3. The 60-day re-entry rule (§7).
+**Confirmed by Trust Gym v3 (2026-10-16, fresh seeds)**
+8. **Re-entry rule** (§7) and **reviewer trust** (§9): tested.
+9. **Carry-over at ≥ 0.8:** safe; its value depends on hidden-test quality (§8).
+
+**Still open**
+1. Speeding up detection of a slowly degrading reviewer (rolling canary window).
+2. A real-world pilot: every result so far is synthetic.
 
 ## Evidence
 
-`PREREG.md` / `REPORT.md` (v0, 22 hypotheses) and `PREREG-v1.md` / `REPORT-v1.md` (v1 revisions) in this
+**Reference numbers (combined policy, `REPORT-v3.md`):**
+- An agent does 25–40% of its work on its own.
+- 93–100% of promotions are deserved.
+- Regressions are caught in a median of 14 actions.
+- 100% of autonomous actions are explainable.
+- Escaped serious errors rise by about 0.2 per 100 actions against reviewing everything (good agent).
+
+Pre-registered rounds: `PREREG.md` / `REPORT.md` (v0, 22 hypotheses), `PREREG-v1.md` / `REPORT-v1.md`,
+`PREREG-v2.md` / `REPORT-v2.md`, and `PREREG-v3.md` / `REPORT-v3.md` (confirmation on fresh seeds), all in this
 repository. All synthetic: simulated organisations, 6,000 generated tasks done by real AI agents, τ²-bench. A
 real-world pilot is next.
