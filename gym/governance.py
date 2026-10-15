@@ -21,7 +21,7 @@ ALLOWED = {
     "edit_tests": {"policy_owner"},                  # tests/checks change only via the policy owner
     "edit_checks": {"policy_owner"},
     "edit_ledger": set(),                            # append-only: nobody edits
-    "read_ledger": {"policy_owner", "agent_owner", "reviewer", "auditor"},
+    "read_ledger": {"policy_owner", "agent_owner", "reviewer", "auditor", "agent"},  # agents may read their own record
     "publish_version": {"builder", "agent_owner"},
 }
 
