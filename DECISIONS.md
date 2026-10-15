@@ -89,3 +89,7 @@ Append-only. Newest at the bottom.
 - F1': main-portfolio automation from a separate run on the world without agent agX (same seed), as in v2.
 - Combined run: T1 uses the single complacency reviewer (no pool), so reviewer trust is inactive there; T1 main worlds have one version per agent, and T2 frozen streams one version, so carry-over is a no-op in the reference numbers; T2 streams carry no calendar day, so the re-entry rule is a no-op on T2. The reference numbers therefore measure the v3 base policy + whatever fixes can act on each stream; the fixes themselves are measured in K1'/R1'/F1'.
 - T2 H1 uses the key's consequence ε; promotions with < 50 following rows are skipped (as v0).
+
+## 2026-10-16 — v3 scored (REPORT-v3.md)
+- K1' FAIL (calibrated ρ −0.83: carry keeps 53% of always-keep's automation; escapes 1.03× discount; passes only with over-informative tests, ρ −0.98) · R1' PASS (bad reviewer ever trusted 9%, good reviewer trusted at end 100%, escapes −15%, minutes +21%) · F1' PASS (drift escapes −17%, 0.0 pts automation). Spend $0.
+- Reference numbers (combined v3 policy): T1 H1 93.3%, reviews removed 30.7%, H4 median 14, G2 100%; T2 good H1 100%, removed 33.9%; T2 sloppy H1 98.6%, removed 21.1%.
