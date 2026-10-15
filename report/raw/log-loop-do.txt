@@ -1,0 +1,7 @@
+do v1: n=100 err=0.160 rules=0 caught=11
+do v2: n=100 err=0.190 rules=3 caught=18
+do v3: n=100 err=0.100 rules=3 caught=8
+do v4: n=100 err=0.090 rules=6 caught=6
+do v5: n=100 err=0.050 rules=9 caught=5
+do v6: n=100 err=0.060 rules=12 caught=5
+wrote t2-loop.jsonl spend $8.55
