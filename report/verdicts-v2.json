@@ -1,0 +1,219 @@
+{
+ "verdicts": {
+  "C1": {
+   "value": "T1: cost/100 3.93 vs flat 3.91; removed 19% vs 23%; T2 good-full: cost/100 1.44 vs flat 1.46; removed 34% vs 35%; T2 sloppy-full: cost/100 6.99 vs flat 6.40; removed 20% vs 14%",
+   "verdict": "MIXED"
+  },
+  "C2": {
+   "value": "T1: C1 reviews removed 45%, 0.60 escapes/100 auto; T2 good-full: C1 reviews removed 54%, 0.84 escapes/100 auto; T2 sloppy-full: C1 reviews removed 63%, 0.71 escapes/100 auto",
+   "verdict": "PASS"
+  },
+  "C3": {
+   "value": "T1: non-serious failures auto-executed \u221247% (114.3\u219260.3); automation \u221211.8 pts; T2 good-full: non-serious failures auto-executed \u22129% (19.4\u219217.6); automation \u22120.2 pts; T2 sloppy-full: non-serious failures auto-executed \u221213% (17.6\u219215.4); automation \u22120.5 pts",
+   "verdict": "FAIL"
+  },
+  "F1": {
+   "value": "half-life 90d: rare-then-drift escapes \u221236% (5.0\u21923.2); main automation \u22126.0 pts \u2192 FAIL; half-life 180d: rare-then-drift escapes \u221231% (5.0\u21923.5); main automation \u22123.9 pts \u2192 FAIL (no fading: main automation 22.9%)",
+   "verdict": "FAIL",
+   "adopt": null
+  },
+  "R1": {
+   "value": "escapes \u221220% (70.4\u219256.3); review minutes +25%; median bad-reviewer reviews at R2 = 0.0; share ending at R2 A/B/C/D = 0%/0%/0%/0%; mean evidence per reviewer 18/20/28/25",
+   "verdict": "FAIL"
+  },
+  "K1": {
+   "value": "automation carry 4.2% / keep 12.9% / discount 1.6%; escapes carry 43.0 / keep 46.8 / discount 42.9; hidden-test \u03c1 = -0.98 over 32828 versions",
+   "verdict": "FAIL"
+  }
+ },
+ "results": {
+  "c_streams": {
+   "T1": {
+    "A": {
+     "automation": 0.0,
+     "cost_per100": 4.085,
+     "esc_per100": 0.49524999999999997,
+     "esc_per100_auto": 0.0,
+     "auto_nsf": 0.0,
+     "reviews": 4080.115,
+     "c1_removed": -0.019767236599169503,
+     "c1_esc_auto": 0.0
+    },
+    "flat": {
+     "automation": 0.27672375,
+     "removed": 0.23345619564171205,
+     "cost_per100": 3.9116250000000004,
+     "esc_per100": 0.606375,
+     "esc_per100_auto": 0.6471800771394858,
+     "auto_nsf": 92.245,
+     "reviews": 3127.64,
+     "c1_removed": 0.4925455418310934,
+     "c1_esc_auto": 0.5577599969082758
+    },
+    "cons": {
+     "automation": 0.22522874999999998,
+     "removed": 0.19422484091725944,
+     "cost_per100": 3.9346249999999996,
+     "esc_per100": 0.5835,
+     "esc_per100_auto": 0.6594798074836025,
+     "auto_nsf": 60.31,
+     "reviews": 3287.7,
+     "c1_removed": 0.4501602303598026,
+     "c1_esc_auto": 0.6046025891466826
+    },
+    "cons-nosucc": {
+     "automation": 0.34280625,
+     "removed": 0.2999827576758803,
+     "cost_per100": 3.8378750000000004,
+     "esc_per100": 0.62875,
+     "esc_per100_auto": 0.6280391667702695,
+     "auto_nsf": 114.27,
+     "reviews": 2856.195,
+     "c1_removed": 0.6667972991402324,
+     "c1_esc_auto": 0.5685777975852944
+    }
+   },
+   "T2 good-full": {
+    "A": {
+     "automation": 0.0,
+     "cost_per100": 1.1183333333333334,
+     "esc_per100": 0.33916666666666667,
+     "esc_per100_auto": 0.0,
+     "auto_nsf": 0.0,
+     "reviews": 6120.95,
+     "c1_removed": -0.02096949891067539,
+     "c1_esc_auto": 0.0
+    },
+    "flat": {
+     "automation": 0.42493333333333333,
+     "removed": 0.35184591954678834,
+     "cost_per100": 1.46,
+     "esc_per100": 0.38416666666666666,
+     "esc_per100_auto": 0.2260904844595625,
+     "auto_nsf": 31.4,
+     "reviews": 3967.3,
+     "c1_removed": 0.34866557734204795,
+     "c1_esc_auto": 0.07020633414421854
+    },
+    "cons": {
+     "automation": 0.40862499999999996,
+     "removed": 0.34085273474683786,
+     "cost_per100": 1.4358333333333335,
+     "esc_per100": 0.5,
+     "esc_per100_auto": 0.5768385203789678,
+     "auto_nsf": 17.6,
+     "reviews": 4034.6,
+     "c1_removed": 0.5408769063180828,
+     "c1_esc_auto": 0.8436312709351309
+    },
+    "cons-nosucc": {
+     "automation": 0.41023333333333334,
+     "removed": 0.34232934277755434,
+     "cost_per100": 1.4083333333333334,
+     "esc_per100": 0.5083333333333333,
+     "esc_per100_auto": 0.5963016920649544,
+     "auto_nsf": 19.35,
+     "reviews": 4025.55,
+     "c1_removed": 0.5403867102396515,
+     "c1_esc_auto": 0.8065918823007523
+    }
+   },
+   "T2 sloppy-full": {
+    "A": {
+     "automation": 0.0,
+     "cost_per100": 6.493333333333334,
+     "esc_per100": 0.7541666666666667,
+     "esc_per100_auto": 0.0,
+     "auto_nsf": 0.0,
+     "reviews": 6119.2,
+     "c1_removed": -0.019907407407407384,
+     "c1_esc_auto": 0.0
+    },
+    "flat": {
+     "automation": 0.17983333333333335,
+     "removed": 0.14489393242315302,
+     "cost_per100": 6.4,
+     "esc_per100": 0.7983333333333333,
+     "esc_per100_auto": 0.2722161371634874,
+     "auto_nsf": 14.9,
+     "reviews": 5232.55,
+     "c1_removed": 0.3985566448801743,
+     "c1_esc_auto": 0.12349719451084243
+    },
+    "cons": {
+     "automation": 0.24289166666666667,
+     "removed": 0.20077425075935662,
+     "cost_per100": 6.989166666666667,
+     "esc_per100": 0.9291666666666666,
+     "esc_per100_auto": 0.7625178918402158,
+     "auto_nsf": 15.4,
+     "reviews": 4890.65,
+     "c1_removed": 0.6272058823529412,
+     "c1_esc_auto": 0.712262401548468
+    },
+    "cons-nosucc": {
+     "automation": 0.24780833333333332,
+     "removed": 0.20511534305276272,
+     "cost_per100": 7.075833333333334,
+     "esc_per100": 0.9416666666666667,
+     "esc_per100_auto": 0.7973344955663795,
+     "auto_nsf": 17.65,
+     "reviews": 4864.05,
+     "c1_removed": 0.6288398692810457,
+     "c1_esc_auto": 0.7188830648891715
+    }
+   }
+  },
+  "f1": {
+   "None": {
+    "drift_escapes": 5.03,
+    "main_automation": 0.229285
+   },
+   "90": {
+    "drift_escapes": 3.21,
+    "main_automation": 0.16939
+   },
+   "180": {
+    "drift_escapes": 3.48,
+    "main_automation": 0.190155
+   }
+  },
+  "r1": {
+   "esc_no": 70.43,
+   "esc_trust": 56.28,
+   "minutes_no": 3164.54,
+   "minutes_trust": 3952.36,
+   "median_bad_at_r2": 0.0,
+   "end_share_r2": {
+    "A": 0.0,
+    "B": 0.0,
+    "C": 0.0,
+    "D": 0.0
+   },
+   "mean_evidence_n": {
+    "A": 17.5,
+    "B": 19.82,
+    "C": 28.34,
+    "D": 25.01
+   }
+  },
+  "k1": {
+   "arms": {
+    "carry": {
+     "automation": 0.042167500000000004,
+     "escapes": 43.02
+    },
+    "discount": {
+     "automation": 0.015585,
+     "escapes": 42.86
+    },
+    "keep": {
+     "automation": 0.1293925,
+     "escapes": 46.77
+    }
+   },
+   "rho": -0.9756323445771083,
+   "n_versions": 32828
+  }
+ }
+}

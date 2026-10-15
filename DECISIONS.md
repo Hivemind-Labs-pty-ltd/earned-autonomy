@@ -65,3 +65,18 @@ Append-only. Newest at the bottom.
 - V1 PASS · V2 PASS · V3 MIXED · V4 FAIL · V5 Thompson R1 PASS / R3 FAIL · V5 drift R1 FAIL (50.1% of calls) / R3 FAIL · V6 MIXED. New spend $0.
 - Recommended v1 = per-type trust, flat ε 0.05 (policy-owner override per type), one-level demotion, carry-over on hidden-test pass, Thompson + forgetting peer routing. Pooling and risk-set ε not adopted.
 - Surprise: T2 "low-risk" types had the highest error rate (3.8%), so risk-set ε promoted error-prone work.
+
+## 2026-10-16 — v2 operationalisations, fixed after the smoke run and before any v2 result
+- Engine: `gym/engine_v2.py` (self-contained; v0/v1 untouched). Base = v1 recommended policy (per type, no pooling, one-level demotion, carry-over).
+- F1: the rare-then-drift and steady-rare keys are **C2** (PREREG did not say; the middle bar). T2 streams have no calendar time, so F1 is T1 only. Fading applies to the original T1 portfolio with days spread evenly over 365.
+- F1 stale step-down is checked at every decision and observation, so a key can step down more than one level over consecutive actions if its decayed bound stays above ε.
+- R1 reviewer evidence is taken literally from PREREG: canaries (hit or miss), second-check disagreements (always a miss) and incidents traced to the reviewer's approval. Clean second checks are not counted. In the no-trust arm there are no canaries or second checks.
+- R1 second checks go to a randomly chosen other reviewer at R2, or any other reviewer if none is at R2.
+- C1/C3/F1/K1 use the v0 complacency reviewer with 2% canaries (as in v0/v1).
+- K1 hidden-pass noise N(0, 0.04) was fixed before running; the smoke run measured Spearman ρ = −0.97 (T2 measured −0.81). Not tuned; reported as a limitation (the simulated hidden tests are more informative than T2's).
+- Seeds: T1 worlds 0–199 (C1, C3), 30 000+ (F1), 40 000+ (R1), 50 000+ (K1), 100 each except C1/C3; T2 seeds 0–19.
+
+## 2026-10-16 — v2 scored (REPORT-v2.md)
+- Pre-registered: C1 MIXED · C2 PASS · C3 FAIL · F1 FAIL · R1 FAIL · K1 FAIL. Spend $0.
+- Exploratory (post-hoc, `analyze_v2_explore.py`): carry-over without "≥ previous" passes K1 on T1 and keeps 142/400 promotions (125/125 deserved, 0 escapes) on the T2 loop; reviewer trust with clean second checks + 5% canaries sorts reviewers correctly (−18% escapes, +20% minutes); a 60-day re-entry step-down cuts drift escapes 17% at zero cost; consequence bars without the success gate beat flat on T1.
+- Recommended SPEC changes listed in REPORT-v2.md; exploratory fixes need a pre-registered confirmation round before being marked [tested].
