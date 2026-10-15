@@ -1,0 +1,17 @@
+cs v1: n=100 err=0.120 rules=0 caught=11
+cs v2: n=100 err=0.010 rules=2 caught=1
+cs v3: n=100 err=0.000 rules=5 caught=0
+cs v4: n=100 err=0.040 rules=5 caught=4
+cs v5: n=100 err=0.270 rules=8 caught=22
+cs v6: n=100 err=0.050 rules=11 caught=5
+ws v1: n=100 err=0.030 rules=0 caught=3
+    retry 1 in 2s: HTTPSConnectionPool(host='openrouter.ai', port=443): Read timed out.
+ws v2: n=100 err=0.060 rules=3 caught=6
+ws v3: n=100 err=0.100 rules=6 caught=9
+    retry 1 in 2s: HTTPSConnectionPool(host='openrouter.ai', port=443): Read timed out.
+ws v4: n=100 err=0.110 rules=9 caught=10
+ws v5: n=100 err=0.050 rules=12 caught=5
+ws v6: n=100 err=0.020 rules=15 caught=1
+it v1: n=100 err=0.050 rules=0 caught=4
+it v2: n=100 err=0.040 rules=3 caught=4
+it v3: n=100 err=0.010 rules=6 caught=1

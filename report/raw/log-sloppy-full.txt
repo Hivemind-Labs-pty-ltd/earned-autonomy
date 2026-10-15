@@ -1,0 +1,2 @@
+    retry 1 in 2s: HTTPSConnectionPool(host='openrouter.ai', port=443): Read timed out.
+sloppy-full: n=6000 errors=0 serious=0.180 success=0.755 cost=$2.016

@@ -1,0 +1,7 @@
+ws v1: n=100 err=0.040 rules=0 caught=4
+ws v2: n=100 err=0.060 rules=3 caught=6
+ws v3: n=100 err=0.000 rules=6 caught=0
+ws v4: n=100 err=0.000 rules=6 caught=0
+ws v5: n=100 err=0.000 rules=6 caught=0
+ws v6: n=100 err=0.000 rules=6 caught=0
+wrote t2-loop.jsonl spend $8.16

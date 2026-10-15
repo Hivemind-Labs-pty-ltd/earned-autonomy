@@ -1,0 +1,1 @@
+good-full: n=6000 errors=0 serious=0.054 success=0.920 cost=$1.782

@@ -1,0 +1,53 @@
+{
+ "of": {
+  "versions": {
+   "v1": [],
+   "v2": [
+    "Only send emails using the 'reminder' template; do not send re-engagement or offer emails.",
+    "Only send emails to contacts with an upcoming appointment.",
+    "If a request asks for a non-reminder email, decline and explain the policy."
+   ],
+   "v3": [
+    "Only send emails using the 'reminder' template; do not send re-engagement or offer emails.",
+    "Only send emails to contacts with an upcoming appointment.",
+    "If a request asks for a non-reminder email, decline and explain the policy."
+   ],
+   "v4": [
+    "Only send emails using the 'reminder' template; do not send re-engagement or offer emails.",
+    "Only send emails to contacts with an upcoming appointment.",
+    "If a request asks for a non-reminder email, decline and explain the policy."
+   ],
+   "v5": [
+    "Only send emails using the 'reminder' template; do not send re-engagement or offer emails.",
+    "Only send emails to contacts with an upcoming appointment.",
+    "If a request asks for a non-reminder email, decline and explain the policy."
+   ],
+   "v6": [
+    "Only send emails using the 'reminder' template; do not send re-engagement or offer emails.",
+    "Only send emails to contacts with an upcoming appointment.",
+    "If a request asks for a non-reminder email, decline and explain the policy."
+   ]
+  },
+  "tests": {
+   "train": [
+    "of-004",
+    "of-014",
+    "of-016",
+    "of-019",
+    "of-022",
+    "of-028",
+    "of-034",
+    "of-040",
+    "of-043",
+    "of-061",
+    "of-098"
+   ],
+   "hidden": [
+    "of-025",
+    "of-047",
+    "of-080",
+    "of-085"
+   ]
+  }
+ }
+}
