@@ -101,7 +101,7 @@ All timestamps UTC. All records carry `org_id`. The trust record is **append-onl
 { "event_id": "out_…", "action_id": "act_…", "decision_id": "dec_…",
   "trust_key": ["org","agent","cs.refund.issue"], "agent_version": "sha…",
   "source": "pre_review | spot_check | incident | canary",
-  "label": "approved | cosmetic_edit | material_edit | rejected",
+  "label": "approved | cosmetic_edit | material_edit | rejected | incomplete",
   "reason_code": "wrong_amount", "serious": true,
   "actor_id": "user_…", "diff_ref": "…", "created_at": "…" }
 ```
@@ -116,7 +116,7 @@ All timestamps UTC. All records carry `org_id`. The trust record is **append-onl
 **Policy** (versioned; every change is a new version)
 ```json
 { "policy_version": 7,
-  "defaults": { "eps": 0.05, "n_min": 30, "confidence": 0.95, "rolling_n": 50, "rolling_min": 10,
+  "defaults": { "eps": 0.05, "n_min": 30, "confidence": 0.95, "rolling_n": 50, "rolling_min": 10, "reentry_gap_days": 60,
                 "spot_rate": { "2": 0.25, "3": 0.05 }, "canary_rate": 0.02,
                 "version_discount": 0.5, "carry_hidden_min": 0.8, "tag_confidence_min": 0.8 },
   "task_types": { "cs.refund.issue": { "eps": 0.03, "capped": false, "tools": ["lookup_order","issue_refund"] },
@@ -194,14 +194,18 @@ elif not capped(k) and s.level < 3
   | **C3 High** | commitments, small refunds, access changes | 2% | 95% | 189 |
   | **C4 Critical** | releasing money, deleting records, legal or irreversible | never promotes | — | — |
 
-  **[default]** values; the AI owner can tighten (never loosen) a type's bar. *Task success* = the share of judged
-  actions approved as-is or with cosmetic edits only; promotion needs its Wilson **lower** bound ≥ the minimum, as
-  well as the error bound ≤ ε.
+  ε values and "C4 never promotes" are **[tested v2]**: the C1 floor frees 45–63% of C1 reviews at under 1
+  escape per 100. The AI owner can tighten (never loosen) a type's bar.
+  *Task success* = the action achieved its goal (outcome label `incomplete` = harmless but didn't do the job). The
+  minimum success values are **monitored alerts to the AI owner, not promotion gates**. **[tested v2]**: as a gate
+  it cost up to 12 points of automation for little gain.
 - **The label sets the bar; measured errors decide whether the agent meets it.** **[tested]**: in testing,
   "low-risk" types had the *highest* error rates, so consequence must never be used to predict accuracy, only to
   set how much accuracy is required.
-- **Evidence expiry:** **[OPEN]** Recommendation: no hard expiry; demotion handles drift. Re-test with an
-  exponential decay (half-life ~90 days) before adopting.
+- **Evidence expiry: none.** **[tested v2]**: fading at 90 or 180 days cost 4–6 points of automation and punished
+  Senior task types, because only 5% of their actions are judged.
+  - **Re-entry rule:** a task type that returns after a gap of more than 60 days steps down one level. It cut drift
+    escapes 17% at no cost. **[exploratory: confirmation pending]**
 - **Concurrency:** state updates are serialised per trust key (optimistic concurrency on `state_version`).
   Decisions read the latest committed state. TrustState must be rebuildable by replaying the trust record.
   **[default]**
@@ -222,9 +226,12 @@ elif not capped(k) and s.level < 3
   improver. **[tested]**: hidden pass rate tracked true error (ρ = −0.81), with no sign of test-gaming.
 - **Minimum hidden suite:** ≥ 10 hidden tests per task type before carry-over can apply. **[default]**
 - **Publishing a new version:** run training and hidden suites on the candidate before it goes live.
-  - **Carry-over rule:** if `hidden_pass ≥ carry_hidden_min (0.8)` AND `hidden_pass ≥ previous version's
-    hidden_pass` for that task type → the trust key keeps all its evidence. **[tested]**: learning agents went from
-    0% to 36% of types promoted, all deserved.
+  - **Carry-over rule:** if `hidden_pass ≥ carry_hidden_min (0.8)` for that task type → the trust key keeps all its
+    evidence. **[exploratory v2: confirmation pending]**: the earlier extra clause "≥ the previous version's score"
+    discarded good versions when versions change often. Without it, 87% of the automation of always-keeping was
+    retained, at the same escapes as always-discounting. On real learning-loop data it gave the same 142/400
+    promotions, all deserved.
+  - **Batch knowledge edits** (e.g. a weekly release), so each small edit doesn't force a re-test. **[default]**
   - **Otherwise:** `n` and `err` are multiplied by `version_discount (0.5)`, and if the upper bound now exceeds ε,
     the key drops to L1. **[tested]**
 - **Separation:** the agent (or any automated improver) can never edit tests, checks, policy or the trust record.
@@ -240,11 +247,15 @@ elif not capped(k) and s.level < 3
 - **Reviewers earn trust too (decided 2026-10-16).** A human reviewer follows the same framework as an agent.
   Each reviewer has a trust key `(org, reviewer_id, review.<task_type>)`. Their evidence comes from canaries (did
   they catch the planted error?) and audits (does a second reviewer or a later incident agree with their call?).
-  - **R1 New reviewer:** their approvals are second-checked on a sample of 25%.
-  - **R2 Trusted reviewer:** single review; 5% second-checked.
+  - **R1 New reviewer:** 25% of their decisions are second-checked.
+  - **R2 Trusted reviewer:** 5% of their decisions are second-checked.
   - **Stepping down:** a reviewer who misses canaries or whose approvals lead to incidents steps down one level,
     and the AI owner is told.
-  - **[default]** values. Same maths as §7, with "missed a serious error" as the error.
+  - **Evidence:** canaries, plus every second check (clean or not). Same maths as §7, ε_rev = 10%, n_min = 30.
+    Canary rate for reviewers: **5%**.
+  - **[exploratory v2: confirmation pending]**: it reliably sorts reviewers (good ones trusted, a poor one
+    never). It's quality control, not the main way to cut errors: −18% escapes for +20% review time. Counting only
+    canaries and disagreements (the pre-registered design) never trusted anyone.
 - **Incident button** on every executed action: "this was wrong" → incident event.
 - **Pause:** per agent or per task type. Pausing holds all new and not-yet-executed actions. It doesn't undo
   executed ones. **[default]**
@@ -349,10 +360,14 @@ A customer service agent proposes a $49 refund. Task type `cs.refund.issue`, ε 
 4. **Retention:** forever, holding references and labels, not customer content (§10).
 5. **Consequence levels** set the bar for each task type (§7).
 
-**Still open**
-1. **Evidence expiry:** should a review from a year ago count as much as one from last week? (§7)
-2. **The C1–C3 values:** the default ε and success bars per consequence level need a Trust Gym run before
-   publishing. In particular, C1's lower floor (35 judged actions) is the main lever on review savings.
+**Settled by Trust Gym v2 (2026-10-16)**
+6. **No evidence fading** (§7).
+7. **Consequence ε values confirmed;** success minimums are alerts, not gates (§7).
+
+**Pending one confirmation run (v3)**
+1. Carry-over without the "≥ previous" clause (§8).
+2. Reviewer trust counting second checks, with 5% canaries (§9).
+3. The 60-day re-entry rule (§7).
 
 ## Evidence
 
