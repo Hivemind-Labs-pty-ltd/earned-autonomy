@@ -1,0 +1,31 @@
+{
+ "equal": {
+  "acc": 0.6708200000000001,
+  "calls": 0.0
+ },
+ "verify": {
+  "acc": 1.0,
+  "calls": 1000.0
+ },
+ "trust": {
+  "acc": 0.966555,
+  "calls": 706.645,
+  "defector_bad_unverified": 19.63,
+  "r3_median_bad_outputs": 0.0,
+  "r3_caught_share": 0.02
+ },
+ "trust-ts": {
+  "acc": 0.9537899999999999,
+  "calls": 432.77,
+  "defector_bad_unverified": 18.375,
+  "r3_median_bad_outputs": 37.5,
+  "r3_caught_share": 1.0
+ },
+ "trust-drift": {
+  "acc": 0.96512,
+  "calls": 500.845,
+  "defector_bad_unverified": 9.99,
+  "r3_median_bad_outputs": 21.0,
+  "r3_caught_share": 1.0
+ }
+}

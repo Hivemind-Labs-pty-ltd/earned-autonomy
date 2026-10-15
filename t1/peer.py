@@ -17,6 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 REL = [{"s0": 0.95, "s1": 0.80}, {"s0": 0.80, "s1": 0.95}, {"s0": 0.60, "s1": 0.60}]
 THRESH, AUDIT, N_Q, DEFECT_AT = 0.85, 0.10, 1000, 500
+FORGET = 0.98
 
 
 def beta_lower(a, b):
@@ -40,7 +41,7 @@ def run(arm: str, seed: int):
 
         if arm == "trust":
             c = max(range(3), key=lambda c: beta_lower(*post[(c, skill)]))
-        elif arm == "trust-ts":   # POST-HOC (2026-10-15): Thompson-sampling routing, explores
+        elif arm in ("trust-ts", "trust-drift"):   # v1 prereg arms (Thompson routing; drift = forgetting 0.98)
             c = max(range(3), key=lambda c: rng.betavariate(*post[(c, skill)]))
         else:
             c = rng.randrange(3)
@@ -58,6 +59,9 @@ def run(arm: str, seed: int):
         verify = beta_lower(*post[(c, skill)]) < THRESH or rng.random() < AUDIT
         if verify:
             calls += 1
+            if arm == "trust-drift":
+                pa = post[(c, skill)]
+                pa[0], pa[1] = 1 + FORGET * (pa[0] - 1), 1 + FORGET * (pa[1] - 1)
             post[(c, skill)][0 if ok else 1] += 1
             correct += 1
         else:
@@ -71,9 +75,12 @@ def run(arm: str, seed: int):
     return dict(acc=correct / N_Q, calls=calls, caught_after=caught_after, leaked=leaked)
 
 
-def main(n=200):
+ARMS = ("equal", "verify", "trust", "trust-ts", "trust-drift")
+
+
+def main(n=200, out="t1-peer.json"):
     res = {}
-    for arm in ("equal", "verify", "trust", "trust-ts"):
+    for arm in ARMS:
         rows = [run(arm, s) for s in range(n)]
         res[arm] = dict(acc=st.fmean(r["acc"] for r in rows), calls=st.fmean(r["calls"] for r in rows))
         if arm.startswith("trust"):
@@ -81,7 +88,7 @@ def main(n=200):
             ca = [r["caught_after"] for r in rows if r["caught_after"] is not None]
             res[arm]["r3_median_bad_outputs"] = st.median(ca) if ca else None
             res[arm]["r3_caught_share"] = len(ca) / n
-    (ROOT / "report/raw/t1-peer.json").write_text(json.dumps(res, indent=1))
+    (ROOT / "report/raw" / out).write_text(json.dumps(res, indent=1))
     return res
 
 

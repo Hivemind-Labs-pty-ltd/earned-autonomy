@@ -52,3 +52,16 @@ Append-only. Newest at the bottom.
 - M1 escapes computed by reweighting the stratified reviewer sample to each frozen agent's real error rate; human miss rate 6% (T1 reviewer).
 - Framework revisions proposed (not applied to the prereg): carry evidence across versions that pass hidden tests; one-level demotion; pooled per-type trust; exploratory peer routing; measure each reviewer agent rather than discounting same-model.
 - Spend: T2 $8.55; T1/T3 $0.
+
+## 2026-10-15 — v1 operationalisations (before any v1 result)
+- Baselines (v0 D, D-agent, A, B-matched) run on the **original** `gym/engine.py`; v1 arms on `gym/engine_v1.py` with only the named change switched on (V2 = soft only; V3 = pooled_k 20 only; V4 = eps_by_risk only; V6 = all + carry-over).
+- B-matched for v1's H3 is tuned to the **v1** arm's automation (same formula as v0).
+- V1 "key-runs" = (seed, agent, task type) pairs on the loop stream, 20 seeds; promoted = reached L2+ at least once. Version v1 is the starting version (no change event); for v2–v6, pass = hidden_pass ≥ 0.8 and ≥ previous version's.
+- H1 for v1 uses each key's own ε (risk-set). Ledger rows record the key's ε and the pooled bound.
+- G3 under one-level demotion: an incident at L3 leaves the type at L2 (still autonomous, more spot-checks) by design; G3 is reported with v0's definition (no autonomous action after an incident that demoted the type to L1, until re-promotion), plus the count of incidents that left a type autonomous.
+- T2 runs use seeds 0–19 (reviewer seed s + 101), as v0.
+
+## 2026-10-15 — v1 scored (REPORT-v1.md)
+- V1 PASS · V2 PASS · V3 MIXED · V4 FAIL · V5 Thompson R1 PASS / R3 FAIL · V5 drift R1 FAIL (50.1% of calls) / R3 FAIL · V6 MIXED. New spend $0.
+- Recommended v1 = per-type trust, flat ε 0.05 (policy-owner override per type), one-level demotion, carry-over on hidden-test pass, Thompson + forgetting peer routing. Pooling and risk-set ε not adopted.
+- Surprise: T2 "low-risk" types had the highest error rate (3.8%), so risk-set ε promoted error-prone work.
