@@ -85,3 +85,52 @@ Paired by task: same task, different condition. 95% bootstrap CIs over tasks.
 3. Score X1–X5 with `analyze_10x.py`; write `REPORT-10x.md`.
 4. **Staging parity check (later, separate):** about 100 tasks pushed as test scenarios to a staging test org.
    Confirm the deployed harness routes and grades the same way as this local run.
+
+---
+
+## Addendum D (2026-10-18, before any D code; tag `prereg-10x-d`)
+
+User decisions relayed by the coordinator: **staging is out entirely**, so procedure step 4 (the staging parity check)
+is dropped and the run stays local; and a fourth condition D is added.
+
+### Condition D = C + the framework's two missing pieces, emulated locally
+
+- **Tool scope per task type:** the agent gets only the tools its task type needs (`t2.archetypes` `ttypes[...][2]` +
+  `escalate_to_human`, no distractors). The ToolRegistry is filtered per task, as an enforced `ToolGrant.when`
+  would. This is the same scope as T2's `good-scoped` run.
+- **Learning loop:** the method of `t2/loop.py`, inside the 10x harness:
+  - **Cycles:** per archetype, tasks in file order, cycles of 40.
+  - **Corrections:** after each cycle, each serious error is caught by the reviewer with probability 0.9 (seeded).
+    Each caught error becomes a correction, assigned by task-id hash to **training (⅔)** or **hidden (⅓)**.
+  - **Rules:** flash proposes ≤ 3 rules from the cycle's training corrections only (same proposer prompt). The rules
+    are written into the bundle's prompt as a "Learned rules" section, making a **new version every cycle**.
+  - **Tests:** each correction is stored as a test in the 10x agent-tests scenario shape (opening_message, persona,
+    goal, assertions, tool_fixtures = the task world, plus `visibility: training|hidden`).
+  - **Carry-over** (SPEC v0.2 §8): before a new version goes live, it runs the archetype's accumulated hidden
+    suite locally, with the same runner, harness and grader. A test passes if the output is not a serious error.
+    - If `hidden_pass ≥ 0.8` and the suite has ≥ 10 tests, the version keeps its evidence. Otherwise the evidence
+      is discounted by 0.5.
+    - Deviation from SPEC, for scale: the suite is per archetype, not per task type (~40 tasks per cycle can't fill
+      a per-type suite).
+  - **Training-suite runs** are skipped (cost); H7-style carry-through isn't re-measured here.
+- **Variants:** D runs for **good and sloppy** prompts. The loop matters most from the sloppy start.
+- **Stream rows** carry `version` and `meta.hidden_pass` (the gating result for that version, or null for v1), so
+  the trust engine applies carry-over. Agent names are `<arch>-10xd-<variant>`.
+- Everything else as C: the gate chain, the context card, the grader and the parity settings.
+
+### Hypotheses (same statistics and PASS / MIXED / FAIL rule as X1–X2)
+
+- **X6. D lowers serious errors further.** D's serious-error rate is ≥ 25% (relative) lower than C's, with the
+  paired CI excluding 0, for both variants.
+- **X7. D earns more trust.** Under the v3 combined trust policy with carry-over driven by each version's
+  `hidden_pass`, D removes ≥ 5 points more reviews than C, with escapes per 100 actions ≤ C's + 0.05, for both
+  variants. Frequent versions are included: every cycle is a version change.
+- **Reported, no threshold:** D's per-cycle error curve, rules per version, hidden-suite sizes and pass rates, the
+  share of version changes that carry over, and cost per task including hidden-suite runs. The scope component
+  can be estimated from T2's existing `good-full` vs `good-scoped` (exploratory, labelled).
+
+### Smoke for D
+
+- **Size:** 2 cycles of 10 tasks per archetype, good and sloppy. The first cycle is the same 60 tasks as the B/C
+  smoke.
+- **What it checks:** the mechanics (rules, versions, hidden-suite runs, carry or discount), not scores.
