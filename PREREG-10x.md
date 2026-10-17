@@ -134,3 +134,34 @@ is dropped and the run stays local; and a fourth condition D is added.
 - **Size:** 2 cycles of 10 tasks per archetype, good and sloppy. The first cycle is the same 60 tasks as the B/C
   smoke.
 - **What it checks:** the mechanics (rules, versions, hidden-suite runs, carry or discount), not scores.
+
+---
+
+## Amendment K (2026-10-18, before any C/D scored run; tag `prereg-10x-k`)
+
+User decision relayed by the coordinator: **knowledge-base lookup is central to the 10x harness**, so C and D must
+use it the way real 10x agents do (Riley and Sally bundles: `"knowledge": {"path": "./knowledge"}` plus the grant
+`platform.knowledge.read`, i.e. the platform's own `read_knowledge` tool from `Services/tool_harness.py`).
+
+- **C and D bundles:**
+  - **A lean prompt:** role, how to work, and "check the relevant knowledge file before acting".
+  - **The archetype's policy split into knowledge files:** e.g. `returns.md`, `refunds.md`, `escalation.md`,
+    `security.md`. The sloppy variant's files hold the sloppy policy (the same 2 rules dropped, terser wording),
+    so C-sloppy has the same information as A-sloppy.
+  - **`read_knowledge`:** its schema comes from `tool_harness.schemas_for_agent` and it executes through
+    `tool_harness.execute_tool`. That is the real tool; the mock archetype tools stay host tools beside it.
+- **B is unchanged:** the runtime only, A's full prompt, no knowledge tool. B vs C still separates the loop from
+  the harness.
+- **In D, learned rules go into `knowledge/learned-rules.md`,** not the prompt. Every cycle is a new version.
+- **The earlier C smoke** (60 tasks on the full-prompt bundles) is superseded and kept only as
+  `10x-C-good-smoke-fullprompt-superseded.jsonl`. It isn't scored.
+- **Budget:** total new spend for the whole 10x experiment stops at +$60 above the usage at its start ($137.95;
+  $71.98 credit remained at the check).
+
+### Hypothesis X8
+
+- **X8. Knowledge lookup carries the policy.** C's serious-error rate is not higher than A's despite the lean
+  prompt: the upper 95% CI bound of the paired difference (C − A) is ≤ +1.0 point for good and ≤ +2.0 points for
+  sloppy. PASS if both, MIXED if one, FAIL if neither.
+- **Reported, no threshold:** `read_knowledge` calls per task (C, D), the share of tasks with no knowledge read,
+  and the serious-error rate for tasks with vs without a knowledge read (correlational, not causal).
