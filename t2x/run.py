@@ -32,6 +32,7 @@ TASKS = ROOT / "report/raw/t2-tasks.jsonl"
 RUNS = ROOT / "report/raw/t2-runs"
 MODEL = "deepseek/deepseek-v4-flash"
 _lock = threading.Lock()
+TASK_TIMEOUT_S = int(os.environ.get("T2X_TASK_TIMEOUT_S") or 600)
 _local = threading.local()
 
 
@@ -352,12 +353,30 @@ def run_many(tasks, cond, variant, workers=16, learned=(), version="v1", name=No
 
     def one(t):
         budget.check(f"10x-{cond}-{variant}")
-        try:
-            r = run_one(t, cond, variant, learned, version)
-        except budget.BudgetStop:
-            raise
-        except Exception as e:  # noqa: BLE001  recorded, not hidden
-            r = dict(task_id=t["task_id"], error=f"{type(e).__name__}: {str(e)[:300]}", cond=cond, variant=variant)
+        box = {}
+
+        def work():
+            try:
+                box["r"] = run_one(t, cond, variant, learned, version)
+            except Exception as e:  # noqa: BLE001  recorded, not hidden
+                box["e"] = e
+
+        # wall-clock watchdog: OpenRouter's keep-alive bytes stop the runtime's read timeout from ever firing, so a
+        # stuck generation can hang forever (seen in the smoke run). A task past TASK_TIMEOUT_S is recorded as an
+        # error and abandoned (daemon thread).
+        th = threading.Thread(target=work, daemon=True)
+        th.start()
+        th.join(TASK_TIMEOUT_S)
+        if th.is_alive():
+            r = dict(task_id=t["task_id"], error=f"timeout: no result after {TASK_TIMEOUT_S}s", cond=cond,
+                     variant=variant)
+        elif "e" in box:
+            if isinstance(box["e"], budget.BudgetStop):
+                raise box["e"]
+            r = dict(task_id=t["task_id"], error=f"{type(box['e']).__name__}: {str(box['e'])[:300]}", cond=cond,
+                     variant=variant)
+        else:
+            r = box["r"]
         with _lock:
             with open(path, "a") as f:
                 f.write(json.dumps(r) + "\n")

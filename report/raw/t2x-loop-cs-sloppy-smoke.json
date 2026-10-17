@@ -1,0 +1,37 @@
+{
+ "versions": {
+  "v1": {
+   "rules": [],
+   "hidden_pass": null,
+   "suite_n": 0,
+   "carried": null
+  }
+ },
+ "current": "v1",
+ "hidden": [
+  "cs-010",
+  "cs-017"
+ ],
+ "train": [
+  "cs-013"
+ ],
+ "cycles_done": 2,
+ "log": [
+  {
+   "cycle": 0,
+   "version": "v1",
+   "n": 10,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 0
+  },
+  {
+   "cycle": 1,
+   "version": "v1",
+   "n": 10,
+   "err": 0.3,
+   "caught": 3,
+   "n_rules": 0
+  }
+ ]
+}

@@ -15,6 +15,7 @@ State (resumable): report/raw/t2x-loop-<arch>-<variant>.json; tests: report/raw/
 cycle rows: report/raw/t2-runs/10x-D-<variant>-<arch>-cNN.jsonl; hidden-suite rows: ...-<version>-hidden.jsonl
 """
 import argparse
+import hashlib
 import json
 import random
 import re
@@ -98,7 +99,9 @@ def main():
         rows, _ = R.run_many(cyc, "D", variant, args.workers, learned=rules, version=v,
                              name=f"10x-D-{variant}-{arch}{tag}-c{c:02d}")
         ok = [r for r in rows if "error" not in r]
-        crng = random.Random(f"10x-D-{arch}-{variant}-c{c}")
+        # hashed seed: Python's str seeding keeps the string's own bytes, so near-identical seed strings give
+        # near-identical first draws (found in the smoke run: every archetype missed its first two errors)
+        crng = random.Random(int(hashlib.sha256(f"10x-D-{arch}-{variant}-c{c}".encode()).hexdigest(), 16))
         caught = [r for r in ok if r["serious"] and crng.random() < REVIEW_CATCH]
         new_train = []
         with open(tests_path, "a") as f:

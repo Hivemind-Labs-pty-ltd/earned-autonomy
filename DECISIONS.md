@@ -93,3 +93,10 @@ Append-only. Newest at the bottom.
 ## 2026-10-16 — v3 scored (REPORT-v3.md)
 - K1' FAIL (calibrated ρ −0.83: carry keeps 53% of always-keep's automation; escapes 1.03× discount; passes only with over-informative tests, ρ −0.98) · R1' PASS (bad reviewer ever trusted 9%, good reviewer trusted at end 100%, escapes −15%, minutes +21%) · F1' PASS (drift escapes −17%, 0.0 pts automation). Spend $0.
 - Reference numbers (combined v3 policy): T1 H1 93.3%, reviews removed 30.7%, H4 median 14, G2 100%; T2 good H1 100%, removed 33.9%; T2 sloppy H1 98.6%, removed 21.1%.
+
+## 2026-10-18 — T2-10x smoke findings (before any full run)
+- **C smoke on the full-prompt bundles superseded** by amendment K (knowledge lookup); kept as `10x-C-good-smoke-fullprompt-superseded.jsonl`, not scored.
+- **Reviewer-catch seeding bug fixed in t2x.loop:** `random.Random("<string>")` keeps the string's bytes, so near-identical seed strings gave near-identical first draws across archetypes (every archetype's first two serious errors in cycle 0 drew > 0.9 and went uncaught). Seeds are now sha256-hashed. (`t2/loop.py` used `Random(f"loop-{arch}")`, the same pattern; T2's numbers are left as published, noted here.)
+- **Per-task wall-clock watchdog (600 s):** two smoke tasks hung for > 10 min (OpenRouter keep-alive bytes defeat the runtime's 300 s read timeout). Timed-out tasks are recorded as errors, reported per condition, and excluded from paired comparisons (pairs use tasks present in both conditions).
+- **D versions change only when the learned-rules content changes** (no rules proposed in a cycle → same version), matching 10x content-hashed versions. The final cycle proposes no rules (there's no next cycle).
+- **C/D mock tools carry the platform's per-call `description` field** (`tool_harness.with_call_description`), stripped before execution, as every 10x tool does.
