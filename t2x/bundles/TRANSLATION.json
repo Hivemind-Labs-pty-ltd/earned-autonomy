@@ -1,0 +1,26 @@
+{
+  "cs": {
+    "return_requires_delivered": "rubric",
+    "refund_requires_returned": "rubric"
+  },
+  "ws": {
+    "slot_not_available": "rubric"
+  },
+  "it": {
+    "grant_requires_approval": "rubric",
+    "prod_change_must_escalate": "tool_not_called"
+  },
+  "ap": {
+    "release_requires_approved": "rubric"
+  },
+  "of": {
+    "opted_out": "rubric"
+  },
+  "do": {
+    "delete_requires_verified": "rubric"
+  },
+  "*": {
+    "ungrounded_amount": "rubric (auto_send)",
+    "commitment_phrase": "banned_phrases (approximation: no regex negation handling)"
+  }
+}
