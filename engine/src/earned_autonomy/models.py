@@ -28,6 +28,12 @@ CONSEQUENCE = {
     "C3": {"eps": 0.02, "success_min": 0.95},
     "C4": {"eps": 0.0, "success_min": None},     # never promotes
 }
+RANK = {"C1": 1, "C2": 2, "C3": 3, "C4": 4}
+
+
+def max_consequence(*levels: str | None) -> str | None:
+    vals = [c for c in levels if c]
+    return max(vals, key=RANK.__getitem__) if vals else None
 
 
 def utcnow() -> datetime:
@@ -72,6 +78,9 @@ class ProposedAction:
     counterparty_id: str | None = None
     parent_action_id: str | None = None         # delegation provenance (SPEC §11)
     created_at: datetime = field(default_factory=utcnow)
+    # write tools this action will call (SPEC §4 tool floor). Names only enter the record; args never do.
+    write_tools: list[str] = field(default_factory=list)
+    write_tool_args: dict[str, Any] = field(default_factory=dict)
 
     @property
     def key(self) -> TrustKey:
@@ -109,6 +118,7 @@ class Decision:
     agent_version: str
     payload_hash: str
     created_at: str
+    tool_floor: str | None = None               # highest floor of the action's write tools (SPEC §4)
 
     @property
     def allowed(self) -> bool:
@@ -190,6 +200,26 @@ class Policy:
     reviewer_canary_rate: float = 0.05
     second_check_rate: dict = field(default_factory=lambda: {1: 0.25, 2: 0.05})
     task_types: dict[str, TaskTypePolicy] = field(default_factory=dict)
+    # SPEC §4 tool floor: explicit per-tool overrides (tool -> C1..C4). Otherwise a tool's floor is derived.
+    tool_floors: dict[str, str] = field(default_factory=dict)
+    # Tools known to write (for the shared-tool lint). Floors apply to whatever an action declares in write_tools.
+    write_tools: list[str] = field(default_factory=list)
+    # SPEC §7 strict promotion: consequence levels ("C3") and/or task type names that use the anytime-valid bound.
+    strict_promotion: list[str] = field(default_factory=list)
+
+    def tool_floor(self, tool: str) -> str:
+        """SPEC §4: explicit override, else the highest consequence of any task type listing the tool,
+        else C4 (a write tool no task type lists)."""
+        if tool in self.tool_floors:
+            return self.tool_floors[tool]
+        levels = [tp.consequence for tp in self.task_types.values() if tool in tp.tools]
+        return max_consequence(*levels) or "C4"
+
+    def is_strict(self, task_type: str) -> bool:
+        if task_type in self.strict_promotion:
+            return True
+        tp = self.type_policy(task_type)
+        return tp is not None and tp.consequence in self.strict_promotion
 
     def type_policy(self, task_type: str) -> TaskTypePolicy | None:
         return self.task_types.get(task_type)
@@ -234,3 +264,23 @@ class Policy:
             d["task_types"] = {k: (asdict(v) if isinstance(v, TaskTypePolicy) else v)
                                for k, v in changes["task_types"].items()}
         return Policy.from_dict(d)
+
+
+def lint_shared_write_tools(policy: Policy, write_tools: list[str] | None = None) -> list[str]:
+    """SPEC §4 design rule: warn when a write tool is listed by task types of different consequence levels.
+    Its derived floor then pushes the lower-consequence types up, so they can never earn autonomy.
+    Checks `write_tools` (or policy.write_tools); with neither, checks every listed tool. Explicit floors are noted."""
+    tools = write_tools if write_tools is not None else (policy.write_tools or
+                                                         sorted({t for tp in policy.task_types.values()
+                                                                 for t in tp.tools}))
+    out = []
+    for tool in tools:
+        users = {tt: tp.consequence for tt, tp in policy.task_types.items() if tool in tp.tools}
+        if len(set(users.values())) > 1:
+            lo = min(users.values(), key=RANK.__getitem__)
+            pushed = sorted(tt for tt, c in users.items() if RANK[c] < RANK[policy.tool_floor(tool)])
+            note = f" (explicit floor {policy.tool_floors[tool]})" if tool in policy.tool_floors else ""
+            out.append(f"write tool '{tool}' is shared across {sorted(set(users.values()))}{note}: "
+                       f"floor {policy.tool_floor(tool)} holds {pushed or [lo]} on every use. Split the tool or give "
+                       f"it an argument-dependent floor.")
+    return out

@@ -16,11 +16,11 @@ from datetime import datetime, timedelta
 from typing import Any, Callable
 
 from .governance import Actor, GovernanceGuard
-from .models import (CONSEQUENCE, COSMETIC_REASONS, L1, L2, L3, LABELS, LEVEL_NAMES, REASON_CODES, ChecksResult,
-                     Decision, Policy, ProposedAction, TaskTypePolicy, TrustKey, TrustState, iso, is_serious,
-                     parse_iso, payload_hash, utcnow)
+from .models import (CONSEQUENCE, COSMETIC_REASONS, L1, L2, L3, LABELS, LEVEL_NAMES, RANK, REASON_CODES,
+                     ChecksResult, Decision, Policy, ProposedAction, TaskTypePolicy, TrustKey, TrustState, iso,
+                     is_serious, max_consequence, parse_iso, payload_hash, utcnow)
 from .record import TrustRecord
-from .stats import BoundStrategy, WilsonBound
+from .stats import BoundStrategy, ConfidenceSequenceBound, WilsonBound
 from .suites import SuiteStore
 from .tagging import Tagger
 
@@ -60,6 +60,13 @@ class _Reducer:
             self.reviewers[k] = TrustState(trust_key=k)
         return self.reviewers[k]
 
+    def promo_upper(self, policy: Policy | None, task_type: str, err: float, n: float, eps: float) -> float:
+        """Upper bound used for promotion and for "does the bound still hold" (SPEC §7). Strict promotion types use
+        the anytime-valid confidence sequence; everything else uses the engine's default bound (Wilson)."""
+        if policy is not None and eps > 0 and policy.is_strict(task_type):
+            return ConfidenceSequenceBound(eps).upper(err, n)
+        return self.bounds.upper(err, n)
+
     def _set_level(self, s: TrustState, to: int, why: str, ts: str):
         frm = s.level
         s.level, s.since_change = to, 0.0
@@ -83,14 +90,14 @@ class _Reducer:
         if s.level >= L2 and len(s.recent) >= rolling_min and self.bounds.lower(sum(s.recent), len(s.recent)) > eps:
             self._set_level(s, s.level - 1, "rolling_bound", ts)
         elif (not capped and eps > 0 and s.level < top and s.since_change >= n_min
-              and self.bounds.upper(s.err, s.n) <= eps):
+              and self.promo_upper(self.policy, s.trust_key[2], s.err, s.n, eps) <= eps):
             self._set_level(s, s.level + 1, "evidence", ts)
 
     def _discount(self, s: TrustState, eps: float, w: float, ts: str, why: str):
         s.n *= w
         s.err *= w
         s.fail *= w
-        if s.level >= L2 and self.bounds.upper(s.err, s.n) > eps:
+        if s.level >= L2 and self.promo_upper(self.policy, s.trust_key[2], s.err, s.n, eps) > eps:
             self._set_level(s, L1, why, ts)
 
     # ---- apply -------------------------------------------------------------------------------------------
@@ -106,7 +113,8 @@ class _Reducer:
             # (or whose type became capped) drops to L1.
             for s in self.states.values():
                 tt = s.trust_key[2]
-                if s.level >= L2 and (new.is_capped(tt) or self.bounds.upper(s.err, s.n) > new.eps_for(tt)):
+                if s.level >= L2 and (new.is_capped(tt) or
+                                      self.promo_upper(new, tt, s.err, s.n, new.eps_for(tt)) > new.eps_for(tt)):
                     self._set_level(s, L1, "policy_change", ts)
                     self._touch(s, ts)
         elif t == "decision":
@@ -196,11 +204,14 @@ class TrustEngine:
 
     def __init__(self, policy: Policy | None = None, record: TrustRecord | None = None, tagger: Tagger | None = None,
                  bounds: BoundStrategy | None = None, clock: Callable[[], datetime] = utcnow,
-                 sampler=None):
+                 sampler=None, tool_floor_fn: Callable[[str, Any, Policy], str | None] | None = None):
         self.record = record if record is not None else TrustRecord()
         self.tagger = tagger
         self.bounds = bounds or WilsonBound()
         self.clock = clock
+        # SPEC §4: optional argument-dependent tool floors, e.g. send_email -> C1 for a reminder, C3 for an offer.
+        # Returns a consequence level, or None to fall back to the policy's floor for that tool.
+        self.tool_floor_fn = tool_floor_fn
         # SPEC §6/§9: sampling must be unpredictable to the agent. Default: the OS CSPRNG.
         self._sampler = sampler or secrets.SystemRandom()
         self._lock = threading.RLock()
@@ -258,30 +269,46 @@ class TrustEngine:
                 ps = self._r.states.get(pk) if pk else None
                 level = min(level, ps.level) if ps else 0
 
-            why, mode = self._rule(action, checks, known, level, p)
+            floor = self.tool_floor(action) if known else None
+            why, mode = self._rule(action, checks, known, level, p, floor)
             eps = p.eps_for(tt) if known else p.eps
             d = Decision(
                 decision_id="dec_" + uuid.uuid4().hex, action_id=action.action_id, trust_key=k, mode=mode, why=why,
                 level=s.level, evidence_n=round(s.n, 4), evidence_err=round(s.err, 4),
-                upper_bound=round(self.bounds.upper(s.err, s.n), 6), eps=eps,
-                consequence=p.task_types[tt].consequence if known else None,
+                upper_bound=round(self._r.promo_upper(p, tt, s.err, s.n, eps), 6), eps=eps,
+                consequence=max_consequence(p.task_types[tt].consequence, floor) if known else None,
+                tool_floor=floor,
                 checks={"passed": list(checks.passed), "failed": list(checks.failed)} if checks else None,
                 policy_version=p.policy_version, agent_version=action.agent_version,
                 payload_hash=payload_hash(action.payload), created_at=self._now())
             body = d.to_dict()
             body.update(tag_confidence=action.tag_confidence, kind=action.kind,
                         parent_action_id=action.parent_action_id, effective_level=level,
-                        bound=self.bounds.name)
+                        write_tools=list(action.write_tools),
+                        bound="cs-mix" if known and p.is_strict(tt) and eps > 0 else self.bounds.name)
             self._emit("decision", body)
             return d
 
-    def _rule(self, action, checks, known, level, p) -> tuple[str, str]:
+    def tool_floor(self, action: ProposedAction) -> str | None:
+        """SPEC §4: the highest floor among the action's write tools (hook first, then the policy's floor)."""
+        p = self.policy
+        levels = []
+        for tool in action.write_tools:
+            c = self.tool_floor_fn(tool, action.write_tool_args.get(tool), p) if self.tool_floor_fn else None
+            if c is not None and c not in RANK:
+                raise ValueError(f"tool_floor_fn returned {c!r} for {tool}; expected C1..C4")
+            levels.append(c or p.tool_floor(tool))
+        return max_consequence(*levels)
+
+    def _rule(self, action, checks, known, level, p, floor=None) -> tuple[str, str]:
         if self._r.is_paused(action.org_id, action.agent_id, action.task_type or ""):
             return "paused", "hold"
         if not known:
             return "unknown_type", "hold"
         if action.tag_confidence is None or action.tag_confidence < p.tag_confidence_min:
             return "low_confidence", "hold"
+        if floor is not None and RANK[floor] > RANK[p.task_types[action.task_type].consequence]:
+            return "tool_floor_mismatch", "hold"          # SPEC §6 step 2b [tested v4]
         if checks is None and p.require_checks:
             return "checks_missing", "hold"
         if checks is not None and not checks.ok:
@@ -559,7 +586,7 @@ class TrustEngine:
                 continue
             tt = k[2]
             eps = p.eps_for(tt)
-            upper = self.bounds.upper(s.err, s.n)
+            upper = self._r.promo_upper(p, tt, s.err, s.n, eps)
             rolling_upper = self.bounds.upper(sum(s.recent), len(s.recent)) if s.recent else None
             alerts = []
             if s.level >= L2 and rolling_upper is not None and len(s.recent) >= p.rolling_min \
@@ -570,6 +597,7 @@ class TrustEngine:
                 alerts.append("task_success_below_minimum")
             d = s.snapshot()
             d.update(level_name=LEVEL_NAMES[s.level], eps=eps, upper_bound=round(upper, 6),
+                     bound="cs-mix" if p.is_strict(tt) and eps > 0 else self.bounds.name,
                      consequence=p.task_types[tt].consequence if tt in p.task_types else None,
                      capped=p.is_capped(tt), paused=self._r.is_paused(org_id, agent_id, tt), alerts=alerts,
                      explanation=self._explain_state(s, eps, upper, p))

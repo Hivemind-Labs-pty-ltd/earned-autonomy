@@ -2,12 +2,15 @@
 
 AI agents earn autonomy over their actions the way a new employee does: they start supervised, every human
 judgement becomes evidence, and each task type climbs (Supervised → Trusted → Senior) or steps down on that evidence.
-This package is the reference implementation of [SPEC.md](../SPEC.md) v0.2. Stdlib only, Python 3.11+.
+This package is the reference implementation of [SPEC.md](../SPEC.md) v0.4. Stdlib only, Python 3.11+.
 
 What it gives you:
 
-- **`decide()`**: hold or act for every proposed action (SPEC §6). Order: paused → tag confidence → checks →
-  capped/C4 → level.
+- **`decide()`**: hold or act for every proposed action (SPEC §6). Order: paused → tag confidence → tool floor →
+  checks → capped/C4 → level.
+- **Tool floors** (§4, [tested v4]): every write tool carries a floor consequence, so an action mis-tagged as a
+  low-consequence task can't borrow that task's trust when it calls a riskier write tool.
+- **Strict promotion** (§7, optional): an anytime-valid confidence sequence for C3 work or weak agents.
 - **The trust maths** (§7): Wilson bounds, consequence levels C1–C4, one-level step-down, the 60-day re-entry
   rule, and versions that keep their trust only when they pass hidden tests (§8).
 - **A tamper-evident trust record**: append-only and hash-chained, with `verify()` detecting any edit, deletion or
@@ -28,7 +31,7 @@ What it gives you:
 
 ```bash
 pip install -e engine          # from the repo root
-pytest engine                  # 45 tests, about 20 s (the Trust Gym parity test replays 40 worlds)
+pytest engine                  # 61 tests, about 20 s (the Trust Gym parity test replays 40 worlds)
 ```
 
 ## Quickstart: wrap any agent
@@ -66,6 +69,26 @@ print(engine.get_state("acme", "cs-agent"))                  # levels, bounds, a
 print(engine.explain("act_123"))                             # why it was held or allowed, under which policy
 assert engine.record.verify().ok                             # the record hasn't been tampered with
 ```
+
+**Tool floors.** Tell the engine which write tools an action will call; it holds the action if any tool's floor
+is above the tagged task type's consequence (`why="tool_floor_mismatch"`):
+
+```python
+action = ProposedAction(..., task_type="cs.order_status.update",            # tagged C1...
+                        write_tools=["issue_refund"],                          # ...but issues a refund (C3)
+                        write_tool_args={"issue_refund": call.args})           # args are never recorded
+engine.decide(action, checks).why                                              # -> "tool_floor_mismatch"
+```
+
+A tool's floor is the highest consequence of any task type listing it, or **C4** for a write tool no task type
+lists. Override with `Policy(tool_floors={"send_email": "C1"})`, or pass `TrustEngine(tool_floor_fn=...)` for floors
+that depend on arguments (`send_email` with a reminder template → C1, anything else → the policy floor). Don't share a
+write tool across consequence levels; `lint_shared_write_tools(policy)` warns when you do.
+
+**Strict promotion.** `Policy(strict_promotion=["C3"])` (consequence levels and/or task type names) switches
+promotion for those types to `ConfidenceSequenceBound`, which stays valid even though the engine re-checks after every
+outcome. Clean floors: 46 / 93 / 236 judged actions for C1 / C2 / C3 (Wilson: 35 / 73 / 189). Step-down still uses
+the rolling Wilson bound. The default is Wilson everywhere.
 
 New agent version? Run its hidden tests, then call `engine.on_version_published(agent_id, version,
 {task_type: {"hidden_pass": 0.9, "training_pass": 1.0}})`. A task type keeps its trust if it passes at least 80%
