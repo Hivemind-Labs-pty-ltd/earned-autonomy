@@ -1,6 +1,6 @@
 # Earned Autonomy Framework: build spec
 
-**Version 0.2 (preview), 2026-10-16.** Companion to the explainer (the loop, the ladder, the five stages). This
+**Version 0.3 (preview), 2026-10-18.** Companion to the explainer (the loop, the ladder, the five stages). This
 document is for the engineer or AI agent building it. It is product-neutral: any agent platform can implement it.
 
 Every rule carries a status:
@@ -90,7 +90,7 @@ All timestamps UTC. All records carry `org_id`. The trust record is **append-onl
 **Decision** (written to the trust record for every action, held or not)
 ```json
 { "decision_id": "dec_…", "action_id": "act_…", "trust_key": ["org","agent","cs.refund.issue"],
-  "mode": "hold | act | act_spot", "why": "level_L1 | check_failed | capped | low_confidence | paused | trusted",
+  "mode": "hold | act", "why": "level_L1 | check_failed | checks_missing | capped | low_confidence | unknown_type | paused | trusted",
   "level": 2, "evidence_n": 81.0, "evidence_err": 1.0, "upper_bound": 0.046, "eps": 0.05,
   "checks": { "passed": ["amount_matches_order"], "failed": [] },
   "policy_version": 7, "agent_version": "sha…", "created_at": "…" }
@@ -140,7 +140,9 @@ Evaluated in this order. The first rule that matches wins.
    **[tested]**
 4. Task type **capped** → `hold`. Capped types never promote. **[tested]**
 5. `level == L1` → `hold`.
-6. `level ≥ L2` → `act`; draw a spot-check with probability `spot_rate[level]` → `act_spot`. **[tested]**
+6. `level ≥ L2` → `act`. **[tested]**
+
+Spot-checks are drawn **after** the action executes, with an unpredictable random source (`spot_rate[level]`). The Decision never says whether an action will be checked, and sampling entries are hidden from the agent's view of its record (§10). **[implemented v0.3]**
 
 Re-evaluate at **execution time**, not just at proposal time. If the state changed in between (pause, demotion,
 policy change), the new decision applies. **[default]**
@@ -348,11 +350,40 @@ A customer service agent proposes a $49 refund. Task type `cs.refund.issue`, ε 
    since_change = 112. Wilson upper(1, 112) = 0.049 > 0.03, so it stays L1.
 5. **Later:** at 170 judged refunds with 1 error, upper = 0.033, still above ε. At 185 with 1 error it drops
    under 0.03, so it **promotes to L2**.
-6. **At L2:** the next refund passes checks → **act**; a 25% draw makes it `act_spot`; the reviewer checks it
+6. **At L2:** the next refund passes checks → **act**; after it executes, a 25% draw selects it for a spot-check; the reviewer checks it
    afterwards.
 7. **Slip:** a carrier change causes 4 serious errors in 20 spot-checked refunds; the rolling lower bound > 0.03 →
    **step down to L1** automatically. A correction becomes a rule and a test; the new version passes its hidden
    tests (0.9 ≥ 0.8), so it keeps its evidence and climbs back once the bound holds.
+
+## 16. Clarifications (v0.3, from building the reference engine)
+
+Each resolves an ambiguity found while implementing this spec in `engine/` (all 45 tests pass, and the T1 parity test
+reproduces the tested results). **[implemented v0.3]**
+
+1. **Spot sampling is post-execution** and unpredictable (§6). There is no `act_spot` mode.
+2. **The agent's view of its own record** excludes spot-sample, canary and second-check entries, so it can't learn
+   when it is watched (§10).
+3. **Lowering ε** re-evaluates every affected key; a key whose bound no longer holds drops to **L1**, as with the
+   version discount. A newly capped type also drops to L1.
+4. **A missing checks result is a hold** (`checks_missing`). Checks are required by default.
+5. **Unknown type and low confidence are separate reasons** (`unknown_type`, `low_confidence`); both hold. An unknown
+   type is anything not in the policy's task catalogue.
+6. **An unannounced version** (an action carrying a version never published through `on_version_published`) is
+   treated as untested: its evidence is discounted.
+7. **Version publishing applies per agent across all its organisations.** Task types missing from the test results
+   are discounted.
+8. **Incident maths:** an incident adds one serious outcome to the totals and steps the key down one level, matching
+   the tested reference. It does not enter the rolling window.
+9. **Reviewer step-down** works through the same evidence maths as agents (rolling bound), not as an instant
+   demotion. Reviewer levels are R1 and R2.
+10. **A second check updates the reviewer's trust only.** The corrected agent outcome is recorded separately by the
+    caller.
+11. **L0 Observe** is a deployment choice, not an automatic level. New trust keys start at L1.
+12. **A task-type ε override** must be at or below its consequence level's ε (tighten only). C4 and capped types have
+    ε = 0.
+13. **Every governance operation names an actor,** including pause, resume and manual promotion or demotion, and is
+    logged to the record.
 
 ## 15. Decisions
 
