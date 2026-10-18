@@ -61,7 +61,9 @@ booking a time. Before any action happens:
 2. **Check it.** Run the automatic checks: right amount, right record, no promise it can't keep, nothing it isn't
    allowed to do. A failed check always goes to a person.
 3. **Look up its trust.** Has this agent earned this kind of work? If not, a person approves it.
-4. **Act, or hold.** Trusted work goes ahead. A random share is reviewed afterwards. The agent never knows which.
+4. **Act, or hold.** Trusted work goes ahead. A random share is reviewed afterwards. The agent never knows which, and
+   checks never follow a fixed schedule. In testing, an agent that could predict its reviews behaved well only when
+   watched and looked eighteen times better than it really was.
 5. **Record and learn.** Every judgement is recorded with a reason. The record updates the agent's standing, and
    real mistakes become new rules and tests.
 
@@ -121,7 +123,9 @@ Move to the next stage only when the current one passes its gate. Stages 1 to 3 
 | **5. Expand** | More task types; the Senior level; regular reviews; a way to challenge any decision; later, agents working with agents | Ongoing | |
 
 **Tip:** choose a narrow set of tools for each task type from day one. In testing, giving the agent only the tools a
-task needs cut wrong actions by about three quarters.
+task needs cut wrong actions by about three quarters. Don't share a tool that changes things across tasks of different
+consequence, for example one "send email" tool for both reminders and offers. A risky tool always pulls an action up
+to its own consequence level, so the low-consequence task could never earn its freedom. Split it into separate tools.
 
 ---
 

@@ -1,6 +1,6 @@
 # Earned Autonomy Framework: build spec
 
-**Version 0.3 (preview), 2026-10-18.** Companion to the explainer (the loop, the ladder, the five stages). This
+**Version 0.4 (preview), 2026-10-18.** Companion to the explainer (the loop, the ladder, the five stages). This
 document is for the engineer or AI agent building it. It is product-neutral: any agent platform can implement it.
 
 Every rule carries a status:
@@ -65,7 +65,8 @@ Components: **Tagger**, **Checks**, **Trust engine** (decide + update), **Trust 
   head or similar) maintains its task types and assigns each a consequence level (§7). The tagger proposes new
   types; the AI owner accepts or rejects them.
 - **Tagger:** a classifier (rules first, model second) returns `{task_type, confidence}` for every proposed action.
-  - **Confidence < 0.8** → treat the action as **L1** (held), whatever the type's level. **[default]**
+  - **Confidence < 0.8** → treat the action as **L1** (held), whatever the type's level. **[tested v4: a partial
+    defence; it held 4 of 10 adversarial downgrades]**
   - **Unknown type** → held, and logged as a candidate new type. **[default]**
 - **Multi-type actions:** if one proposal contains several actions (a reply plus a record update), each action is
   tagged and decided separately. If they must happen together, the **most restrictive** decision applies to the
@@ -74,6 +75,15 @@ Components: **Tagger**, **Checks**, **Trust engine** (decide + update), **Trust 
   **[tested]**: borrowing (pooling) penalised good types and helped nothing.
 - **Tool scope:** each task type lists the tools it may use. The agent is only offered those tools when working on
   that type. **[tested]**: −73% wrong or unneeded tool calls, serious errors 2.0% → 0.67%.
+- **Tool floor (anti mis-tagging).** Every write tool carries a floor consequence: the highest consequence of any task
+  type that uses it, or C4 for a write tool no task type lists. An action's effective consequence =
+  max(its tag's consequence, the floor of every write tool it uses). If the floor is above the tag's consequence,
+  the action is **held** (a mismatch), whatever the tagged type's level. **[tested v4]**: removed 100% of autonomous
+  escapes from deliberately mis-tagged actions, at 0.3–1.8 points of automation; on a real LLM tagger, it held all 8
+  adversarial downgrades that came with a risky write.
+  - **Design rule:** don't share a write tool across consequence levels. A shared `send_email` pushed low-consequence
+    reminders up to C3, so they could never earn autonomy. Split such tools (`send_reminder`, `send_offer`) or give
+    them floors that depend on their arguments.
 
 ## 5. Data model
 
@@ -136,13 +146,14 @@ Evaluated in this order. The first rule that matches wins.
 
 1. Task type or agent **paused** → `hold`.
 2. `tag_confidence < tag_confidence_min` or unknown type → `hold`.
+2b. A write tool's **floor** is above the tag's consequence → `hold` (`tool_floor_mismatch`). **[tested v4]**
 3. **Checks** run. Any failure → `hold` (with the failed checks attached). **Checks run at every level.**
    **[tested]**
 4. Task type **capped** → `hold`. Capped types never promote. **[tested]**
 5. `level == L1` → `hold`.
 6. `level ≥ L2` → `act`. **[tested]**
 
-Spot-checks are drawn **after** the action executes, with an unpredictable random source (`spot_rate[level]`). The Decision never says whether an action will be checked, and sampling entries are hidden from the agent's view of its record (§10). **[implemented v0.3]**
+Spot-checks are drawn **after** the action executes, with an unpredictable random source (`spot_rate[level]`). The Decision never says whether an action will be checked, and sampling entries are hidden from the agent's view of its record (§10). **[tested v4]**: with random hidden sampling the measured error rate matched the true one (ratio 0.98). With a predictable schedule, an agent that behaved well only when watched showed 1% errors while really making 18.5%, and without incidents it went undetected for a median of 498 actions (vs 54). Never sample on a fixed cadence. Keep incidents and challenges as a second, ungameable signal.
 
 Re-evaluate at **execution time**, not just at proposal time. If the state changed in between (pause, demotion,
 policy change), the new decision applies. **[default]**
@@ -177,6 +188,12 @@ elif not capped(k) and s.level < 3
   level immediately. **[tested]**: one level is as safe as dropping to L1 and costs less.
 - **Wilson score interval** at 95%: for `e` errors in `n` trials, `p = e/n`, `z = 1.96`;
   `upper/lower = (p + z²/2n ± z·√(p(1−p)/n + z²/4n²)) / (1 + z²/n)`.
+- **Strict promotion (optional).** For C3 task types, or agents with a weak record, use an anytime-valid bound (a
+  Beta-binomial mixture confidence sequence, prior Beta(1, 1/ε − 1), α = 0.05). It stays valid even though the engine
+  re-checks after every outcome. **[exploratory v4]**: on real-agent streams it cut undeserved promotions from 2.0% to
+  0.2%, at +28% evidence. In simulation it barely helped, because undeserved promotions there came from agents getting
+  worse *after* promotion, which demotion handles. Clean floors: C1 46, C2 93, C3 236. A stricter fixed Wilson (99%)
+  or a flat prior cost more evidence for less benefit; don't use them.
 - **What this means in practice:** judged actions needed before the first promotion:
 
   | ε | with 0 errors | with 1 error |
