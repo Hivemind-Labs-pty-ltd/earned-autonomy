@@ -1,0 +1,124 @@
+{
+ "s2a_split": {
+  "random 2%": {
+   "off": {
+    "autonomous": 0.33,
+    "missed_in_review": 0.14
+   },
+   "on": {
+    "autonomous": 0.0,
+    "missed_in_review": 0.105
+   },
+   "autonomous_cut": 1.0
+  },
+  "random 5%": {
+   "off": {
+    "autonomous": 0.955,
+    "missed_in_review": 0.29
+   },
+   "on": {
+    "autonomous": 0.0,
+    "missed_in_review": 0.325
+   },
+   "autonomous_cut": 1.0
+  },
+  "random 10%": {
+   "off": {
+    "autonomous": 1.845,
+    "missed_in_review": 0.56
+   },
+   "on": {
+    "autonomous": 0.0,
+    "missed_in_review": 0.705
+   },
+   "autonomous_cut": 1.0
+  },
+  "adversarial q=10%": {
+   "off": {
+    "autonomous": 0.715,
+    "missed_in_review": 0.105
+   },
+   "on": {
+    "autonomous": 0.0,
+    "missed_in_review": 0.16
+   },
+   "autonomous_cut": 1.0
+  },
+  "adversarial q=30%": {
+   "off": {
+    "autonomous": 2.01,
+    "missed_in_review": 0.275
+   },
+   "on": {
+    "autonomous": 0.0,
+    "missed_in_review": 0.435
+   },
+   "autonomous_cut": 1.0
+  },
+  "adversarial q=60%": {
+   "off": {
+    "autonomous": 3.785,
+    "missed_in_review": 0.66
+   },
+   "on": {
+    "autonomous": 0.0,
+    "missed_in_review": 0.795
+   },
+   "autonomous_cut": 1.0
+  }
+ },
+ "s1_t1_by_pattern": {
+  "W95": {
+   "learning": {
+    "undeserved": 0,
+    "promotions": 188
+   },
+   "early": {
+    "undeserved": 0,
+    "promotions": 164
+   },
+   "defector": {
+    "undeserved": 33,
+    "promotions": 109
+   },
+   "steady": {
+    "undeserved": 0,
+    "promotions": 599
+   },
+   "bad_update": {
+    "undeserved": 33,
+    "promotions": 155
+   },
+   "drift": {
+    "undeserved": 6,
+    "promotions": 146
+   }
+  },
+  "CS-mix": {
+   "early": {
+    "undeserved": 0,
+    "promotions": 139
+   },
+   "learning": {
+    "undeserved": 0,
+    "promotions": 163
+   },
+   "defector": {
+    "undeserved": 35,
+    "promotions": 95
+   },
+   "steady": {
+    "undeserved": 0,
+    "promotions": 505
+   },
+   "bad_update": {
+    "undeserved": 20,
+    "promotions": 136
+   },
+   "drift": {
+    "undeserved": 3,
+    "promotions": 130
+   }
+  }
+ }
+}

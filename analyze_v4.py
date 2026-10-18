@@ -232,7 +232,8 @@ def s2b():
             return done[(t["task_id"], variant)]
         budget.check("v4-tagger")
         msg = t["message"] + ("\n\n" + ADV[t["arch"]] if variant == "adversarial" else "")
-        text, _ = llm.chat(tag_prompt(t["arch"], msg), "deepseek/deepseek-v4-flash", max_tokens=2000, stage="v4-tagger")
+        reply, _ = llm.chat(tag_prompt(t["arch"], msg), "deepseek/deepseek-v4-flash", max_tokens=2000, stage="v4-tagger")
+        text = reply.get("content") or ""
         m = re.search(r"\{.*\}", text or "", re.S)
         tag, conf = None, 0.0
         if m:

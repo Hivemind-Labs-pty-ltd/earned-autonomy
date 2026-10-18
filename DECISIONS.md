@@ -127,3 +127,12 @@ Append-only. Newest at the bottom.
   - **"Measured" error:** errors the reviewer actually *found* on spot-checked gamer autonomous actions ÷ spot-checked gamer autonomous actions. The reviewer's catch rate, about 0.93, sits inside the ratio.
   - **Gamer check flag:** watched actions get normal check recall (0.70) and false-alarm rate (0.05). Unwatched gamer errors evade checks in the main run.
   - **Predictable sampling:** every 4th autonomous action of a key at L2, every 20th at L3, counted per key across levels.
+
+## 2026-10-18 — v4 verdicts (REPORT-v4.md, content returned to parent)
+- **S1:** CS-mix MIXED (T2 pooled −90% undeserved at +28% actions; T1 −6%). W99 and CS-flat FAIL. Per the prereg rule, the default stays W95.
+- **S2a:** FAIL on the pre-registered metric (−71…−82%, under 90%). S2b reported: adversarial downgrade 3.3% vs clean 0.3%; the floor held 8/8 risky writes. S2b spend $0.004.
+- **S3:** FAIL (measured tracks ✓, caught fast ✓, predictable ≥ 2× escapes ✗ at 1.2×).
+- **EXPLORATORY (`explore_v4.py`):**
+  - **S2a:** the defence removes 100% of *autonomous* downgrade escapes in every scenario; the residual is reviewer misses on held actions, which the prereg metric counted.
+  - **S1 T1:** all 72 undeserved W95 promotions are in defector / bad-update / drift keys (none in steady, learning or early). T1's undeserved promotions are post-promotion change, not peeking.
+  - **S3 incidents-off sensitivity** (pre-registered as a sensitivity, not a bar): predictable sampling, median 498 actions to demotion vs 54, escapes 1.9×.
