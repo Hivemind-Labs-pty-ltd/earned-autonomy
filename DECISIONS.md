@@ -100,3 +100,8 @@ Append-only. Newest at the bottom.
 - **Per-task wall-clock watchdog (600 s):** two smoke tasks hung for > 10 min (OpenRouter keep-alive bytes defeat the runtime's 300 s read timeout). Timed-out tasks are recorded as errors, reported per condition, and excluded from paired comparisons (pairs use tasks present in both conditions).
 - **D versions change only when the learned-rules content changes** (no rules proposed in a cycle → same version), matching 10x content-hashed versions. The final cycle proposes no rules (there's no next cycle).
 - **C/D mock tools carry the platform's per-call `description` field** (`tool_harness.with_call_description`), stripped before execution, as every 10x tool does.
+
+## 2026-10-18 — T2-10x scored (REPORT-10x.md)
+- X1 FAIL · X2 FAIL · X3 MIXED · X6 PASS · X7 MIXED · X8 FAIL. Spend $43.13 of the $60 cap. 37 of 24,000 task runs errored (timeouts / failed turns), excluded from pairs.
+- Decomposition (exploratory, labelled): D rows before any learned rule = C + scope only (−46% / −47% vs C on the same tasks); after ≥ 1 rule −92% / −84%.
+- Carry-over never fired (0 of 66 version changes): hidden suites stayed under the 10-test minimum once errors became rare.
