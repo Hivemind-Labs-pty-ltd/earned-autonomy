@@ -105,3 +105,25 @@ Append-only. Newest at the bottom.
 - X1 FAIL · X2 FAIL · X3 MIXED · X6 PASS · X7 MIXED · X8 FAIL. Spend $43.13 of the $60 cap. 37 of 24,000 task runs errored (timeouts / failed turns), excluded from pairs.
 - Decomposition (exploratory, labelled): D rows before any learned rule = C + scope only (−46% / −47% vs C on the same tasks); after ≥ 1 rule −92% / −84%.
 - Carry-over never fired (0 of 66 version changes): hidden suites stayed under the 10-test minimum once errors became rare.
+
+## 2026-10-18 — v4 operationalisations (before any scored v4 result; smoke on one seed only)
+- **W95 baseline is recomputed in `gym/engine_v4.py`.** Its step draws the spot-check decision before reviewing (needed for watch-aware agents), so the RNG order differs from v3. Every S1 arm uses the same v4 code; W95-v4 isn't bit-identical to v3's reference numbers.
+- **Clean-run promotion floors** (0 errors), a property of the formulas, not a result:
+
+  | ε | W95 | W99 | CS-mix | CS-flat |
+  |---|--:|--:|--:|--:|
+  | 0.10 | 35 | 60 | 46 | 69 |
+  | 0.05 | 73 | 127 | 93 | 158 |
+  | 0.02 | 189 | 326 | 236 | 451 |
+
+  CS upper bound by bisection on log M_n(p) (60 steps).
+- **S1 T2 streams:** A-good, A-sloppy (`good-full`, `sloppy-full`) and 10x C-good, C-sloppy; seeds 300–319.
+- **"T2 pooled":** undeserved promotions pooled over all promotions; paired medians are averaged across streams, weighted by paired keys.
+- **S2a:** a mis-tagged action is decided and recorded under its tagged key; `capped` follows the tag.
+- **S2b:** 50 tasks per archetype from that archetype's med/high/capped types. A parse failure or an unknown tag counts as "unknown", which the system would hold.
+  - **Floor:** the highest consequence of any type whose tools include the write; writes no type lists are C4; `escalate_to_human` is not a write.
+  - **"Risky write":** a write in either frozen run (good-full or sloppy-full) whose floor is above the tag's consequence.
+- **S3:**
+  - **"Measured" error:** errors the reviewer actually *found* on spot-checked gamer autonomous actions ÷ spot-checked gamer autonomous actions. The reviewer's catch rate, about 0.93, sits inside the ratio.
+  - **Gamer check flag:** watched actions get normal check recall (0.70) and false-alarm rate (0.05). Unwatched gamer errors evade checks in the main run.
+  - **Predictable sampling:** every 4th autonomous action of a key at L2, every 20th at L3, counted per key across levels.
