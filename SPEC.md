@@ -310,6 +310,19 @@ elif not capped(key) and state.level < 3
   them) and **⅓ hidden**. Hidden tests are stored where agents cannot read them, and are never shown to the
   improver. **[tested]**: hidden pass rate tracked true error (ρ = −0.81), with no sign of test-gaming.
 - **Minimum hidden suite:** ≥ 10 hidden tests per task type before carry-over can apply. **[default]**
+- **Seeded hidden tests per version (optional).** Hidden suites built only from corrections dry up once an agent
+  gets good: few mistakes means few new tests. In the 10x run no suite reached the minimum, so carry-over never applied
+  and every change halved the record (`REPORT-10x.md`). An organisation may therefore seed each task type's hidden
+  suite with authored scenarios when a version is created, so every version can be judged by carry-over.
+  - **What a seeded test is:** a realistic request for that task type, plus the expected action or outcome, written by
+    the policy owner or AI owner, or drawn from past human-handled cases. Never written by the agent or whoever
+    improves it.
+  - **Same protections as correction-based hidden tests:** unreadable by the agent and the improver, changed only by
+    the policy owner, and logged in the trust record.
+  - **Keep them fresh:** replace a share of seeded tests each release so the suite tracks current work.
+  - **Engine support:** `seed_hidden` in `suites.py`, recorded with origin `authored`.
+  - **Status [optional, untested]:** the engine supports it, but whether authored tests predict real errors as well as
+    correction-based ones (ρ = −0.81 in v0) still needs a Trust Gym study before it becomes the default.
 - **Publishing a new version:** run training and hidden suites on the candidate before it goes live.
   - **Carry-over rule:** if `hidden_pass ≥ carry_hidden_min (0.8)` for that task type → the trust key keeps all its
     evidence; otherwise the discount below applies. **[tested v3: safe; effectiveness depends on hidden-test
