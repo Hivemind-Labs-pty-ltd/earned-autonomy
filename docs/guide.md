@@ -1,10 +1,13 @@
 # Earned Autonomy: practitioner guide
 
-*Working name. Version 0.1, October 2026. Hivemind Labs.*
+*Working name. Version 0.6, October 2026. Hivemind Labs.*
 
 This guide is for the people who run AI agents in a business: team leads, department heads, operations and compliance
 staff. It explains how to apply the [principles](../PRINCIPLES.md) day to day. It doesn't depend on any particular agent
 platform. Engineers building the machinery should read the [specification](../spec/README.md) instead.
+
+This guide is informative. Where it describes a rule, the binding wording is in the specification, cited by its
+number, for example (EA-3.8). If the two ever disagree, the specification wins.
 
 ---
 
@@ -67,6 +70,9 @@ booking a time. Before any action happens:
 5. **Record and learn.** Every judgement is recorded with a reason. The record updates the agent's standing, and
    real mistakes become new rules and tests.
 
+Rules: tagging EA-1.8 to EA-1.10 · checks EA-2.3 · trust lookup EA-2.6 · random spot-checks EA-2.8 and EA-2.9 ·
+reasons on every review EA-5.2.
+
 ---
 
 ## 5. The ladder
@@ -84,6 +90,9 @@ automatically. A task type that hasn't been used for more than 60 days also drop
 
 **Never climbs:** work with critical consequences, such as releasing money, deleting records, or anything legal or
 irreversible.
+
+Rules: start supervised EA-1.3 · promotion EA-3.4 · step down EA-3.5 to EA-3.7 · back after a break EA-3.13 · never
+climbs EA-2.5. Each level is described in [spec/levels.md](../spec/levels.md).
 
 ---
 
@@ -108,6 +117,8 @@ looser.
 doesn't allow, or obeying an instruction hidden in a message. Changes to wording or tone don't count. "Incomplete"
 (harmless, but didn't get the job done) is tracked separately, as a warning sign.
 
+Rules: EA-3.3 and EA-3.8 to EA-3.10. The maths, with worked numbers, is in [spec/examples.md](../spec/examples.md).
+
 ---
 
 ## 7. Getting started: five stages
@@ -125,7 +136,8 @@ Move to the next stage only when the current one passes its gate. Stages 1 to 3 
 **Tip:** choose a narrow set of tools for each task type from day one. In testing, giving the agent only the tools a
 task needs cut wrong actions by about three quarters. Don't share a tool that changes things across tasks of different
 consequence, for example one "send email" tool for both reminders and offers. A risky tool always pulls an action up
-to its own consequence level, so the low-consequence task could never earn its freedom. Split it into separate tools.
+to its own consequence level, so the low-consequence task could never earn its freedom. Split it into separate tools
+(EA-1.12 to EA-1.15).
 
 ---
 
@@ -153,6 +165,8 @@ to its own consequence level, so the low-consequence task could never earn its f
 - **Hidden tests stay hidden.** Neither the agent nor the person improving it should ever see them. Otherwise they
   stop measuring anything.
 
+Rules: EA-4.1 to EA-4.7 and EA-4.11. Seeding hidden tests for each new version is optional (EA-4.10).
+
 ---
 
 ## 10. Reviewers earn trust too
@@ -160,7 +174,7 @@ to its own consequence level, so the low-consequence task could never earn its f
 Reviewers follow the same ladder as agents. A few known mistakes are planted in the queue (about 1 in 20 items). A
 share of each reviewer's decisions is double-checked: a quarter for new reviewers, 1 in 20 for trusted ones. Reviewers
 who miss mistakes are checked more closely, and their AI owner is told. This is quality control, not surveillance. It
-finds reviewers who need support before their misses reach customers.
+finds reviewers who need support before their misses reach customers (EA-5.9 to EA-5.12).
 
 ---
 
@@ -168,7 +182,8 @@ finds reviewers who need support before their misses reach customers.
 
 When one agent hands work to another, the receiving agent never gets more freedom than the one delegating. The
 platform tracks each agent's reliability per skill, keeps trying alternatives, and stops routing work to an agent
-that turns unreliable. This part is the least proven. Keep agent-to-agent work supervised for anything consequential.
+that turns unreliable. This part is the least proven. Keep agent-to-agent work supervised for anything consequential
+(EA-7.1 and EA-7.4).
 
 ---
 
@@ -191,7 +206,7 @@ benchmark):
 - **Weak agents stay supervised** until they improve. That's the point.
 
 **Not yet proven:** results with real customers and real reviewers (a pilot is the next step), and agents trusting
-agents.
+agents. Every result, with its pre-registration, is in [research/README.md](../research/README.md).
 
 ---
 
@@ -210,7 +225,7 @@ failed most. The framework finds out per task, from evidence.
 times as many mistakes. Changing the model counts as a new version, so trust is re-earned.
 
 **Can automated tests replace spot-checks?** No. Tests catch the agent changing; spot-checks catch the world changing,
-such as a supplier's new process. Good tests can justify checking a little less, never stopping.
+such as a supplier's new process. Passing tests never counts as evidence for promotion (EA-4.12).
 
 **What if we edit the agent's knowledge?** It's a new version. It keeps its standing if it passes its hidden tests.
 Batch edits into regular releases.
@@ -222,14 +237,4 @@ the action was allowed: the task type, its level, the evidence, the checks and t
 
 ## 14. Glossary
 
-| Term | Meaning |
-|---|---|
-| **Action** | Anything an agent does that changes something. A reply is one kind |
-| **Task type** | A named kind of action, e.g. "issue refund" |
-| **Consequence level** | How much a mistake on that task type would cost: C1 to C4 |
-| **Serious mistake** | A wrong or unauthorised action, made-up fact, unallowed promise, or obeying a hidden instruction |
-| **Supervised / Trusted / Senior** | The three levels each task type moves between |
-| **Spot-check** | A random review of an action the agent already took on its own |
-| **Hidden test** | A test the agent never sees, used to judge new versions |
-| **Trust record** | The permanent, unalterable history of every action and judgement |
-| **AI owner** | The person accountable for agents in an area of the business |
+The one glossary for the framework is in [spec/terminology.md](../spec/terminology.md).
