@@ -25,19 +25,19 @@ trust only if they pass tests they have never seen.
 |---|---|
 | **Action** | Anything an agent does that changes something outside itself: sending a message, calling a write tool, updating a record, booking, paying, deleting, delegating to another agent. Reads are not actions. |
 | **Proposed action** | An action the agent wants to take, captured *before* it happens. The framework only ever governs proposed actions. |
-| **Task type** | A named category of action, e.g. `cs.order_status.update`. Trust is tracked per task type. See §4. |
-| **Trust key** | `(org_id, agent_id, task_type)`. All trust state is per key. **[tested]**: per-agent and pooled keys both did worse. |
+| **Task type** | A catalogue entry describing one kind of action, e.g. `customer_service.order_status.update`, with a description, example requests, allowed tools and a consequence level. Trust is tracked per task type. See §4. |
+| **Trust key** | `(organisation_id, agent_id, task_type)`. All trust state is per key. **[tested]**: per-agent and pooled keys both did worse. |
 | **Level** | `L1 Supervised`, `L2 Trusted`, `L3 Senior`. (`L0 Observe`: the agent may tag and suggest but not propose actions; used before an agent is enabled for a task type.) |
 | **Outcome** | A human (or authorised verifier) judgement of one action: `approved`, `cosmetic_edit`, `material_edit`, `rejected`, plus a reason code. |
 | **Serious error** | An outcome labelled `material_edit` or `rejected` with a non-cosmetic reason code, or any incident. Only serious errors count against trust. |
-| **ε (epsilon)** | The maximum acceptable serious-error rate for a task type, e.g. 0.05. Set by the policy owner. |
+| **Error bar (ε)** | The maximum acceptable serious-error rate for a task type, e.g. 0.05. Field name `error_bar`; ε is its symbol in formulas. Set by the consequence level (§7). |
 | **Agent version** | An immutable snapshot of everything that determines behaviour. See §8. |
 
 ## 3. Architecture
 
 ```
             ┌────────────┐   ┌──────────┐   ┌────────────────┐
-proposed ──►│ 1 Tagger   │──►│ 2 Checks │──►│ 3 Trust engine │──► decision: HOLD | ACT | ACT+SPOT
+proposed ──►│ 1 Tagger   │──►│ 2 Checks │──►│ 3 Trust engine │──► decision: HOLD | ACT
  action     └────────────┘   └──────────┘   │   decide()     │
                                             └───────┬────────┘
                        HOLD ──► human review ──┐    │ ACT ──► execute ──► (sampled) post-review ─┐
@@ -57,14 +57,43 @@ Components: **Tagger**, **Checks**, **Trust engine** (decide + update), **Trust 
 
 ## 4. Task types
 
-- **Shape:** `<domain>.<object>.<verb>`, e.g. `cs.refund.issue`, `cs.order_status.update`, `it.access.grant`.
-  **[default]**
-- **Granularity rule: split a task type when the consequence of a mistake differs materially**, not when the
-  wording differs. "Refund ≤ $50" and "refund > $50" are separate types if a wrong large refund costs more.
+**A task type is a catalogue entry, not just a name.** Each entry has:
+
+| Field | What it holds |
+|---|---|
+| `name` | The key, e.g. `customer_service.refund.issue` |
+| `description` | One or two plain sentences: what is in scope and what is out of scope |
+| `examples` | 3–5 example requests that belong to this type |
+| `tools` | The tools the agent may use for this type (tool scope, below) |
+| `consequence` | C1–C4 (§7): how much proof is needed before the agent acts alone |
+
+The tagger works from the descriptions and examples, and reviewers use them to judge whether an action was in scope.
+**[default]**
+
+- **Naming is a convention, not a rule.** The default shape is `<domain>.<object>.<verb>`, e.g.
+  `customer_service.refund.issue`, `customer_service.order_status.update`, `it_service_desk.access.grant`.
+  **[default]** It's useful because:
+  - reports roll up by domain and by object;
+  - object + verb map naturally to tools and permissions;
+  - defaults can be set per domain.
+
+  The name has **no effect on the trust maths**. It's only a key.
+- **Granularity rule: split a task type only when the consequence of a mistake differs, or the agent's measured error
+  rate clearly differs.** Don't split because the wording differs. The evidence:
+  - **Too coarse** (trust per agent) gave 7% automation, against 27% per task type. **[tested v0]**
+  - **Borrowing evidence across types** (pooling) penalised good types and helped nothing. **[tested v1]**
+  - **Too fine** slows everything down: each type re-earns trust from scratch, 35–189 judged actions depending on
+    consequence (§7). **[tested]**
+- **Don't encode parameters in names.** No `customer_service.refund.issue_over_200`. Handle "a larger refund is
+  riskier" with an argument-dependent tool floor (below, and the engine's `tool_floor_function`). That keeps the
+  catalogue small.
 - **Catalogue owner (decided 2026-10-16):** the **AI owner** for that area of the business (a team lead, department
-  head or similar) maintains its task types and assigns each a consequence level (§7). The tagger proposes new
-  types; the AI owner accepts or rejects them.
+  head or similar) maintains its task types, writes their descriptions and examples, and assigns each a consequence
+  level (§7). The tagger proposes new types; the AI owner accepts or rejects them.
 - **Tagger:** a classifier (rules first, model second) returns `{task_type, confidence}` for every proposed action.
+  - **Tagging accuracy depends mostly on the descriptions and examples.** **[default]** In testing, adversarial
+    phrasing steered an LLM tagger to a lower-consequence type 3.3% of the time, and the tool floor caught every one
+    that came with a risky write. **[tested v4]** A dedicated tagging-accuracy study is a candidate for future work.
   - **Confidence < 0.8** → treat the action as **L1** (held), whatever the type's level. **[tested v4: a partial
     defence; it held 4 of 10 adversarial downgrades]**
   - **Unknown type** → held, and logged as a candidate new type. **[default]**
@@ -83,55 +112,77 @@ Components: **Tagger**, **Checks**, **Trust engine** (decide + update), **Trust 
   adversarial downgrades that came with a risky write.
   - **Design rule:** don't share a write tool across consequence levels. A shared `send_email` pushed low-consequence
     reminders up to C3, so they could never earn autonomy. Split such tools (`send_reminder`, `send_offer`) or give
-    them floors that depend on their arguments.
+    them floors that depend on their arguments, e.g. `issue_refund` floors at C3 above $200 and at C2 below.
 
 ## 5. Data model
 
-All timestamps UTC. All records carry `org_id`. The trust record is **append-only**: no updates or deletes, ever.
+All timestamps UTC. All records carry `organisation_id`. The trust record is **append-only**: no updates or deletes,
+ever.
 
 **ProposedAction**
 ```json
-{ "action_id": "act_…", "org_id": "…", "agent_id": "…", "agent_version": "sha…",
+{ "action_id": "action_…", "organisation_id": "…", "agent_id": "…", "agent_version": "sha256…",
   "kind": "message.send | tool.call | delegate", "payload": {…},
-  "task_type": "cs.refund.issue", "tag_confidence": 0.93,
+  "task_type": "customer_service.refund.issue", "tag_confidence": 0.93,
+  "write_tools": ["issue_refund"],
   "counterparty_id": "…", "parent_action_id": null, "created_at": "…" }
 ```
 
 **Decision** (written to the trust record for every action, held or not)
 ```json
-{ "decision_id": "dec_…", "action_id": "act_…", "trust_key": ["org","agent","cs.refund.issue"],
-  "mode": "hold | act", "why": "level_L1 | check_failed | checks_missing | capped | low_confidence | unknown_type | paused | trusted",
-  "level": 2, "evidence_n": 81.0, "evidence_err": 1.0, "upper_bound": 0.046, "eps": 0.05,
+{ "decision_id": "decision_…", "action_id": "action_…",
+  "trust_key": ["organisation", "agent", "customer_service.refund.issue"],
+  "mode": "hold | act",
+  "why": "level_L1 | check_failed | checks_missing | capped | low_confidence | unknown_type | tool_floor_mismatch | paused | trusted",
+  "level": 2, "judged_count": 81.0, "serious_error_count": 1.0, "upper_bound": 0.046, "error_bar": 0.05,
+  "consequence": "C2", "tool_floor": "C2",
   "checks": { "passed": ["amount_matches_order"], "failed": [] },
-  "policy_version": 7, "agent_version": "sha…", "created_at": "…" }
+  "policy_version": 7, "agent_version": "sha256…", "created_at": "…" }
 ```
 
 **OutcomeEvent** (append-only; the evidence)
 ```json
-{ "event_id": "out_…", "action_id": "act_…", "decision_id": "dec_…",
-  "trust_key": ["org","agent","cs.refund.issue"], "agent_version": "sha…",
+{ "event_id": "outcome_…", "action_id": "action_…", "decision_id": "decision_…",
+  "trust_key": ["organisation", "agent", "customer_service.refund.issue"], "agent_version": "sha256…",
   "source": "pre_review | spot_check | incident | canary",
   "label": "approved | cosmetic_edit | material_edit | rejected | incomplete",
   "reason_code": "wrong_amount", "serious": true,
-  "actor_id": "user_…", "diff_ref": "…", "created_at": "…" }
+  "actor_id": "user_…", "diff_reference": "…", "created_at": "…" }
 ```
 
 **TrustState** (derived; can always be rebuilt by replaying the trust record)
 ```json
-{ "trust_key": [...], "level": 2, "n": 81.0, "err": 1.0, "since_change": 34,
-  "recent": [0,0,1,0,…],            // last 50 serious flags, cleared on level change
-  "agent_version": "sha…", "paused": false, "state_version": 412, "updated_at": "…" }
+{ "trust_key": [...], "level": 2, "judged_count": 81.0, "serious_error_count": 1.0, "incomplete_count": 0.0,
+  "since_change": 34,
+  "recent": [0, 0, 1, 0, …],            // last 50 serious flags, cleared on level change
+  "agent_version": "sha256…", "paused": false, "state_version": 412, "updated_at": "…" }
 ```
 
 **Policy** (versioned; every change is a new version)
 ```json
 { "policy_version": 7,
-  "defaults": { "eps": 0.05, "n_min": 30, "confidence": 0.95, "rolling_n": 50, "rolling_min": 10, "reentry_gap_days": 60,
+  "defaults": { "error_bar": 0.05, "min_judged": 30, "confidence": 0.95, "rolling_window": 50,
+                "rolling_window_min": 10, "reentry_gap_days": 60,
                 "spot_rate": { "2": 0.25, "3": 0.05 }, "canary_rate": 0.02,
                 "version_discount": 0.5, "carry_hidden_min": 0.8, "tag_confidence_min": 0.8 },
-  "task_types": { "cs.refund.issue": { "eps": 0.03, "capped": false, "tools": ["lookup_order","issue_refund"] },
-                  "cs.payment.release": { "capped": true } },
-  "roles": { "owner": "user_…", "policy_owner": "user_…", "reviewers": [...], "auditors": [...] } }
+  "task_types": {
+    "customer_service.refund.issue": {
+      "description": "Issue a refund on an existing order, up to the order total, within the refund policy. Out of scope: goodwill credits, refunds on someone else's order.",
+      "examples": ["Can I get my money back for order 1043?", "The tent arrived broken, please refund me",
+                   "You charged me twice, refund the second one"],
+      "tools": ["lookup_order", "issue_refund"],
+      "consequence": "C3" },
+    "customer_service.order_status.update": {
+      "description": "Tell a customer where their order is, using the tracking on file. Out of scope: changing delivery details.",
+      "examples": ["Where's my order?", "Has order 2210 shipped yet?", "When will my parcel arrive?"],
+      "tools": ["lookup_order", "send_update"],
+      "consequence": "C1" },
+    "customer_service.payment.release": {
+      "description": "Release a held payment to a supplier. Never done by an agent alone.",
+      "examples": ["Release the payment for invoice 774", "Pay the supplier today"],
+      "tools": ["release_payment"],
+      "consequence": "C4" } },
+  "roles": { "ai_owner": "user_…", "policy_owner": "user_…", "reviewers": [...], "auditors": [...] } }
 ```
 
 **Reason codes** **[default]**
@@ -164,29 +215,29 @@ policy change), the new decision applies. **[default]**
 **Unjudged autonomous actions count as nothing.** Silence is not approval. **[default]** Spot-check and pre-review
 outcomes carry equal weight. **[tested]**
 
-On each event for key `k`:
+On each event for trust key `key`, with its state `state`:
 
 ```
-s.n   += 1
-s.err += serious
-s.since_change += 1
-s.recent.append(serious)                     # last rolling_n only
+state.judged_count        += 1
+state.serious_error_count += serious
+state.since_change        += 1
+state.recent.append(serious)                 # last rolling_window only
 
 # demotion first
-if s.level >= 2 and len(s.recent) >= rolling_min
-   and wilson_lower(sum(s.recent), len(s.recent), confidence) > eps(k):
-       s.level -= 1 ; s.since_change = 0 ; s.recent.clear()           # one level [tested]
+if state.level >= 2 and len(state.recent) >= rolling_window_min
+   and wilson_lower(sum(state.recent), len(state.recent), confidence) > error_bar(key):
+       state.level -= 1 ; state.since_change = 0 ; state.recent.clear()           # one level [tested]
 
 # promotion
-elif not capped(k) and s.level < 3
-   and s.since_change >= n_min
-   and wilson_upper(s.err, s.n, confidence) <= eps(k):
-       s.level += 1 ; s.since_change = 0 ; s.recent.clear()           # [tested]
+elif not capped(key) and state.level < 3
+   and state.since_change >= min_judged
+   and wilson_upper(state.serious_error_count, state.judged_count, confidence) <= error_bar(key):
+       state.level += 1 ; state.since_change = 0 ; state.recent.clear()           # [tested]
 ```
 
 - **Incident** (a serious problem found after the fact): counts as one serious outcome AND steps the key down one
   level immediately. **[tested]**: one level is as safe as dropping to L1 and costs less.
-- **Wilson score interval** at 95%: for `e` errors in `n` trials, `p = e/n`, `z = 1.96`;
+- **Wilson score interval** at 95%: for e serious errors in n judged actions, `p = e/n`, `z = 1.96`;
   `upper/lower = (p + z²/2n ± z·√(p(1−p)/n + z²/4n²)) / (1 + z²/n)`.
 - **Strict promotion (optional).** For C3 task types, or agents with a weak record, use an anytime-valid bound (a
   Beta-binomial mixture confidence sequence, prior Beta(1, 1/ε − 1), α = 0.05). It stays valid even though the engine
@@ -252,7 +303,7 @@ elif not capped(k) and s.level < 3
     large and sharp per task type.
     - The earlier clause "≥ the previous version's score" is removed: it added noise without safety.
   - **Batch knowledge edits** (e.g. a weekly release), so each small edit doesn't force a re-test. **[default]**
-  - **Otherwise:** `n` and `err` are multiplied by `version_discount (0.5)`, and if the upper bound now exceeds ε,
+  - **Otherwise:** `judged_count` and `serious_error_count` are multiplied by `version_discount (0.5)`, and if the upper bound now exceeds ε,
     the key drops to L1. **[tested]**
 - **Separation:** the agent (or any automated improver) can never edit tests, checks, policy or the trust record.
   **[tested]**: 28/28 attempts blocked.
@@ -265,13 +316,13 @@ elif not capped(k) and s.level < 3
 - **Canaries:** `canary_rate` of review items are known-bad seeded actions. **[tested in simulation only]**: −15%
   missed errors.
 - **Reviewers earn trust too (decided 2026-10-16).** A human reviewer follows the same framework as an agent.
-  Each reviewer has a trust key `(org, reviewer_id, review.<task_type>)`. Their evidence comes from canaries (did
+  Each reviewer has a trust key `(organisation_id, reviewer_id, review.<task_type>)`. Their evidence comes from canaries (did
   they catch the planted error?) and audits (does a second reviewer or a later incident agree with their call?).
   - **R1 New reviewer:** 25% of their decisions are second-checked.
   - **R2 Trusted reviewer:** 5% of their decisions are second-checked.
   - **Stepping down:** a reviewer who misses canaries or whose approvals lead to incidents steps down one level,
     and the AI owner is told.
-  - **Evidence:** canaries, plus every second check (clean or not). Same maths as §7, ε_rev = 10%, n_min = 30.
+  - **Evidence:** canaries, plus every second check (clean or not). Same maths as §7, `reviewer_error_bar` = 10%, `reviewer_min_judged` = 30.
     Canary rate for reviewers: **5%**.
   - **[tested v3]**: it sorts reviewers correctly. A poor reviewer (60% catch) was ever trusted in 9% of worlds,
     and a good one (95%) ended trusted in 100%. It's quality control rather than the main way to cut errors: −15%
@@ -316,7 +367,7 @@ elif not capped(k) and s.level < 3
 
 ## 11. Multi-agent (preview; least proven)
 
-- **Authority** = the set of `(task_type, level)` an agent holds in an org.
+- **Authority** = the set of `(task_type, level)` an agent holds in an organisation.
 - **Delegation cap:** when agent A delegates an action of type `t` to agent B, B's effective level for that action
   is `min(level_A(t), level_B(t))`. If A holds no level for `t`, B's action is held. **[default]**
 - **Provenance:** every delegated action carries `parent_action_id`. Serious outcomes count against the agent whose
@@ -332,15 +383,16 @@ elif not capped(k) and s.level < 3
 ## 12. API surface (reference)
 
 ```
-tag(proposed_action)                         -> {task_type, confidence}
-decide(proposed_action)                      -> Decision          # also re-called at execution time
-record_outcome(action_id, label, reason_code, source, actor_id)
+tag(proposed_action)                                    -> {task_type, confidence}
+decide(proposed_action, checks)                         -> Decision     # also re-called at execution time
+mark_executed(action_id)                                # spot-check drawn here, never shown to the agent
+record_outcome(action_id, label, reason_code, source, actor_id, diff_reference?)
 report_incident(action_id, severity, actor_id, note)
-on_version_published(agent_id, version, results: {task_type: {training_pass, hidden_pass, n_hidden}})
-get_state(org_id, agent_id, task_type?)      -> TrustState[] with explanation
-explain(action_id)                           -> Decision + evidence snapshot + policy version
-pause(scope) / resume(scope)                 # scope = agent | agent+task_type
-governance.request(actor, op, target, args)  -> allowed: bool       # logged either way
+on_version_published(agent_id, version, results: {task_type: {training_pass, hidden_pass, hidden_test_count}})
+get_state(organisation_id, agent_id, task_type?)        -> TrustState[] with explanation
+explain(action_id)                                      -> Decision + evidence snapshot + policy version
+pause(actor, organisation_id, agent_id, task_type?) / resume(...)
+governance.request(actor, operation, target, arguments) -> allowed: bool   # logged either way
 ```
 
 ## 13. Conformance tests (a build is compliant if all pass)
@@ -358,12 +410,12 @@ governance.request(actor, op, target, args)  -> allowed: bool       # logged eit
 
 ## 14. Worked example
 
-A customer service agent proposes a $49 refund. Task type `cs.refund.issue`, ε = 0.03, level L1.
+A customer service agent proposes a $49 refund. Task type `customer_service.refund.issue`, error bar 0.03, level L1.
 
-1. **Tag:** `cs.refund.issue`, confidence 0.95.
+1. **Tag:** `customer_service.refund.issue`, confidence 0.95.
 2. **Checks:** the amount equals the order total, and the order is inside the 30-day window. Pass.
 3. **Decide:** level L1 → **hold**. A Decision is written with `why = level_L1`.
-4. **Review:** the reviewer approves it unchanged. OutcomeEvent `approved`, not serious. State: n = 112, err = 1,
+4. **Review:** the reviewer approves it unchanged. OutcomeEvent `approved`, not serious. State: judged_count = 112, serious_error_count = 1,
    since_change = 112. Wilson upper(1, 112) = 0.049 > 0.03, so it stays L1.
 5. **Later:** at 170 judged refunds with 1 error, upper = 0.033, still above ε. At 185 with 1 error it drops
    under 0.03, so it **promotes to L2**.
@@ -378,7 +430,7 @@ A customer service agent proposes a $49 refund. Task type `cs.refund.issue`, ε 
 Each resolves an ambiguity found while implementing this spec in `engine/` (all 45 tests pass, and the T1 parity test
 reproduces the tested results). **[implemented v0.3]**
 
-1. **Spot sampling is post-execution** and unpredictable (§6). There is no `act_spot` mode.
+1. **Spot sampling is post-execution** and unpredictable (§6). There is no separate "act and spot-check" mode.
 2. **The agent's view of its own record** excludes spot-sample, canary and second-check entries, so it can't learn
    when it is watched (§10).
 3. **Lowering ε** re-evaluates every affected key; a key whose bound no longer holds drops to **L1**, as with the

@@ -31,7 +31,7 @@ What it gives you:
 
 ```bash
 pip install -e engine          # from the repo root
-pytest engine                  # 61 tests, about 20 s (the Trust Gym parity test replays 40 worlds)
+pytest engine                  # 62+ tests, about 20 s (the Trust Gym parity test replays 40 worlds)
 ```
 
 ## Quickstart: wrap any agent
@@ -40,16 +40,25 @@ pytest engine                  # 61 tests, about 20 s (the Trust Gym parity test
 from earned_autonomy import (TrustEngine, Policy, TaskTypePolicy, ProposedAction, ChecksResult, RuleTagger)
 
 policy = Policy(task_types={
-    "cs.order_status.update": TaskTypePolicy("C1", tools=["lookup_order"]),         # low consequence: 10% bar
-    "cs.refund.issue":        TaskTypePolicy("C3", tools=["lookup_order", "issue_refund"]),  # high: 2% bar
-    "cs.payment.release":     TaskTypePolicy("C4"),                                  # critical: never promotes
+    # each task type is a catalogue entry: consequence, tools, and a description and examples for the tagger
+    "customer_service.order_status.update": TaskTypePolicy(
+        "C1", tools=["lookup_order", "send_update"],                                  # low consequence: 10% bar
+        description="Tell a customer where their order is. Out of scope: changing delivery details.",
+        examples=["Where's my order?", "Has order 2210 shipped yet?", "When will my parcel arrive?"]),
+    "customer_service.refund.issue": TaskTypePolicy(
+        "C3", tools=["lookup_order", "issue_refund"],                                 # high consequence: 2% bar
+        description="Refund an existing order, up to its total. Out of scope: goodwill credits.",
+        examples=["Can I get my money back for order 1043?", "You charged me twice, refund the second one"]),
+    "customer_service.payment.release": TaskTypePolicy("C4"),                        # critical: never promotes
 })
-tagger = RuleTagger([(lambda a: a.payload.get("tool") == "issue_refund", "cs.refund.issue"),
-                     (lambda a: a.payload.get("tool") == "send_update", "cs.order_status.update")])
+tagger = RuleTagger([
+    (lambda action: action.payload.get("tool") == "issue_refund", "customer_service.refund.issue"),
+    (lambda action: action.payload.get("tool") == "send_update", "customer_service.order_status.update"),
+])
 engine = TrustEngine(policy, tagger=tagger)
 
 def handle(agent_output, run_it, my_checks):
-    action = ProposedAction(action_id=agent_output.id, org_id="acme", agent_id="cs-agent",
+    action = ProposedAction(action_id=agent_output.id, organisation_id="acme", agent_id="customer_service_agent",
                             agent_version=agent_output.version, kind="tool.call", payload=agent_output.call)
     engine.tag(action)                                       # 1 tag (also offers only engine.tools_for(type))
     checks = my_checks(action)                               # 2 your pre-send checks -> ChecksResult
@@ -61,12 +70,12 @@ def handle(agent_output, run_it, my_checks):
         send_to_review_queue(action, decision.why)           # 4 hold: a person approves, edits or rejects
 
 # 5 record every human judgement; this is the evidence trust is built from
-engine.record_outcome("act_123", "approved", None, "pre_review", actor_id="sam")
-engine.record_outcome("act_124", "rejected", "wrong_amount", "pre_review", actor_id="sam")
-engine.report_incident("act_125", "high", actor_id="ops")    # found later: steps the task type down one level
+engine.record_outcome("action_123", "approved", None, "pre_review", actor_id="sam")
+engine.record_outcome("action_124", "rejected", "wrong_amount", "pre_review", actor_id="sam")
+engine.report_incident("action_125", "high", actor_id="ops")    # found later: steps the task type down one level
 
-print(engine.get_state("acme", "cs-agent"))                  # levels, bounds, alerts, plain-English explanation
-print(engine.explain("act_123"))                             # why it was held or allowed, under which policy
+print(engine.get_state("acme", "customer_service_agent"))                  # levels, bounds, alerts, plain-English explanation
+print(engine.explain("action_123"))                             # why it was held or allowed, under which policy
 assert engine.record.verify().ok                             # the record hasn't been tampered with
 ```
 
@@ -74,14 +83,14 @@ assert engine.record.verify().ok                             # the record hasn't
 is above the tagged task type's consequence (`why="tool_floor_mismatch"`):
 
 ```python
-action = ProposedAction(..., task_type="cs.order_status.update",            # tagged C1...
+action = ProposedAction(..., task_type="customer_service.order_status.update",  # tagged C1...
                         write_tools=["issue_refund"],                          # ...but issues a refund (C3)
-                        write_tool_args={"issue_refund": call.args})           # args are never recorded
+                        write_tool_arguments={"issue_refund": call.arguments})      # arguments are never recorded
 engine.decide(action, checks).why                                              # -> "tool_floor_mismatch"
 ```
 
 A tool's floor is the highest consequence of any task type listing it, or **C4** for a write tool no task type
-lists. Override with `Policy(tool_floors={"send_email": "C1"})`, or pass `TrustEngine(tool_floor_fn=...)` for floors
+lists. Override with `Policy(tool_floors={"send_email": "C1"})`, or pass `TrustEngine(tool_floor_function=...)` for floors
 that depend on arguments (`send_email` with a reminder template → C1, anything else → the policy floor). Don't share a
 write tool across consequence levels; `lint_shared_write_tools(policy)` warns when you do.
 

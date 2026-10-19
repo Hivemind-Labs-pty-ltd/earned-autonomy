@@ -8,6 +8,7 @@ the engine, never in the reducer, and only its outcome is recorded.
 from __future__ import annotations
 
 import copy
+import dataclasses
 import secrets
 import threading
 import uuid
@@ -25,13 +26,13 @@ from .suites import SuiteStore
 from .tagging import Tagger
 
 
-def _key(k) -> TrustKey:
-    return (k[0], k[1], k[2])
+def _key(key) -> TrustKey:
+    return (key[0], key[1], key[2])
 
 
-def reviewer_key(org_id: str, reviewer_id: str, task_type: str) -> TrustKey:
-    """SPEC §9: a reviewer's trust key is (org, reviewer_id, review.<task_type>)."""
-    return (org_id, reviewer_id, f"review.{task_type}")
+def reviewer_key(organisation_id: str, reviewer_id: str, task_type: str) -> TrustKey:
+    """SPEC §9: a reviewer's trust key is (organisation, reviewer_id, review.<task_type>)."""
+    return (organisation_id, reviewer_id, f"review.{task_type}")
 
 
 class _Reducer:
@@ -43,160 +44,161 @@ class _Reducer:
         self.policies: dict[int, dict] = {}
         self.states: dict[TrustKey, TrustState] = {}
         self.reviewers: dict[TrustKey, TrustState] = {}
-        self.paused: set[tuple] = set()                     # (org, agent, task_type|None)
+        self.paused: set[tuple] = set()                     # (organisation, agent, task_type|None)
         self.actions: dict[str, dict] = {}                  # action_id -> index
         self.published: dict[str, set] = {}                 # agent_id -> versions published
         self.queue: dict[str, dict] = {}                    # action_id -> review item (pre_review | spot_check)
         self.level_changes: list[dict] = []
 
     # ---- helpers -----------------------------------------------------------------------------------------
-    def state(self, k: TrustKey) -> TrustState:
-        if k not in self.states:
-            self.states[k] = TrustState(trust_key=k)
-        return self.states[k]
+    def state(self, key: TrustKey) -> TrustState:
+        if key not in self.states:
+            self.states[key] = TrustState(trust_key=key)
+        return self.states[key]
 
-    def rstate(self, k: TrustKey) -> TrustState:
-        if k not in self.reviewers:
-            self.reviewers[k] = TrustState(trust_key=k)
-        return self.reviewers[k]
+    def reviewer_state(self, key: TrustKey) -> TrustState:
+        if key not in self.reviewers:
+            self.reviewers[key] = TrustState(trust_key=key)
+        return self.reviewers[key]
 
-    def promo_upper(self, policy: Policy | None, task_type: str, err: float, n: float, eps: float) -> float:
+    def promotion_upper_bound(self, policy: Policy | None, task_type: str, serious_errors: float, judged: float,
+                              error_bar: float) -> float:
         """Upper bound used for promotion and for "does the bound still hold" (SPEC §7). Strict promotion types use
         the anytime-valid confidence sequence; everything else uses the engine's default bound (Wilson)."""
-        if policy is not None and eps > 0 and policy.is_strict(task_type):
-            return ConfidenceSequenceBound(eps).upper(err, n)
-        return self.bounds.upper(err, n)
+        if policy is not None and error_bar > 0 and policy.is_strict(task_type):
+            return ConfidenceSequenceBound(error_bar).upper(serious_errors, judged)
+        return self.bounds.upper(serious_errors, judged)
 
-    def _set_level(self, s: TrustState, to: int, why: str, ts: str):
-        frm = s.level
-        s.level, s.since_change = to, 0.0
-        s.recent = []
-        self.level_changes.append({"key": list(s.trust_key), "from": frm, "to": to, "why": why, "ts": ts})
+    def _set_level(self, state: TrustState, to: int, why: str, timestamp: str):
+        from_level = state.level
+        state.level, state.since_change = to, 0.0
+        state.recent = []
+        self.level_changes.append({"key": list(state.trust_key), "from": from_level, "to": to, "why": why, "timestamp": timestamp})
 
-    def _touch(self, s: TrustState, ts: str):
-        s.state_version += 1
-        s.updated_at = ts
+    def _touch(self, state: TrustState, timestamp: str):
+        state.state_version += 1
+        state.updated_at = timestamp
 
-    def _observe(self, s: TrustState, serious: bool, fail: bool, ts: str, eps: float, capped: bool,
-                 n_min: int, rolling_n: int, rolling_min: int, top: int = L3):
+    def _observe(self, state: TrustState, serious: bool, fail: bool, timestamp: str, error_bar: float, capped: bool,
+                 min_judged: int, rolling_window: int, rolling_window_min: int, top: int = L3):
         """SPEC §7 update: evidence, then demotion first, then promotion."""
-        s.n += 1
-        s.err += 1 if serious else 0
-        s.fail += 1 if fail else 0
-        s.since_change += 1
-        s.recent.append(1 if serious else 0)
-        if len(s.recent) > rolling_n:
-            s.recent = s.recent[-rolling_n:]
-        if s.level >= L2 and len(s.recent) >= rolling_min and self.bounds.lower(sum(s.recent), len(s.recent)) > eps:
-            self._set_level(s, s.level - 1, "rolling_bound", ts)
-        elif (not capped and eps > 0 and s.level < top and s.since_change >= n_min
-              and self.promo_upper(self.policy, s.trust_key[2], s.err, s.n, eps) <= eps):
-            self._set_level(s, s.level + 1, "evidence", ts)
+        state.judged_count += 1
+        state.serious_error_count += 1 if serious else 0
+        state.incomplete_count += 1 if fail else 0
+        state.since_change += 1
+        state.recent.append(1 if serious else 0)
+        if len(state.recent) > rolling_window:
+            state.recent = state.recent[-rolling_window:]
+        if state.level >= L2 and len(state.recent) >= rolling_window_min and self.bounds.lower(sum(state.recent), len(state.recent)) > error_bar:
+            self._set_level(state, state.level - 1, "rolling_bound", timestamp)
+        elif (not capped and error_bar > 0 and state.level < top and state.since_change >= min_judged
+              and self.promotion_upper_bound(self.policy, state.trust_key[2], state.serious_error_count, state.judged_count, error_bar) <= error_bar):
+            self._set_level(state, state.level + 1, "evidence", timestamp)
 
-    def _discount(self, s: TrustState, eps: float, w: float, ts: str, why: str):
-        s.n *= w
-        s.err *= w
-        s.fail *= w
-        if s.level >= L2 and self.promo_upper(self.policy, s.trust_key[2], s.err, s.n, eps) > eps:
-            self._set_level(s, L1, why, ts)
+    def _discount(self, state: TrustState, error_bar: float, weight: float, timestamp: str, why: str):
+        state.judged_count *= weight
+        state.serious_error_count *= weight
+        state.incomplete_count *= weight
+        if state.level >= L2 and self.promotion_upper_bound(self.policy, state.trust_key[2], state.serious_error_count, state.judged_count, error_bar) > error_bar:
+            self._set_level(state, L1, why, timestamp)
 
     # ---- apply -------------------------------------------------------------------------------------------
-    def apply(self, e) -> None:
-        b, ts = e.body, e.ts
-        t = e.type
-        p = self.policy
-        if t == "policy":
-            new = Policy.from_dict(b["policy"])
+    def apply(self, entry) -> None:
+        body, timestamp = entry.body, entry.timestamp
+        entry_type = entry.type
+        policy = self.policy
+        if entry_type == "policy":
+            new = Policy.from_dict(body["policy"])
             self.policy = new
-            self.policies[new.policy_version] = b["policy"]
+            self.policies[new.policy_version] = body["policy"]
             # SPEC §10: policy changes take effect immediately; a trusted key whose bound no longer holds
             # (or whose type became capped) drops to L1.
-            for s in self.states.values():
-                tt = s.trust_key[2]
-                if s.level >= L2 and (new.is_capped(tt) or
-                                      self.promo_upper(new, tt, s.err, s.n, new.eps_for(tt)) > new.eps_for(tt)):
-                    self._set_level(s, L1, "policy_change", ts)
-                    self._touch(s, ts)
-        elif t == "decision":
-            k = _key(b["trust_key"])
-            s = self.state(k)
-            if s.agent_version is None:
-                s.agent_version = b["agent_version"]
-            s.last_activity_at = b["created_at"]
-            self._touch(s, ts)
-            a = self.actions.setdefault(b["action_id"], {"outcomes": [], "decisions": []})
-            a.update(key=k, agent_version=b["agent_version"], decision_id=b["decision_id"], mode=b["mode"],
-                     level=b["level"], agent_id=k[1], org_id=k[0], task_type=k[2])
-            a["decisions"].append(b["decision_id"])
-            if b["mode"] == "hold":
-                self.queue[b["action_id"]] = {"action_id": b["action_id"], "kind": "pre_review", "key": list(k),
-                                              "why": b["why"], "since": ts}
-        elif t == "level_change":
-            s = self.state(_key(b["trust_key"]))
-            self._set_level(s, b["to"], b["why"], ts)
-            self._touch(s, ts)
-        elif t == "outcome":
-            k = _key(b["trust_key"])
-            s = self.state(k)
-            tt = k[2]
-            self._observe(s, b["serious"], b["label"] == "incomplete", ts, p.eps_for(tt), p.is_capped(tt),
-                          p.n_min, p.rolling_n, p.rolling_min)
-            self._touch(s, ts)
-            a = self.actions.setdefault(b["action_id"], {"outcomes": [], "decisions": []})
-            a["outcomes"].append(b["event_id"])
-            if b["source"] == "pre_review":
-                a["review_label"] = b["label"]
-                if b["label"] in ("approved", "cosmetic_edit"):
-                    a["approved_by"] = b["actor_id"]
-            self.queue.pop(b["action_id"], None)
-        elif t == "incident":
-            k = _key(b["trust_key"])
-            s = self.state(k)
+            for state in self.states.values():
+                task_type = state.trust_key[2]
+                if state.level >= L2 and (new.is_capped(task_type) or
+                                      self.promotion_upper_bound(new, task_type, state.serious_error_count, state.judged_count, new.error_bar_for(task_type)) > new.error_bar_for(task_type)):
+                    self._set_level(state, L1, "policy_change", timestamp)
+                    self._touch(state, timestamp)
+        elif entry_type == "decision":
+            key = _key(body["trust_key"])
+            state = self.state(key)
+            if state.agent_version is None:
+                state.agent_version = body["agent_version"]
+            state.last_activity_at = body["created_at"]
+            self._touch(state, timestamp)
+            action_record = self.actions.setdefault(body["action_id"], {"outcomes": [], "decisions": []})
+            action_record.update(key=key, agent_version=body["agent_version"], decision_id=body["decision_id"], mode=body["mode"],
+                     level=body["level"], agent_id=key[1], organisation_id=key[0], task_type=key[2])
+            action_record["decisions"].append(body["decision_id"])
+            if body["mode"] == "hold":
+                self.queue[body["action_id"]] = {"action_id": body["action_id"], "kind": "pre_review", "key": list(key),
+                                              "why": body["why"], "since": timestamp}
+        elif entry_type == "level_change":
+            state = self.state(_key(body["trust_key"]))
+            self._set_level(state, body["to"], body["why"], timestamp)
+            self._touch(state, timestamp)
+        elif entry_type == "outcome":
+            key = _key(body["trust_key"])
+            state = self.state(key)
+            task_type = key[2]
+            self._observe(state, body["serious"], body["label"] == "incomplete", timestamp, policy.error_bar_for(task_type), policy.is_capped(task_type),
+                          policy.min_judged, policy.rolling_window, policy.rolling_window_min)
+            self._touch(state, timestamp)
+            action_record = self.actions.setdefault(body["action_id"], {"outcomes": [], "decisions": []})
+            action_record["outcomes"].append(body["event_id"])
+            if body["source"] == "pre_review":
+                action_record["review_label"] = body["label"]
+                if body["label"] in ("approved", "cosmetic_edit"):
+                    action_record["approved_by"] = body["actor_id"]
+            self.queue.pop(body["action_id"], None)
+        elif entry_type == "incident":
+            key = _key(body["trust_key"])
+            state = self.state(key)
             # SPEC §7: counts as one serious outcome AND steps the key down one level immediately.
-            s.n += 1
-            s.err += 1
-            if s.level >= L2:
-                self._set_level(s, s.level - 1, "incident", ts)
-            self._touch(s, ts)
-        elif t == "executed":
-            a = self.actions.setdefault(b["action_id"], {"outcomes": [], "decisions": []})
-            a["executed"] = True
-            a["executed_at"] = ts
-            a["autonomous"] = b["autonomous"]
-        elif t == "spot_sample":
-            a = self.actions.get(b["action_id"], {})
-            self.queue[b["action_id"]] = {"action_id": b["action_id"], "kind": "spot_check",
-                                          "key": list(a.get("key", ())), "why": "sampled", "since": ts}
-        elif t == "version_published":
-            agent = b["agent_id"]
-            self.published.setdefault(agent, set()).add(b["version"])
-            for s in self.states.values():
-                if s.trust_key[1] != agent:
+            state.judged_count += 1
+            state.serious_error_count += 1
+            if state.level >= L2:
+                self._set_level(state, state.level - 1, "incident", timestamp)
+            self._touch(state, timestamp)
+        elif entry_type == "executed":
+            action_record = self.actions.setdefault(body["action_id"], {"outcomes": [], "decisions": []})
+            action_record["executed"] = True
+            action_record["executed_at"] = timestamp
+            action_record["autonomous"] = body["autonomous"]
+        elif entry_type == "spot_sample":
+            action_record = self.actions.get(body["action_id"], {})
+            self.queue[body["action_id"]] = {"action_id": body["action_id"], "kind": "spot_check",
+                                          "key": list(action_record.get("key", ())), "why": "sampled", "since": timestamp}
+        elif entry_type == "version_published":
+            agent = body["agent_id"]
+            self.published.setdefault(agent, set()).add(body["version"])
+            for state in self.states.values():
+                if state.trust_key[1] != agent:
                     continue
-                tt = s.trust_key[2]
-                r = b["results"].get(tt)
-                if not (r and r.get("carry")):
-                    self._discount(s, p.eps_for(tt), p.version_discount, ts, "version_change")
-                s.agent_version = b["version"]
-                self._touch(s, ts)
-        elif t == "version_unannounced":
-            s = self.state(_key(b["trust_key"]))
-            self._discount(s, p.eps_for(s.trust_key[2]), p.version_discount, ts, "version_change")
-            s.agent_version = b["version"]
-            self._touch(s, ts)
-        elif t == "pause":
-            self.paused.add((b["org_id"], b["agent_id"], b.get("task_type")))
-        elif t == "resume":
-            self.paused.discard((b["org_id"], b["agent_id"], b.get("task_type")))
-        elif t == "reviewer_evidence":
-            s = self.rstate(_key(b["reviewer_key"]))
-            self._observe(s, b["miss"], False, ts, p.reviewer_eps, False, p.reviewer_n_min, p.rolling_n,
-                          p.rolling_min, top=L2)
-            self._touch(s, ts)
+                task_type = state.trust_key[2]
+                result = body["results"].get(task_type)
+                if not (result and result.get("carry")):
+                    self._discount(state, policy.error_bar_for(task_type), policy.version_discount, timestamp, "version_change")
+                state.agent_version = body["version"]
+                self._touch(state, timestamp)
+        elif entry_type == "version_unannounced":
+            state = self.state(_key(body["trust_key"]))
+            self._discount(state, policy.error_bar_for(state.trust_key[2]), policy.version_discount, timestamp, "version_change")
+            state.agent_version = body["version"]
+            self._touch(state, timestamp)
+        elif entry_type == "pause":
+            self.paused.add((body["organisation_id"], body["agent_id"], body.get("task_type")))
+        elif entry_type == "resume":
+            self.paused.discard((body["organisation_id"], body["agent_id"], body.get("task_type")))
+        elif entry_type == "reviewer_evidence":
+            state = self.reviewer_state(_key(body["reviewer_key"]))
+            self._observe(state, body["miss"], False, timestamp, policy.reviewer_error_bar, False, policy.reviewer_min_judged, policy.rolling_window,
+                          policy.rolling_window_min, top=L2)
+            self._touch(state, timestamp)
         # governance, canary, second_check_sample: log-only entries
 
-    def is_paused(self, org: str, agent: str, task_type: str) -> bool:
-        return (org, agent, None) in self.paused or (org, agent, task_type) in self.paused
+    def is_paused(self, organisation: str, agent: str, task_type: str) -> bool:
+        return (organisation, agent, None) in self.paused or (organisation, agent, task_type) in self.paused
 
 
 class TrustEngine:
@@ -204,48 +206,48 @@ class TrustEngine:
 
     def __init__(self, policy: Policy | None = None, record: TrustRecord | None = None, tagger: Tagger | None = None,
                  bounds: BoundStrategy | None = None, clock: Callable[[], datetime] = utcnow,
-                 sampler=None, tool_floor_fn: Callable[[str, Any, Policy], str | None] | None = None):
+                 sampler=None, tool_floor_function: Callable[[str, Any, Policy], str | None] | None = None):
         self.record = record if record is not None else TrustRecord()
         self.tagger = tagger
         self.bounds = bounds or WilsonBound()
         self.clock = clock
         # SPEC §4: optional argument-dependent tool floors, e.g. send_email -> C1 for a reminder, C3 for an offer.
         # Returns a consequence level, or None to fall back to the policy's floor for that tool.
-        self.tool_floor_fn = tool_floor_fn
+        self.tool_floor_function = tool_floor_function
         # SPEC §6/§9: sampling must be unpredictable to the agent. Default: the OS CSPRNG.
         self._sampler = sampler or secrets.SystemRandom()
         self._lock = threading.RLock()
         self.governance = GovernanceGuard(self._log)
         self.suites = SuiteStore(self.governance)
-        self._r = _Reducer(self.bounds)
-        for e in self.record.entries():           # existing record: rebuild from it
-            self._r.apply(e)
-        if self._r.policy is None:
+        self._reducer = _Reducer(self.bounds)
+        for entry in self.record.entries():           # existing record: rebuild from it
+            self._reducer.apply(entry)
+        if self._reducer.policy is None:
             self._emit("policy", {"policy": (policy or Policy()).to_dict()})
 
     # ---- plumbing ----------------------------------------------------------------------------------------
     def _now(self) -> str:
         return iso(self.clock())
 
-    def _emit(self, type_: str, body: dict):
-        e = self.record.append(type_, body, self._now())
-        self._r.apply(e)
-        return e
+    def _emit(self, entry_type: str, body: dict):
+        entry = self.record.append(entry_type, body, self._now())
+        self._reducer.apply(entry)
+        return entry
 
-    def _log(self, type_: str, body: dict):
-        self.record.append(type_, body, self._now())
+    def _log(self, entry_type: str, body: dict):
+        self.record.append(entry_type, body, self._now())
 
     @property
     def policy(self) -> Policy:
-        return self._r.policy
+        return self._reducer.policy
 
     # ---- tagging (SPEC §4) ---------------------------------------------------------------------------------
     def tag(self, action: ProposedAction):
         if self.tagger is None:
             raise RuntimeError("no tagger configured")
-        r = self.tagger.tag(action)
-        action.task_type, action.tag_confidence = r.task_type, r.confidence
-        return r
+        result = self.tagger.tag(action)
+        action.task_type, action.tag_confidence = result.task_type, result.confidence
+        return result
 
     # ---- decide (SPEC §6) ----------------------------------------------------------------------------------
     def decide(self, action: ProposedAction, checks: ChecksResult | None = None) -> Decision:
@@ -255,103 +257,103 @@ class TrustEngine:
                 self.tag(action)
             if action.task_type is not None and action.tag_confidence is None:
                 action.tag_confidence = 1.0             # caller-assigned type
-            p = self.policy
-            tt = action.task_type or ""
-            k = (action.org_id, action.agent_id, tt)
-            known = tt in p.task_types
+            policy = self.policy
+            task_type = action.task_type or ""
+            key = (action.organisation_id, action.agent_id, task_type)
+            known = task_type in policy.task_types
             if known:
-                self._maintain(k, action)
-            s = self._r.states.get(k) or TrustState(trust_key=k)
-            level = s.level
+                self._maintain(key, action)
+            state = self._reducer.states.get(key) or TrustState(trust_key=key)
+            level = state.level
             if action.parent_action_id:                  # delegation cap (SPEC §11)
-                parent = self._r.actions.get(action.parent_action_id)
-                pk = (action.org_id, parent["agent_id"], tt) if parent else None
-                ps = self._r.states.get(pk) if pk else None
-                level = min(level, ps.level) if ps else 0
+                parent = self._reducer.actions.get(action.parent_action_id)
+                parent_key = (action.organisation_id, parent["agent_id"], task_type) if parent else None
+                parent_state = self._reducer.states.get(parent_key) if parent_key else None
+                level = min(level, parent_state.level) if parent_state else 0
 
             floor = self.tool_floor(action) if known else None
-            why, mode = self._rule(action, checks, known, level, p, floor)
-            eps = p.eps_for(tt) if known else p.eps
-            d = Decision(
-                decision_id="dec_" + uuid.uuid4().hex, action_id=action.action_id, trust_key=k, mode=mode, why=why,
-                level=s.level, evidence_n=round(s.n, 4), evidence_err=round(s.err, 4),
-                upper_bound=round(self._r.promo_upper(p, tt, s.err, s.n, eps), 6), eps=eps,
-                consequence=max_consequence(p.task_types[tt].consequence, floor) if known else None,
+            why, mode = self._rule(action, checks, known, level, policy, floor)
+            error_bar = policy.error_bar_for(task_type) if known else policy.error_bar
+            decision = Decision(
+                decision_id="decision_" + uuid.uuid4().hex, action_id=action.action_id, trust_key=key, mode=mode, why=why,
+                level=state.level, judged_count=round(state.judged_count, 4), serious_error_count=round(state.serious_error_count, 4),
+                upper_bound=round(self._reducer.promotion_upper_bound(policy, task_type, state.serious_error_count, state.judged_count, error_bar), 6), error_bar=error_bar,
+                consequence=max_consequence(policy.task_types[task_type].consequence, floor) if known else None,
                 tool_floor=floor,
                 checks={"passed": list(checks.passed), "failed": list(checks.failed)} if checks else None,
-                policy_version=p.policy_version, agent_version=action.agent_version,
+                policy_version=policy.policy_version, agent_version=action.agent_version,
                 payload_hash=payload_hash(action.payload), created_at=self._now())
-            body = d.to_dict()
+            body = decision.to_dict()
             body.update(tag_confidence=action.tag_confidence, kind=action.kind,
                         parent_action_id=action.parent_action_id, effective_level=level,
                         write_tools=list(action.write_tools),
-                        bound="cs-mix" if known and p.is_strict(tt) and eps > 0 else self.bounds.name)
+                        bound="confidence_sequence" if known and policy.is_strict(task_type) and error_bar > 0 else self.bounds.name)
             self._emit("decision", body)
-            return d
+            return decision
 
     def tool_floor(self, action: ProposedAction) -> str | None:
         """SPEC §4: the highest floor among the action's write tools (hook first, then the policy's floor)."""
-        p = self.policy
+        policy = self.policy
         levels = []
         for tool in action.write_tools:
-            c = self.tool_floor_fn(tool, action.write_tool_args.get(tool), p) if self.tool_floor_fn else None
-            if c is not None and c not in RANK:
-                raise ValueError(f"tool_floor_fn returned {c!r} for {tool}; expected C1..C4")
-            levels.append(c or p.tool_floor(tool))
+            floor_level = self.tool_floor_function(tool, action.write_tool_arguments.get(tool), policy) if self.tool_floor_function else None
+            if floor_level is not None and floor_level not in RANK:
+                raise ValueError(f"tool_floor_function returned {floor_level!r} for {tool}; expected C1..C4")
+            levels.append(floor_level or policy.tool_floor(tool))
         return max_consequence(*levels)
 
-    def _rule(self, action, checks, known, level, p, floor=None) -> tuple[str, str]:
-        if self._r.is_paused(action.org_id, action.agent_id, action.task_type or ""):
+    def _rule(self, action, checks, known, level, policy, floor=None) -> tuple[str, str]:
+        if self._reducer.is_paused(action.organisation_id, action.agent_id, action.task_type or ""):
             return "paused", "hold"
         if not known:
             return "unknown_type", "hold"
-        if action.tag_confidence is None or action.tag_confidence < p.tag_confidence_min:
+        if action.tag_confidence is None or action.tag_confidence < policy.tag_confidence_min:
             return "low_confidence", "hold"
-        if floor is not None and RANK[floor] > RANK[p.task_types[action.task_type].consequence]:
+        if floor is not None and RANK[floor] > RANK[policy.task_types[action.task_type].consequence]:
             return "tool_floor_mismatch", "hold"          # SPEC §6 step 2b [tested v4]
-        if checks is None and p.require_checks:
+        if checks is None and policy.require_checks:
             return "checks_missing", "hold"
         if checks is not None and not checks.ok:
             return "check_failed", "hold"
-        if p.is_capped(action.task_type):
+        if policy.is_capped(action.task_type):
             return "capped", "hold"
         if level <= L1:
             return ("delegation_cap" if action.parent_action_id else "level_L1"), "hold"
         return "trusted", "act"
 
-    def _maintain(self, k: TrustKey, action: ProposedAction):
+    def _maintain(self, key: TrustKey, action: ProposedAction):
         """State maintenance that must happen before the level is read: unannounced versions and re-entry."""
-        s = self._r.states.get(k)
-        if s is None:
+        state = self._reducer.states.get(key)
+        if state is None:
             return
-        published = self._r.published.get(action.agent_id, set())
-        if s.agent_version is not None and action.agent_version != s.agent_version \
+        published = self._reducer.published.get(action.agent_id, set())
+        if state.agent_version is not None and action.agent_version != state.agent_version \
                 and action.agent_version not in published:
             # a version nobody published through on_version_published: treat as untested (discount)
-            self._emit("version_unannounced", {"trust_key": list(k), "version": action.agent_version})
-        if s.level >= L2 and s.last_activity_at is not None:
-            gap = self.clock() - parse_iso(s.last_activity_at)
+            self._emit("version_unannounced", {"trust_key": list(key), "version": action.agent_version})
+        if state.level >= L2 and state.last_activity_at is not None:
+            gap = self.clock() - parse_iso(state.last_activity_at)
             if gap > timedelta(days=self.policy.reentry_gap_days):
                 # SPEC §7 re-entry rule [tested v3]
-                self._emit("level_change", {"trust_key": list(k), "to": s.level - 1, "why": "reentry_gap"})
+                self._emit("level_change", {"trust_key": list(key), "to": state.level - 1, "why": "reentry_gap"})
 
     def decide_bundle(self, actions: list[tuple[ProposedAction, ChecksResult | None]]) -> list[Decision]:
         """SPEC §4: actions that must happen together get the most restrictive decision."""
-        ds = [self.decide(a, c) for a, c in actions]
-        if any(not d.allowed for d in ds):
-            for d in ds:
-                if d.allowed:
-                    d.mode, d.why = "hold", "bundle_restricted"
-        return ds
+        decisions = [self.decide(action, checks) for action, checks in actions]
+        if any(not decision.allowed for decision in decisions):
+            for decision in decisions:
+                if decision.allowed:
+                    decision.mode, decision.why = "hold", "bundle_restricted"
+        return decisions
 
     # ---- execution -------------------------------------------------------------------------------------
     def may_execute(self, action_id: str) -> bool:
-        a = self._r.actions.get(action_id)
-        if a is None:
+        action_record = self._reducer.actions.get(action_id)
+        if action_record is None:
             return False
-        if a.get("mode") == "act":
+        if action_record.get("mode") == "act":
             return True
-        return a.get("review_label") in ("approved", "cosmetic_edit", "material_edit")   # a person approved it
+        return action_record.get("review_label") in ("approved", "cosmetic_edit", "material_edit")   # a person approved it
 
     def mark_executed(self, action_id: str) -> None:
         """Record that an action ran. Autonomous actions are then spot-sampled with an unpredictable RNG; the result
@@ -359,31 +361,31 @@ class TrustEngine:
         with self._lock:
             if not self.may_execute(action_id):
                 raise PermissionError(f"action {action_id} is not allowed to execute")
-            a = self._r.actions[action_id]
-            autonomous = a.get("mode") == "act" and "review_label" not in a
+            action_record = self._reducer.actions[action_id]
+            autonomous = action_record.get("mode") == "act" and "review_label" not in action_record
             self._emit("executed", {"action_id": action_id, "autonomous": autonomous})
             if autonomous:
-                rate = self.policy.spot_rate.get(a["level"], 0.0)
+                rate = self.policy.spot_rate.get(action_record["level"], 0.0)
                 if self._sampler.random() < rate:
                     self._emit("spot_sample", {"action_id": action_id})
 
     def execute(self, action: ProposedAction, run: Callable[[], Any], checks: ChecksResult | None = None):
         """Convenience: decide, run only if allowed, record execution. Returns (decision, result or None)."""
-        d = self.decide(action, checks)
-        if not d.allowed:
-            return d, None
+        decision = self.decide(action, checks)
+        if not decision.allowed:
+            return decision, None
         result = run()
         self.mark_executed(action.action_id)
-        return d, result
+        return decision, result
 
     def review_queue(self) -> list[dict]:
         """Held actions awaiting a person, plus sampled autonomous actions awaiting a spot-check. Platform-side only:
         never expose this to agents."""
-        return list(self._r.queue.values())
+        return list(self._reducer.queue.values())
 
     # ---- outcomes and incidents (SPEC §7) ----------------------------------------------------------------
     def record_outcome(self, action_id: str, label: str, reason_code: str | None, source: str, actor_id: str,
-                       diff_ref: str | None = None) -> dict:
+                       diff_reference: str | None = None) -> dict:
         with self._lock:
             if label not in LABELS:
                 raise ValueError(f"unknown label {label}")
@@ -393,112 +395,116 @@ class TrustEngine:
                 raise ValueError("material_edit and rejected need a reason code (SPEC §9)")
             if reason_code is not None and reason_code not in REASON_CODES:
                 raise ValueError(f"unknown reason code {reason_code}")
-            a = self._r.actions.get(action_id)
-            if a is None:
+            action_record = self._reducer.actions.get(action_id)
+            if action_record is None:
                 raise KeyError(f"no decision recorded for {action_id}")
-            body = {"event_id": "out_" + uuid.uuid4().hex, "action_id": action_id, "decision_id": a["decision_id"],
-                    "trust_key": list(a["key"]), "agent_version": a["agent_version"], "source": source,
+            body = {"event_id": "outcome_" + uuid.uuid4().hex, "action_id": action_id, "decision_id": action_record["decision_id"],
+                    "trust_key": list(action_record["key"]), "agent_version": action_record["agent_version"], "source": source,
                     "label": label, "reason_code": reason_code, "serious": is_serious(label, reason_code),
-                    "actor_id": actor_id, "diff_ref": diff_ref, "created_at": self._now()}
+                    "actor_id": actor_id, "diff_reference": diff_reference, "created_at": self._now()}
             self._emit("outcome", body)
             return body
 
     def report_incident(self, action_id: str, severity: str, actor_id: str, note: str | None = None) -> dict:
         """A serious problem found after the fact. Applied to the key and agent version *of that action* (SPEC §7)."""
         with self._lock:
-            a = self._r.actions.get(action_id)
-            if a is None:
+            action_record = self._reducer.actions.get(action_id)
+            if action_record is None:
                 raise KeyError(f"no decision recorded for {action_id}")
-            body = {"incident_id": "inc_" + uuid.uuid4().hex, "action_id": action_id, "trust_key": list(a["key"]),
-                    "agent_version": a["agent_version"], "severity": severity, "actor_id": actor_id,
+            body = {"incident_id": "incident_" + uuid.uuid4().hex, "action_id": action_id, "trust_key": list(action_record["key"]),
+                    "agent_version": action_record["agent_version"], "severity": severity, "actor_id": actor_id,
                     "note_hash": payload_hash(note) if note else None}
             self._emit("incident", body)
-            reviewer = a.get("approved_by")
+            reviewer = action_record.get("approved_by")
             if reviewer:   # SPEC §9: a reviewer whose approval led to an incident gets a miss
-                self._emit("reviewer_evidence", {"reviewer_key": list(reviewer_key(a["org_id"], reviewer, a["task_type"])),
+                self._emit("reviewer_evidence", {"reviewer_key": list(reviewer_key(action_record["organisation_id"], reviewer, action_record["task_type"])),
                                                  "miss": True, "source": "incident", "action_id": action_id})
             return body
 
     # ---- versions (SPEC §8) --------------------------------------------------------------------------------
     def on_version_published(self, agent_id: str, version: str, results: dict[str, dict] | None = None,
                              actor: Actor | None = None) -> dict:
-        """`results[task_type] = {training_pass, hidden_pass, n_hidden?}`. A task type keeps its evidence when
+        """`results[task_type] = {training_pass, hidden_pass, hidden_test_count?}`. A task type keeps its evidence when
         hidden_pass ≥ carry_hidden_min with ≥ min_hidden_tests hidden tests; otherwise its evidence is discounted."""
         with self._lock:
             if actor is not None and not self.governance.request(actor, "publish_version", agent_id,
                                                                  {"version": version}):
                 raise PermissionError("not allowed to publish this agent")
-            p = self.policy
+            policy = self.policy
             out = {}
-            for tt, r in (results or {}).items():
-                n_hidden = r.get("n_hidden", self.suites.hidden_count(tt))
-                hp = r.get("hidden_pass")
-                carry = hp is not None and n_hidden >= p.min_hidden_tests and hp >= p.carry_hidden_min
-                out[tt] = {"training_pass": r.get("training_pass"), "hidden_pass": hp, "n_hidden": n_hidden,
+            for task_type, result in (results or {}).items():
+                hidden_test_count = result.get("hidden_test_count", self.suites.hidden_count(task_type))
+                hidden_pass = result.get("hidden_pass")
+                carry = hidden_pass is not None and hidden_test_count >= policy.min_hidden_tests and hidden_pass >= policy.carry_hidden_min
+                out[task_type] = {"training_pass": result.get("training_pass"), "hidden_pass": hidden_pass, "hidden_test_count": hidden_test_count,
                            "carry": carry}
             self._emit("version_published", {"agent_id": agent_id, "version": version, "results": out})
             return out
 
     # ---- oversight -----------------------------------------------------------------------------------------
-    def pause(self, actor: Actor, org_id: str, agent_id: str, task_type: str | None = None) -> bool:
+    def pause(self, actor: Actor, organisation_id: str, agent_id: str, task_type: str | None = None) -> bool:
         with self._lock:
-            if not self.governance.request(actor, "pause", agent_id, {"org_id": org_id, "task_type": task_type}):
+            if not self.governance.request(actor, "pause", agent_id, {"organisation_id": organisation_id, "task_type": task_type}):
                 return False
-            self._emit("pause", {"org_id": org_id, "agent_id": agent_id, "task_type": task_type})
+            self._emit("pause", {"organisation_id": organisation_id, "agent_id": agent_id, "task_type": task_type})
             return True
 
-    def resume(self, actor: Actor, org_id: str, agent_id: str, task_type: str | None = None) -> bool:
+    def resume(self, actor: Actor, organisation_id: str, agent_id: str, task_type: str | None = None) -> bool:
         with self._lock:
-            if not self.governance.request(actor, "resume", agent_id, {"org_id": org_id, "task_type": task_type}):
+            if not self.governance.request(actor, "resume", agent_id, {"organisation_id": organisation_id, "task_type": task_type}):
                 return False
-            self._emit("resume", {"org_id": org_id, "agent_id": agent_id, "task_type": task_type})
+            self._emit("resume", {"organisation_id": organisation_id, "agent_id": agent_id, "task_type": task_type})
             return True
 
-    def demote(self, actor: Actor, org_id: str, agent_id: str, task_type: str) -> bool:
+    def demote(self, actor: Actor, organisation_id: str, agent_id: str, task_type: str) -> bool:
         with self._lock:
-            if not self.governance.request(actor, "demote", agent_id, {"org_id": org_id, "task_type": task_type}):
+            if not self.governance.request(actor, "demote", agent_id, {"organisation_id": organisation_id, "task_type": task_type}):
                 return False
-            s = self._r.states.get((org_id, agent_id, task_type))
-            if s and s.level > L1:
-                self._emit("level_change", {"trust_key": [org_id, agent_id, task_type], "to": s.level - 1,
+            state = self._reducer.states.get((organisation_id, agent_id, task_type))
+            if state and state.level > L1:
+                self._emit("level_change", {"trust_key": [organisation_id, agent_id, task_type], "to": state.level - 1,
                                             "why": "manual_demote"})
             return True
 
-    def promote(self, actor: Actor, org_id: str, agent_id: str, task_type: str) -> bool:
+    def promote(self, actor: Actor, organisation_id: str, agent_id: str, task_type: str) -> bool:
         """Manual promotion by the policy owner (never the agent's builder). Capped types never promote."""
         with self._lock:
-            if not self.governance.request(actor, "promote", agent_id, {"org_id": org_id, "task_type": task_type}):
+            if not self.governance.request(actor, "promote", agent_id, {"organisation_id": organisation_id, "task_type": task_type}):
                 return False
             if self.policy.is_capped(task_type):
                 return False
-            s = self._r.states.get((org_id, agent_id, task_type))
-            level = s.level if s else L1
+            state = self._reducer.states.get((organisation_id, agent_id, task_type))
+            level = state.level if state else L1
             if level < L3:
-                self._emit("level_change", {"trust_key": [org_id, agent_id, task_type], "to": level + 1,
+                self._emit("level_change", {"trust_key": [organisation_id, agent_id, task_type], "to": level + 1,
                                             "why": "manual_promote"})
             return True
 
     # ---- policy and catalogue (SPEC §4, §10) -------------------------------------------------------------
-    def set_policy(self, actor: Actor, op: str = "set_policy", **changes) -> bool:
+    def set_policy(self, actor: Actor, operation: str = "set_policy", **changes) -> bool:
         """Policy-as-code: every change is a new policy version, logged and applied immediately."""
         with self._lock:
-            if not self.governance.request(actor, op, None, {k: str(v) for k, v in changes.items()}):
+            if not self.governance.request(actor, operation, None, {key: str(v) for key, v in changes.items()}):
                 return False
             new = self.policy.evolve(**changes)
             self._validate(new)
             self._emit("policy", {"policy": new.to_dict()})
             return True
 
-    def add_task_type(self, actor: Actor, task_type: str, consequence: str, tools: list[str] | None = None) -> bool:
+    def add_task_type(self, actor: Actor, task_type: str, consequence: str, tools: list[str] | None = None,
+                      description: str = "", examples: list[str] | None = None) -> bool:
+        """Add a catalogue entry (SPEC §4): name, consequence, tools, and the description and examples the tagger
+        and reviewers work from."""
         if consequence not in CONSEQUENCE:
             raise ValueError("consequence must be C1..C4")
         with self._lock:
             if not self.governance.request(actor, "add_task_type", None,
                                            {"task_type": task_type, "consequence": consequence}):
                 return False
-            tts = dict(self.policy.task_types)
-            tts[task_type] = TaskTypePolicy(consequence=consequence, tools=list(tools or []))
-            self._emit("policy", {"policy": self.policy.evolve(task_types=tts).to_dict()})
+            task_types = dict(self.policy.task_types)
+            task_types[task_type] = TaskTypePolicy(consequence=consequence, tools=list(tools or []),
+                                                   description=description, examples=list(examples or []))
+            self._emit("policy", {"policy": self.policy.evolve(task_types=task_types).to_dict()})
             return True
 
     def set_consequence(self, actor: Actor, task_type: str, consequence: str) -> bool:
@@ -508,145 +514,145 @@ class TrustEngine:
             if not self.governance.request(actor, "set_consequence", None,
                                            {"task_type": task_type, "consequence": consequence}):
                 return False
-            tts = dict(self.policy.task_types)
-            old = tts[task_type]
-            tts[task_type] = TaskTypePolicy(consequence=consequence, eps=old.eps, capped=old.capped, tools=old.tools)
-            new = self.policy.evolve(task_types=tts)
+            task_types = dict(self.policy.task_types)
+            old = task_types[task_type]
+            task_types[task_type] = dataclasses.replace(old, consequence=consequence)
+            new = self.policy.evolve(task_types=task_types)
             self._validate(new)
             self._emit("policy", {"policy": new.to_dict()})
             return True
 
-    def set_task_eps(self, actor: Actor, task_type: str, eps: float) -> bool:
+    def set_task_error_bar(self, actor: Actor, task_type: str, error_bar: float) -> bool:
         """Tighten a type's bar below its consequence level's ε (never loosen; SPEC §7)."""
         with self._lock:
-            if not self.governance.request(actor, "set_eps", None, {"task_type": task_type, "eps": eps}):
+            if not self.governance.request(actor, "set_error_bar", None, {"task_type": task_type, "error_bar": error_bar}):
                 return False
-            tts = dict(self.policy.task_types)
-            old = tts[task_type]
-            tts[task_type] = TaskTypePolicy(consequence=old.consequence, eps=eps, capped=old.capped, tools=old.tools)
-            new = self.policy.evolve(task_types=tts)
+            task_types = dict(self.policy.task_types)
+            old = task_types[task_type]
+            task_types[task_type] = dataclasses.replace(old, error_bar=error_bar)
+            new = self.policy.evolve(task_types=task_types)
             self._validate(new)
             self._emit("policy", {"policy": new.to_dict()})
             return True
 
     @staticmethod
-    def _validate(p: Policy):
-        for tt, tp in p.task_types.items():
-            if tp.consequence not in CONSEQUENCE:
-                raise ValueError(f"{tt}: unknown consequence {tp.consequence}")
-            base = CONSEQUENCE[tp.consequence]["eps"]
-            if tp.eps is not None and tp.eps > base:
-                raise ValueError(f"{tt}: ε {tp.eps} looser than {tp.consequence}'s {base} (only tightening allowed)")
+    def _validate(policy: Policy):
+        for task_type, type_policy in policy.task_types.items():
+            if type_policy.consequence not in CONSEQUENCE:
+                raise ValueError(f"{task_type}: unknown consequence {type_policy.consequence}")
+            base = CONSEQUENCE[type_policy.consequence]["error_bar"]
+            if type_policy.error_bar is not None and type_policy.error_bar > base:
+                raise ValueError(f"{task_type}: error bar {type_policy.error_bar} looser than {type_policy.consequence}'s {base} (only tightening allowed)")
 
     def tools_for(self, task_type: str) -> list[str]:
         """Tool scope per task type (SPEC §4, [tested]): offer the agent only these tools."""
-        tp = self.policy.type_policy(task_type)
-        return list(tp.tools) if tp else []
+        type_policy = self.policy.type_policy(task_type)
+        return list(type_policy.tools) if type_policy else []
 
     # ---- reviewer trust (SPEC §9, [tested v3]) -------------------------------------------------------------
-    def reviewer_level(self, org_id: str, reviewer_id: str, task_type: str) -> int:
-        s = self._r.reviewers.get(reviewer_key(org_id, reviewer_id, task_type))
-        return s.level if s else L1
+    def reviewer_level(self, organisation_id: str, reviewer_id: str, task_type: str) -> int:
+        state = self._reducer.reviewers.get(reviewer_key(organisation_id, reviewer_id, task_type))
+        return state.level if state else L1
 
-    def should_insert_canary(self, org_id: str, reviewer_id: str) -> bool:
+    def should_insert_canary(self, organisation_id: str, reviewer_id: str) -> bool:
         """Platform-side: seed a known-bad item into this reviewer's queue at the reviewer canary rate (5%)."""
         hit = self._sampler.random() < self.policy.reviewer_canary_rate
         if hit:
-            self._log("canary", {"org_id": org_id, "reviewer_id": reviewer_id})
+            self._log("canary", {"organisation_id": organisation_id, "reviewer_id": reviewer_id})
         return hit
 
-    def record_canary(self, org_id: str, reviewer_id: str, task_type: str, caught: bool) -> None:
+    def record_canary(self, organisation_id: str, reviewer_id: str, task_type: str, caught: bool) -> None:
         with self._lock:
-            self._emit("reviewer_evidence", {"reviewer_key": list(reviewer_key(org_id, reviewer_id, task_type)),
+            self._emit("reviewer_evidence", {"reviewer_key": list(reviewer_key(organisation_id, reviewer_id, task_type)),
                                              "miss": not caught, "source": "canary"})
 
-    def should_second_check(self, org_id: str, reviewer_id: str, task_type: str) -> bool:
+    def should_second_check(self, organisation_id: str, reviewer_id: str, task_type: str) -> bool:
         """R1 reviewers get 25% of decisions second-checked, R2 reviewers 5%."""
-        lvl = self.reviewer_level(org_id, reviewer_id, task_type)
-        hit = self._sampler.random() < self.policy.second_check_rate.get(min(lvl, L2), 0.0)
+        current_level = self.reviewer_level(organisation_id, reviewer_id, task_type)
+        hit = self._sampler.random() < self.policy.second_check_rate.get(min(current_level, L2), 0.0)
         if hit:
-            self._log("second_check_sample", {"org_id": org_id, "reviewer_id": reviewer_id, "task_type": task_type})
+            self._log("second_check_sample", {"organisation_id": organisation_id, "reviewer_id": reviewer_id, "task_type": task_type})
         return hit
 
-    def record_second_check(self, org_id: str, first_reviewer_id: str, task_type: str, found_error: bool,
+    def record_second_check(self, organisation_id: str, first_reviewer_id: str, task_type: str, found_error: bool,
                             action_id: str | None = None) -> None:
         """Every second check is evidence about the first reviewer: clean counts as clean (v3), a found error is a miss.
         Record the corrected outcome for the agent separately with record_outcome."""
         with self._lock:
             self._emit("reviewer_evidence",
-                       {"reviewer_key": list(reviewer_key(org_id, first_reviewer_id, task_type)),
+                       {"reviewer_key": list(reviewer_key(organisation_id, first_reviewer_id, task_type)),
                         "miss": bool(found_error), "source": "second_check", "action_id": action_id})
 
     # ---- reading (SPEC §12) --------------------------------------------------------------------------------
-    def get_state(self, org_id: str, agent_id: str, task_type: str | None = None) -> list[dict]:
+    def get_state(self, organisation_id: str, agent_id: str, task_type: str | None = None) -> list[dict]:
         out = []
-        p = self.policy
-        for k, s in sorted(self._r.states.items()):
-            if k[0] != org_id or k[1] != agent_id or (task_type and k[2] != task_type):
+        policy = self.policy
+        for key, state in sorted(self._reducer.states.items()):
+            if key[0] != organisation_id or key[1] != agent_id or (task_type and key[2] != task_type):
                 continue
-            tt = k[2]
-            eps = p.eps_for(tt)
-            upper = self._r.promo_upper(p, tt, s.err, s.n, eps)
-            rolling_upper = self.bounds.upper(sum(s.recent), len(s.recent)) if s.recent else None
+            task_type = key[2]
+            error_bar = policy.error_bar_for(task_type)
+            upper = self._reducer.promotion_upper_bound(policy, task_type, state.serious_error_count, state.judged_count, error_bar)
+            rolling_upper = self.bounds.upper(sum(state.recent), len(state.recent)) if state.recent else None
             alerts = []
-            if s.level >= L2 and rolling_upper is not None and len(s.recent) >= p.rolling_min \
-                    and rolling_upper > p.alert_fraction * eps:
+            if state.level >= L2 and rolling_upper is not None and len(state.recent) >= policy.rolling_window_min \
+                    and rolling_upper > policy.alert_fraction * error_bar:
                 alerts.append("rolling_error_near_bar")
-            smin = p.success_min(tt)
-            if smin is not None and s.n >= p.n_min and self.bounds.lower(s.n - s.fail, s.n) < smin:
+            success_minimum = policy.success_min(task_type)
+            if success_minimum is not None and state.judged_count >= policy.min_judged and self.bounds.lower(state.judged_count - state.incomplete_count, state.judged_count) < success_minimum:
                 alerts.append("task_success_below_minimum")
-            d = s.snapshot()
-            d.update(level_name=LEVEL_NAMES[s.level], eps=eps, upper_bound=round(upper, 6),
-                     bound="cs-mix" if p.is_strict(tt) and eps > 0 else self.bounds.name,
-                     consequence=p.task_types[tt].consequence if tt in p.task_types else None,
-                     capped=p.is_capped(tt), paused=self._r.is_paused(org_id, agent_id, tt), alerts=alerts,
-                     explanation=self._explain_state(s, eps, upper, p))
-            out.append(d)
+            row = state.snapshot()
+            row.update(level_name=LEVEL_NAMES[state.level], error_bar=error_bar, upper_bound=round(upper, 6),
+                     bound="confidence_sequence" if policy.is_strict(task_type) and error_bar > 0 else self.bounds.name,
+                     consequence=policy.task_types[task_type].consequence if task_type in policy.task_types else None,
+                     capped=policy.is_capped(task_type), paused=self._reducer.is_paused(organisation_id, agent_id, task_type), alerts=alerts,
+                     explanation=self._explain_state(state, error_bar, upper, policy))
+            out.append(row)
         return out
 
-    def _explain_state(self, s, eps, upper, p) -> str:
-        if p.is_capped(s.trust_key[2]):
+    def _explain_state(self, state, error_bar, upper, policy) -> str:
+        if policy.is_capped(state.trust_key[2]):
             return "Capped task type: always held for a person."
-        if s.level >= L3:
-            return f"Senior: worst-case error {upper:.1%} ≤ bar {eps:.0%}."
-        need = max(0, int(p.n_min - s.since_change))
-        return (f"{LEVEL_NAMES[s.level]}: {s.n:.0f} judged, {s.err:.0f} serious; worst-case error {upper:.1%} vs bar "
-                f"{eps:.0%}. Promotion needs the worst case under the bar and at least {need} more judged actions.")
+        if state.level >= L3:
+            return f"Senior: worst-case error {upper:.1%} ≤ bar {error_bar:.0%}."
+        need = max(0, int(policy.min_judged - state.since_change))
+        return (f"{LEVEL_NAMES[state.level]}: {state.judged_count:.0f} judged, {state.serious_error_count:.0f} serious; worst-case error {upper:.1%} vs bar "
+                f"{error_bar:.0%}. Promotion needs the worst case under the bar and at least {need} more judged actions.")
 
     def explain(self, action_id: str) -> dict:
         """Every decision for the action with its evidence snapshot, the outcomes, and the policy it ran under."""
         decisions, outcomes, executed = [], [], None
-        for e in self.record.entries():
-            if e.body.get("action_id") != action_id:
+        for entry in self.record.entries():
+            if entry.body.get("action_id") != action_id:
                 continue
-            if e.type == "decision":
-                decisions.append(e.body)
-            elif e.type in ("outcome", "incident"):
-                outcomes.append({"type": e.type, **e.body})
-            elif e.type == "executed":
-                executed = e.body
-        pv = decisions[-1]["policy_version"] if decisions else None
+            if entry.type == "decision":
+                decisions.append(entry.body)
+            elif entry.type in ("outcome", "incident"):
+                outcomes.append({"type": entry.type, **entry.body})
+            elif entry.type == "executed":
+                executed = entry.body
+        policy_version = decisions[-1]["policy_version"] if decisions else None
         return {"action_id": action_id, "decisions": decisions, "outcomes": outcomes, "executed": executed,
-                "policy_version": pv, "policy": self._r.policies.get(pv)}
+                "policy_version": policy_version, "policy": self._reducer.policies.get(policy_version)}
 
     # ---- integrity (SPEC §13.4) --------------------------------------------------------------------------
     def rebuild_state(self) -> dict:
         """Replay the record from empty and return the derived state."""
-        r = _Reducer(self.bounds)
-        for e in self.record.entries():
-            r.apply(e)
-        return self._dump(r)
+        reducer = _Reducer(self.bounds)
+        for entry in self.record.entries():
+            reducer.apply(entry)
+        return self._dump(reducer)
 
     def live_state(self) -> dict:
-        return self._dump(self._r)
+        return self._dump(self._reducer)
 
     @staticmethod
-    def _dump(r: _Reducer) -> dict:
-        return {"policy": r.policy.to_dict() if r.policy else None,
-                "states": {"|".join(k): s.snapshot() for k, s in sorted(r.states.items())},
-                "reviewers": {"|".join(k): s.snapshot() for k, s in sorted(r.reviewers.items())},
-                "paused": sorted(map(str, r.paused)),
-                "queue": copy.deepcopy(r.queue)}
+    def _dump(reducer: _Reducer) -> dict:
+        return {"policy": reducer.policy.to_dict() if reducer.policy else None,
+                "states": {"|".join(key): state.snapshot() for key, state in sorted(reducer.states.items())},
+                "reviewers": {"|".join(key): state.snapshot() for key, state in sorted(reducer.reviewers.items())},
+                "paused": sorted(map(str, reducer.paused)),
+                "queue": copy.deepcopy(reducer.queue)}
 
     def level_changes(self) -> list[dict]:
-        return list(self._r.level_changes)
+        return list(self._reducer.level_changes)

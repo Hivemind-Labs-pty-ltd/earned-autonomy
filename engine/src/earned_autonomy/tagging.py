@@ -27,8 +27,8 @@ class RuleTagger:
         self.fallback = fallback
 
     def tag(self, action: ProposedAction) -> TagResult:
-        for pred, task_type in self.rules:
-            if pred(action):
+        for predicate, task_type in self.rules:
+            if predicate(action):
                 return TagResult(task_type, 1.0)
         if self.fallback is not None:
             return self.fallback.tag(action)

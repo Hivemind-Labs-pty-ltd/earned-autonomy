@@ -8,11 +8,11 @@ from dataclasses import dataclass, field
 
 ROLES = frozenset({"ai_owner", "policy_owner", "reviewer", "auditor", "builder", "agent"})
 
-# op -> roles allowed to perform it
+# operation -> roles allowed to perform it
 ALLOWED: dict[str, set] = {
     # policy (SPEC §10: the policy owner sets ε, caps, tools per type and sample rates)
     "set_policy": {"policy_owner"},
-    "set_eps": {"policy_owner"},
+    "set_error_bar": {"policy_owner"},
     "set_cap": {"policy_owner"},
     "set_spot_rate": {"policy_owner"},
     "set_tools": {"policy_owner"},
@@ -36,7 +36,7 @@ ALLOWED: dict[str, set] = {
 }
 
 # Ops that loosen or bypass the rules for a specific agent: its builder may never do these (separation of duties).
-SOD_OPS = frozenset({"promote", "set_eps", "set_cap", "set_spot_rate", "set_tools", "edit_tests", "edit_checks",
+SEPARATION_OF_DUTIES_OPERATIONS = frozenset({"promote", "set_error_bar", "set_cap", "set_spot_rate", "set_tools", "edit_tests", "edit_checks",
                      "read_hidden_tests", "set_consequence", "set_policy", "resume"})
 
 
@@ -64,27 +64,27 @@ class GovernanceGuard:
         """`log(type, body)` appends to the trust record."""
         self._log = log
 
-    def check(self, actor: Actor, op: str, target_agent: str | None = None) -> GovernanceResult:
-        if op not in ALLOWED:
+    def check(self, actor: Actor, operation: str, target_agent: str | None = None) -> GovernanceResult:
+        if operation not in ALLOWED:
             return GovernanceResult(False, "unknown_op")
         if actor.agent_id is not None or "agent" in actor.roles:
             # an agent may read its own record and nothing else (SPEC §10)
-            if op == "read_record" and (target_agent is None or target_agent == actor.agent_id):
+            if operation == "read_record" and (target_agent is None or target_agent == actor.agent_id):
                 return GovernanceResult(True, "ok")
             return GovernanceResult(False, "agent_cannot_govern")
-        if not (set(actor.roles) & ALLOWED[op]):
+        if not (set(actor.roles) & ALLOWED[operation]):
             return GovernanceResult(False, "role_not_allowed")
-        if op in SOD_OPS:
+        if operation in SEPARATION_OF_DUTIES_OPERATIONS:
             if target_agent and target_agent in actor.builds:
                 return GovernanceResult(False, "separation_of_duties")
             if target_agent is None and actor.builds:
-                # org-wide rule changes: anyone who builds an agent can't move them
+                # organisation-wide rule changes: anyone who builds an agent can't move them
                 return GovernanceResult(False, "separation_of_duties")
         return GovernanceResult(True, "ok")
 
-    def request(self, actor: Actor, op: str, target_agent: str | None = None, args: dict | None = None) -> bool:
-        r = self.check(actor, op, target_agent)
-        self._log("governance", {"actor_id": actor.actor_id, "roles": sorted(actor.roles), "op": op,
-                                 "target_agent": target_agent, "args": args or {}, "allowed": r.allowed,
-                                 "reason": r.reason})
-        return r.allowed
+    def request(self, actor: Actor, operation: str, target_agent: str | None = None, arguments: dict | None = None) -> bool:
+        result = self.check(actor, operation, target_agent)
+        self._log("governance", {"actor_id": actor.actor_id, "roles": sorted(actor.roles), "operation": operation,
+                                 "target_agent": target_agent, "arguments": arguments or {}, "allowed": result.allowed,
+                                 "reason": result.reason})
+        return result.allowed

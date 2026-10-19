@@ -23,31 +23,31 @@ REASON_CODES = SERIOUS_REASONS + COSMETIC_REASONS
 
 # ---- consequence levels (SPEC §7, decided 2026-10-16, [tested v2]) --------------------------------------------
 CONSEQUENCE = {
-    "C1": {"eps": 0.10, "success_min": 0.85},
-    "C2": {"eps": 0.05, "success_min": 0.90},
-    "C3": {"eps": 0.02, "success_min": 0.95},
-    "C4": {"eps": 0.0, "success_min": None},     # never promotes
+    "C1": {"error_bar": 0.10, "success_min": 0.85},
+    "C2": {"error_bar": 0.05, "success_min": 0.90},
+    "C3": {"error_bar": 0.02, "success_min": 0.95},
+    "C4": {"error_bar": 0.0, "success_min": None},     # never promotes
 }
 RANK = {"C1": 1, "C2": 2, "C3": 3, "C4": 4}
 
 
 def max_consequence(*levels: str | None) -> str | None:
-    vals = [c for c in levels if c]
-    return max(vals, key=RANK.__getitem__) if vals else None
+    present_levels = [level for level in levels if level]
+    return max(present_levels, key=RANK.__getitem__) if present_levels else None
 
 
 def utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def iso(dt: datetime) -> str:
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc).isoformat()
+def iso(moment: datetime) -> str:
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    return moment.astimezone(timezone.utc).isoformat()
 
 
-def parse_iso(s: str) -> datetime:
-    return datetime.fromisoformat(s)
+def parse_iso(text: str) -> datetime:
+    return datetime.fromisoformat(text)
 
 
 def payload_hash(payload: Any) -> str:
@@ -68,7 +68,7 @@ TrustKey = tuple[str, str, str]      # (org_id, agent_id, task_type)
 class ProposedAction:
     """SPEC §5. `payload` stays with the caller; only its hash enters the trust record."""
     action_id: str
-    org_id: str
+    organisation_id: str
     agent_id: str
     agent_version: str
     kind: str                                   # message.send | tool.call | delegate | ...
@@ -78,13 +78,13 @@ class ProposedAction:
     counterparty_id: str | None = None
     parent_action_id: str | None = None         # delegation provenance (SPEC §11)
     created_at: datetime = field(default_factory=utcnow)
-    # write tools this action will call (SPEC §4 tool floor). Names only enter the record; args never do.
+    # write tools this action will call (SPEC §4 tool floor). Names only enter the record; arguments never do.
     write_tools: list[str] = field(default_factory=list)
-    write_tool_args: dict[str, Any] = field(default_factory=dict)
+    write_tool_arguments: dict[str, Any] = field(default_factory=dict)
 
     @property
     def key(self) -> TrustKey:
-        return (self.org_id, self.agent_id, self.task_type or "")
+        return (self.organisation_id, self.agent_id, self.task_type or "")
 
 
 @dataclass
@@ -108,10 +108,10 @@ class Decision:
     mode: str                                   # hold | act
     why: str
     level: int
-    evidence_n: float
-    evidence_err: float
+    judged_count: float
+    serious_error_count: float
     upper_bound: float
-    eps: float
+    error_bar: float
     consequence: str | None
     checks: dict
     policy_version: int
@@ -125,9 +125,9 @@ class Decision:
         return self.mode == "act"
 
     def to_dict(self) -> dict:
-        d = asdict(self)
-        d["trust_key"] = list(self.trust_key)
-        return d
+        data = asdict(self)
+        data["trust_key"] = list(self.trust_key)
+        return data
 
 
 @dataclass
@@ -142,7 +142,7 @@ class OutcomeEvent:
     reason_code: str | None
     serious: bool
     actor_id: str
-    diff_ref: str | None
+    diff_reference: str | None
     created_at: str
 
 
@@ -151,9 +151,9 @@ class TrustState:
     """SPEC §5. Derived; rebuilt exactly by replaying the trust record."""
     trust_key: TrustKey
     level: int = L1
-    n: float = 0.0
-    err: float = 0.0
-    fail: float = 0.0                           # incomplete outcomes (task success alert only)
+    judged_count: float = 0.0
+    serious_error_count: float = 0.0
+    incomplete_count: float = 0.0               # incomplete outcomes (task success alert only)
     since_change: float = 0.0
     recent: list = field(default_factory=list)  # last rolling_n serious flags, cleared on level change
     agent_version: str | None = None
@@ -163,28 +163,32 @@ class TrustState:
     updated_at: str | None = None
 
     def snapshot(self) -> dict:
-        d = asdict(self)
-        d["trust_key"] = list(self.trust_key)
-        return d
+        data = asdict(self)
+        data["trust_key"] = list(self.trust_key)
+        return data
 
 
 @dataclass
 class TaskTypePolicy:
+    """A task-type catalogue entry (SPEC §4). The name is its key in `Policy.task_types`; it's only a key and has no
+    effect on the trust maths. The tagger and reviewers work from `description` and `examples`."""
     consequence: str = "C2"
-    eps: float | None = None                    # optional override; may only tighten the consequence bar
+    error_bar: float | None = None                    # optional override; may only tighten the consequence bar
     capped: bool = False
     tools: list[str] = field(default_factory=list)
+    description: str = ""                             # one or two sentences: what is in scope and what is out
+    examples: list[str] = field(default_factory=list) # 3-5 example requests that belong to this type
 
 
 @dataclass
 class Policy:
     """Policy-as-code (SPEC §5, §10). Immutable in use: every change produces a new version via governance."""
     policy_version: int = 1
-    eps: float = 0.05                           # fallback when a type has no consequence level
-    n_min: int = 30
+    error_bar: float = 0.05                           # fallback when a type has no consequence level
+    min_judged: int = 30
     confidence: float = 0.95
-    rolling_n: int = 50
-    rolling_min: int = 10
+    rolling_window: int = 50
+    rolling_window_min: int = 10
     reentry_gap_days: float = 60.0
     spot_rate: dict = field(default_factory=lambda: {2: 0.25, 3: 0.05})
     canary_rate: float = 0.02
@@ -195,8 +199,8 @@ class Policy:
     alert_fraction: float = 0.8                 # alert when the rolling upper bound passes 80% of ε (SPEC §9)
     require_checks: bool = True
     # reviewer trust (SPEC §9, [tested v3])
-    reviewer_eps: float = 0.10
-    reviewer_n_min: int = 30
+    reviewer_error_bar: float = 0.10
+    reviewer_min_judged: int = 30
     reviewer_canary_rate: float = 0.05
     second_check_rate: dict = field(default_factory=lambda: {1: 0.25, 2: 0.05})
     task_types: dict[str, TaskTypePolicy] = field(default_factory=dict)
@@ -212,58 +216,58 @@ class Policy:
         else C4 (a write tool no task type lists)."""
         if tool in self.tool_floors:
             return self.tool_floors[tool]
-        levels = [tp.consequence for tp in self.task_types.values() if tool in tp.tools]
+        levels = [type_policy.consequence for type_policy in self.task_types.values() if tool in type_policy.tools]
         return max_consequence(*levels) or "C4"
 
     def is_strict(self, task_type: str) -> bool:
         if task_type in self.strict_promotion:
             return True
-        tp = self.type_policy(task_type)
-        return tp is not None and tp.consequence in self.strict_promotion
+        type_policy = self.type_policy(task_type)
+        return type_policy is not None and type_policy.consequence in self.strict_promotion
 
     def type_policy(self, task_type: str) -> TaskTypePolicy | None:
         return self.task_types.get(task_type)
 
-    def eps_for(self, task_type: str) -> float:
-        tp = self.type_policy(task_type)
-        if tp is None:
-            return self.eps
-        if tp.consequence == "C4" or tp.capped:
+    def error_bar_for(self, task_type: str) -> float:
+        type_policy = self.type_policy(task_type)
+        if type_policy is None:
+            return self.error_bar
+        if type_policy.consequence == "C4" or type_policy.capped:
             return 0.0
-        base = CONSEQUENCE[tp.consequence]["eps"]
-        return min(base, tp.eps) if tp.eps is not None else base
+        base = CONSEQUENCE[type_policy.consequence]["error_bar"]
+        return min(base, type_policy.error_bar) if type_policy.error_bar is not None else base
 
     def is_capped(self, task_type: str) -> bool:
-        tp = self.type_policy(task_type)
-        return tp is not None and (tp.capped or tp.consequence == "C4")
+        type_policy = self.type_policy(task_type)
+        return type_policy is not None and (type_policy.capped or type_policy.consequence == "C4")
 
     def success_min(self, task_type: str) -> float | None:
-        tp = self.type_policy(task_type)
-        return CONSEQUENCE[tp.consequence]["success_min"] if tp else None
+        type_policy = self.type_policy(task_type)
+        return CONSEQUENCE[type_policy.consequence]["success_min"] if type_policy else None
 
     def to_dict(self) -> dict:
-        d = asdict(self)
-        d["spot_rate"] = {str(k): v for k, v in self.spot_rate.items()}
-        d["second_check_rate"] = {str(k): v for k, v in self.second_check_rate.items()}
-        return d
+        data = asdict(self)
+        data["spot_rate"] = {str(k): v for k, v in self.spot_rate.items()}
+        data["second_check_rate"] = {str(k): v for k, v in self.second_check_rate.items()}
+        return data
 
     @classmethod
-    def from_dict(cls, d: dict) -> "Policy":
-        d = copy.deepcopy(d)
-        d["spot_rate"] = {int(k): v for k, v in d.get("spot_rate", {}).items()}
-        d["second_check_rate"] = {int(k): v for k, v in d.get("second_check_rate", {}).items()}
-        d["task_types"] = {k: TaskTypePolicy(**v) for k, v in d.get("task_types", {}).items()}
-        return cls(**d)
+    def from_dict(cls, data: dict) -> "Policy":
+        data = copy.deepcopy(data)
+        data["spot_rate"] = {int(k): v for k, v in data.get("spot_rate", {}).items()}
+        data["second_check_rate"] = {int(k): v for k, v in data.get("second_check_rate", {}).items()}
+        data["task_types"] = {k: TaskTypePolicy(**v) for k, v in data.get("task_types", {}).items()}
+        return cls(**data)
 
     def evolve(self, **changes) -> "Policy":
         """A new policy version with the given fields changed."""
-        d = self.to_dict()
-        d.update(changes)
-        d["policy_version"] = self.policy_version + 1
+        data = self.to_dict()
+        data.update(changes)
+        data["policy_version"] = self.policy_version + 1
         if "task_types" in changes:
-            d["task_types"] = {k: (asdict(v) if isinstance(v, TaskTypePolicy) else v)
+            data["task_types"] = {k: (asdict(v) if isinstance(v, TaskTypePolicy) else v)
                                for k, v in changes["task_types"].items()}
-        return Policy.from_dict(d)
+        return Policy.from_dict(data)
 
 
 def lint_shared_write_tools(policy: Policy, write_tools: list[str] | None = None) -> list[str]:
@@ -271,16 +275,16 @@ def lint_shared_write_tools(policy: Policy, write_tools: list[str] | None = None
     Its derived floor then pushes the lower-consequence types up, so they can never earn autonomy.
     Checks `write_tools` (or policy.write_tools); with neither, checks every listed tool. Explicit floors are noted."""
     tools = write_tools if write_tools is not None else (policy.write_tools or
-                                                         sorted({t for tp in policy.task_types.values()
-                                                                 for t in tp.tools}))
+                                                         sorted({t for type_policy in policy.task_types.values()
+                                                                 for t in type_policy.tools}))
     out = []
     for tool in tools:
-        users = {tt: tp.consequence for tt, tp in policy.task_types.items() if tool in tp.tools}
+        users = {task_type: type_policy.consequence for task_type, type_policy in policy.task_types.items() if tool in type_policy.tools}
         if len(set(users.values())) > 1:
-            lo = min(users.values(), key=RANK.__getitem__)
-            pushed = sorted(tt for tt, c in users.items() if RANK[c] < RANK[policy.tool_floor(tool)])
+            lowest = min(users.values(), key=RANK.__getitem__)
+            pushed = sorted(task_type for task_type, level in users.items() if RANK[level] < RANK[policy.tool_floor(tool)])
             note = f" (explicit floor {policy.tool_floors[tool]})" if tool in policy.tool_floors else ""
             out.append(f"write tool '{tool}' is shared across {sorted(set(users.values()))}{note}: "
-                       f"floor {policy.tool_floor(tool)} holds {pushed or [lo]} on every use. Split the tool or give "
+                       f"floor {policy.tool_floor(tool)} holds {pushed or [lowest]} on every use. Split the tool or give "
                        f"it an argument-dependent floor.")
     return out
