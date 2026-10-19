@@ -51,4 +51,4 @@ There is value in the items on the right; we value the items on the left more.
 ---
 
 These principles are backed by four rounds of pre-registered testing, including the ones that failed. See the
-evidence reports. The practitioner guide (`GUIDE.md`) explains how to apply them.
+evidence reports in [research/](research/README.md). The [practitioner guide](docs/guide.md) explains how to apply them.
