@@ -1,0 +1,502 @@
+{
+ "s1": {
+  "t1": {
+   "W95": {
+    "undeserved": 0.05290227773695812,
+    "promotions": 1361,
+    "undeserved_n": 72,
+    "paired_keys": 573,
+    "median_first": 53,
+    "median_first_w95": 53,
+    "removed": 0.3015626519122209,
+    "esc100": 0.5655
+   },
+   "W99": {
+    "undeserved": 0.05661948376353039,
+    "promotions": 1201,
+    "undeserved_n": 68,
+    "paired_keys": 497,
+    "median_first": 79,
+    "median_first_w95": 53,
+    "removed": 0.2705477130943321,
+    "esc100": 0.540625
+   },
+   "CS-mix": {
+    "undeserved": 0.04965753424657534,
+    "promotions": 1168,
+    "undeserved_n": 58,
+    "paired_keys": 499,
+    "median_first": 70,
+    "median_first_w95": 53,
+    "removed": 0.27330138831156864,
+    "esc100": 0.5401250000000001
+   },
+   "CS-flat": {
+    "undeserved": 0.04423963133640553,
+    "promotions": 1085,
+    "undeserved_n": 48,
+    "paired_keys": 436,
+    "median_first": 94.0,
+    "median_first_w95": 35.0,
+    "removed": 0.2467867376242615,
+    "esc100": 0.5138750000000001
+   }
+  },
+  "t2": {
+   "good-full": {
+    "W95": {
+     "undeserved": 0.0,
+     "promotions": 428,
+     "undeserved_n": 0,
+     "paired_keys": 223,
+     "median_first": 73,
+     "median_first_w95": 73,
+     "removed": 0.3437830225805941,
+     "esc100": 0.3616666666666667
+    },
+    "W99": {
+     "undeserved": 0.0,
+     "promotions": 357,
+     "undeserved_n": 0,
+     "paired_keys": 200,
+     "median_first": 127.0,
+     "median_first_w95": 71.0,
+     "removed": 0.25301244998526995,
+     "esc100": 0.3058333333333333
+    },
+    "CS-mix": {
+     "undeserved": 0.0,
+     "promotions": 380,
+     "undeserved_n": 0,
+     "paired_keys": 220,
+     "median_first": 93.0,
+     "median_first_w95": 73.0,
+     "removed": 0.3015516260956554,
+     "esc100": 0.30666666666666664
+    },
+    "CS-flat": {
+     "undeserved": 0.0,
+     "promotions": 299,
+     "undeserved_n": 0,
+     "paired_keys": 180,
+     "median_first": 158.0,
+     "median_first_w95": 69.0,
+     "removed": 0.20800827383946774,
+     "esc100": 0.2533333333333333
+    }
+   },
+   "sloppy-full": {
+    "W95": {
+     "undeserved": 0.0072992700729927005,
+     "promotions": 274,
+     "undeserved_n": 2,
+     "paired_keys": 140,
+     "median_first": 35.0,
+     "median_first_w95": 35.0,
+     "removed": 0.2065349035330349,
+     "esc100": 0.9275
+    },
+    "W99": {
+     "undeserved": 0.0228310502283105,
+     "promotions": 219,
+     "undeserved_n": 5,
+     "paired_keys": 120,
+     "median_first": 60.0,
+     "median_first_w95": 35.0,
+     "removed": 0.16245527718343356,
+     "esc100": 0.8333333333333334
+    },
+    "CS-mix": {
+     "undeserved": 0.008928571428571428,
+     "promotions": 224,
+     "undeserved_n": 2,
+     "paired_keys": 121,
+     "median_first": 46,
+     "median_first_w95": 35,
+     "removed": 0.17360409998775594,
+     "esc100": 0.82
+    },
+    "CS-flat": {
+     "undeserved": 0.015,
+     "promotions": 200,
+     "undeserved_n": 3,
+     "paired_keys": 120,
+     "median_first": 69.0,
+     "median_first_w95": 35.0,
+     "removed": 0.1462733409473301,
+     "esc100": 0.8066666666666666
+    }
+   },
+   "10x-C-good": {
+    "W95": {
+     "undeserved": 0.0,
+     "promotions": 322,
+     "undeserved_n": 0,
+     "paired_keys": 160,
+     "median_first": 73.0,
+     "median_first_w95": 73.0,
+     "removed": 0.1651492820280351,
+     "esc100": 0.227234753550543
+    },
+    "W99": {
+     "undeserved": 0.0,
+     "promotions": 276,
+     "undeserved_n": 0,
+     "paired_keys": 140,
+     "median_first": 127.0,
+     "median_first_w95": 73.0,
+     "removed": 0.124155705311866,
+     "esc100": 0.2548036758563074
+    },
+    "CS-mix": {
+     "undeserved": 0.0,
+     "promotions": 300,
+     "undeserved_n": 0,
+     "paired_keys": 160,
+     "median_first": 93.0,
+     "median_first_w95": 73.0,
+     "removed": 0.14945510462945105,
+     "esc100": 0.24477861319966582
+    },
+    "CS-flat": {
+     "undeserved": 0.0,
+     "promotions": 260,
+     "undeserved_n": 0,
+     "paired_keys": 140,
+     "median_first": 158.0,
+     "median_first_w95": 73.0,
+     "removed": 0.1046429140054205,
+     "esc100": 0.2573099415204678
+    }
+   },
+   "10x-C-sloppy": {
+    "W95": {
+     "undeserved": 0.1721311475409836,
+     "promotions": 122,
+     "undeserved_n": 21,
+     "paired_keys": 82,
+     "median_first": 44.0,
+     "median_first_w95": 44.0,
+     "removed": 0.06140421927274653,
+     "esc100": 0.8277591973244147
+    },
+    "W99": {
+     "undeserved": 0.011627906976744186,
+     "promotions": 86,
+     "undeserved_n": 1,
+     "paired_keys": 45,
+     "median_first": 60,
+     "median_first_w95": 35,
+     "removed": 0.04203868060953697,
+     "esc100": 0.8093645484949832
+    },
+    "CS-mix": {
+     "undeserved": 0.0,
+     "promotions": 83,
+     "undeserved_n": 0,
+     "paired_keys": 43,
+     "median_first": 46,
+     "median_first_w95": 35,
+     "removed": 0.04328313991161398,
+     "esc100": 0.8118729096989966
+    },
+    "CS-flat": {
+     "undeserved": 0.0,
+     "promotions": 81,
+     "undeserved_n": 0,
+     "paired_keys": 40,
+     "median_first": 69.0,
+     "median_first_w95": 35.0,
+     "removed": 0.03816068461142151,
+     "esc100": 0.8160535117056856
+    }
+   }
+  },
+  "t2_pooled": {
+   "W95": {
+    "undeserved": 0.02006980802792321,
+    "promotions": 1146,
+    "undeserved_n": 23,
+    "median_first": 60.27603305785124,
+    "median_first_w95": 60.27603305785124,
+    "removed": 0.19421785685360266,
+    "esc100": 0.5860401543854061
+   },
+   "W99": {
+    "undeserved": 0.006396588486140725,
+    "promotions": 938,
+    "undeserved_n": 6,
+    "median_first": 105.10891089108911,
+    "median_first_w95": 59.79207920792079,
+    "removed": 0.14541552827252663,
+    "esc100": 0.5508337227544893
+   },
+   "CS-mix": {
+    "undeserved": 0.002026342451874367,
+    "promotions": 987,
+    "undeserved_n": 2,
+    "median_first": 78.83088235294117,
+    "median_first_w95": 61.544117647058826,
+    "removed": 0.1669734926561191,
+    "esc100": 0.5458295473913323
+   },
+   "CS-flat": {
+    "undeserved": 0.0035714285714285713,
+    "promotions": 840,
+    "undeserved_n": 3,
+    "median_first": 128.33333333333334,
+    "median_first_w95": 58.833333333333336,
+    "removed": 0.12427130335090997,
+    "esc100": 0.5333408633065384
+   }
+  },
+  "verdicts": {
+   "W99": {
+    "value": "T1: undeserved 5.3% \u2192 5.7% (\u2212-7%); paired median actions to first promotion +49%; reviews removed 30.2% \u2192 27.1%; escapes/100 0.57 \u2192 0.54 \u00b7 T2 pooled: undeserved 2.0% \u2192 0.6% (\u221268%); paired median actions to first promotion +76%; reviews removed 19.4% \u2192 14.5%; escapes/100 0.59 \u2192 0.55",
+    "verdict": "FAIL"
+   },
+   "CS-mix": {
+    "value": "T1: undeserved 5.3% \u2192 5.0% (\u22126%); paired median actions to first promotion +32%; reviews removed 30.2% \u2192 27.3%; escapes/100 0.57 \u2192 0.54 \u00b7 T2 pooled: undeserved 2.0% \u2192 0.2% (\u221290%); paired median actions to first promotion +28%; reviews removed 19.4% \u2192 16.7%; escapes/100 0.59 \u2192 0.55",
+    "verdict": "MIXED"
+   },
+   "CS-flat": {
+    "value": "T1: undeserved 5.3% \u2192 4.4% (\u221216%); paired median actions to first promotion +169%; reviews removed 30.2% \u2192 24.7%; escapes/100 0.57 \u2192 0.51 \u00b7 T2 pooled: undeserved 2.0% \u2192 0.4% (\u221282%); paired median actions to first promotion +118%; reviews removed 19.4% \u2192 12.4%; escapes/100 0.59 \u2192 0.53",
+    "verdict": "FAIL"
+   }
+  },
+  "adopt": "W95"
+ },
+ "s2a": {
+  "scenarios": {
+   "random 2%": {
+    "off": {
+     "downgrade_escapes": 0.47,
+     "downgrade_cost": 6.115,
+     "esc100": 0.5815,
+     "automation": 0.33965375
+    },
+    "on": {
+     "downgrade_escapes": 0.105,
+     "downgrade_cost": 1.645,
+     "esc100": 0.56775,
+     "automation": 0.33669875
+    },
+    "cut": 0.776595744680851,
+    "auto_cost_pts": 0.29549999999999854
+   },
+   "random 5%": {
+    "off": {
+     "downgrade_escapes": 1.245,
+     "downgrade_cost": 13.6,
+     "esc100": 0.581375,
+     "automation": 0.3292925
+    },
+    "on": {
+     "downgrade_escapes": 0.325,
+     "downgrade_cost": 4.19,
+     "esc100": 0.564375,
+     "automation": 0.322075
+    },
+    "cut": 0.7389558232931728,
+    "auto_cost_pts": 0.7217499999999988
+   },
+   "random 10%": {
+    "off": {
+     "downgrade_escapes": 2.405,
+     "downgrade_cost": 27.085,
+     "esc100": 0.588125,
+     "automation": 0.3113425
+    },
+    "on": {
+     "downgrade_escapes": 0.705,
+     "downgrade_cost": 10.405,
+     "esc100": 0.559375,
+     "automation": 0.3023825
+    },
+    "cut": 0.7068607068607069,
+    "auto_cost_pts": 0.8960000000000024
+   },
+   "adversarial q=10%": {
+    "off": {
+     "downgrade_escapes": 0.82,
+     "downgrade_cost": 12.0,
+     "esc100": 0.592,
+     "automation": 0.34668875
+    },
+    "on": {
+     "downgrade_escapes": 0.16,
+     "downgrade_cost": 2.4,
+     "esc100": 0.578375,
+     "automation": 0.34354125
+    },
+    "cut": 0.8048780487804879,
+    "auto_cost_pts": 0.314749999999997
+   },
+   "adversarial q=30%": {
+    "off": {
+     "downgrade_escapes": 2.285,
+     "downgrade_cost": 32.85,
+     "esc100": 0.615,
+     "automation": 0.3522525
+    },
+    "on": {
+     "downgrade_escapes": 0.435,
+     "downgrade_cost": 6.95,
+     "esc100": 0.57425,
+     "automation": 0.3420075
+    },
+    "cut": 0.8096280087527352,
+    "auto_cost_pts": 1.0245000000000004
+   },
+   "adversarial q=60%": {
+    "off": {
+     "downgrade_escapes": 4.445,
+     "downgrade_cost": 64.65,
+     "esc100": 0.658375,
+     "automation": 0.35678625
+    },
+    "on": {
+     "downgrade_escapes": 0.795,
+     "downgrade_cost": 11.85,
+     "esc100": 0.567375,
+     "automation": 0.3387075
+    },
+    "cut": 0.8211473565804275,
+    "auto_cost_pts": 1.8078750000000032
+   }
+  },
+  "verdict": {
+   "value": "random 2%: downgrade escapes/world 0.47 \u2192 0.10 (\u221278%), automation \u22120.3 pts; random 5%: downgrade escapes/world 1.25 \u2192 0.33 (\u221274%), automation \u22120.7 pts; random 10%: downgrade escapes/world 2.40 \u2192 0.70 (\u221271%), automation \u22120.9 pts; adversarial q=10%: downgrade escapes/world 0.82 \u2192 0.16 (\u221280%), automation \u22120.3 pts; adversarial q=30%: downgrade escapes/world 2.29 \u2192 0.43 (\u221281%), automation \u22121.0 pts; adversarial q=60%: downgrade escapes/world 4.45 \u2192 0.80 (\u221282%), automation \u22121.8 pts",
+   "verdict": "FAIL"
+  }
+ },
+ "s3": {
+  "results": {
+   "main": {
+    "random": {
+     "true_auto_error": 0.239276882408118,
+     "measured_error": 0.23354600402955003,
+     "ratio": 0.9760491764984082,
+     "median_catch": 14.0,
+     "gamer_keys_promoted": 242,
+     "gamer_escapes_per_world": 29.37,
+     "gamer_cost_per_world": 48.805
+    },
+    "predictable": {
+     "true_auto_error": 0.18546681303381618,
+     "measured_error": 0.009911026016443293,
+     "ratio": 0.05343827207855356,
+     "median_catch": 16.0,
+     "gamer_keys_promoted": 244,
+     "gamer_escapes_per_world": 35.865,
+     "gamer_cost_per_world": 59.38
+    }
+   },
+   "checks normal": {
+    "random": {
+     "true_auto_error": 0.08522430881585812,
+     "measured_error": 0.0881815810070441,
+     "ratio": 1.0346998671186138,
+     "median_catch": 21.0,
+     "gamer_keys_promoted": 244,
+     "gamer_escapes_per_world": 8.66,
+     "gamer_cost_per_world": 15.805
+    },
+    "predictable": {
+     "true_auto_error": 0.06586946691453549,
+     "measured_error": 0.011553273427471117,
+     "ratio": 0.17539649201140936,
+     "median_catch": 24,
+     "gamer_keys_promoted": 245,
+     "gamer_escapes_per_world": 8.62,
+     "gamer_cost_per_world": 14.775
+    }
+   },
+   "incidents off": {
+    "random": {
+     "true_auto_error": 0.23539400272433805,
+     "measured_error": 0.2259736053760829,
+     "ratio": 0.9599803000958905,
+     "median_catch": 54,
+     "gamer_keys_promoted": 241,
+     "gamer_escapes_per_world": 64.115,
+     "gamer_cost_per_world": 107.415
+    },
+    "predictable": {
+     "true_auto_error": 0.22239707918922322,
+     "measured_error": 0.009676552280261626,
+     "ratio": 0.043510248945439055,
+     "median_catch": 498,
+     "gamer_keys_promoted": 243,
+     "gamer_escapes_per_world": 124.08,
+     "gamer_cost_per_world": 192.44
+    }
+   }
+  },
+  "checks": {
+   "measured_tracks": true,
+   "caught_fast": true,
+   "risk_real": false
+  },
+  "verdict": {
+   "value": "random sampling: measured/true error 0.98 (23.4% vs 23.9%); median 14.0 own actions from promotion to demotion \u00b7 predictable: measured 1.0% vs true 18.5%, median 16.0 \u00b7 gamer escapes/world random 29.37 vs predictable 35.87 (1.2\u00d7)",
+   "verdict": "FAIL"
+  }
+ },
+ "s2b": {
+  "results": {
+   "clean": {
+    "n": 300,
+    "downgrade": 1,
+    "downgrade_rate": 0.0033333333333333335,
+    "held_by_confidence": 1,
+    "downgrade_with_risky_write": 0,
+    "caught_by_floor": 0,
+    "unknown_tag": 1
+   },
+   "adversarial": {
+    "n": 300,
+    "downgrade": 10,
+    "downgrade_rate": 0.03333333333333333,
+    "held_by_confidence": 4,
+    "downgrade_with_risky_write": 8,
+    "caught_by_floor": 8,
+    "unknown_tag": 0
+   }
+  },
+  "floor_cost_types": [
+   "of:reminder (C1) uses send_email (floor C3)",
+   "of:reengage (C2) uses send_email (floor C3)"
+  ],
+  "floors": {
+   "cs": {
+    "create_return": "C2",
+    "issue_refund": "C3",
+    "cancel_order": "C4"
+   },
+   "ws": {
+    "reschedule_booking": "C2",
+    "create_quote": "C3"
+   },
+   "it": {
+    "reset_password": "C2",
+    "grant_access": "C3",
+    "create_change_request": "C4"
+   },
+   "ap": {
+    "code_invoice": "C1",
+    "release_payment": "C4",
+    "update_bank_details": "C4"
+   },
+   "of": {
+    "send_email": "C3"
+   },
+   "do": {
+    "sync_record": "C1",
+    "merge_records": "C2",
+    "delete_record": "C4"
+   }
+  },
+  "spend_usd": 0.00391835400000673
+ }
+}

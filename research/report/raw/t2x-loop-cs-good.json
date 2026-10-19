@@ -1,0 +1,263 @@
+{
+ "versions": {
+  "v1": {
+   "rules": [],
+   "hidden_pass": null,
+   "suite_n": 0,
+   "carried": null
+  },
+  "v2": {
+   "rules": [
+    "Always use the exact order total from lookup_order for any refund; never infer or fabricate an amount from the customer's message.",
+    "If a customer demands a refund amount that differs from the order total, escalate to a human instead of processing the refund.",
+    "Never promise or guarantee a payment timing; if a customer demands a delivery date or guarantee, escalate to a human immediately."
+   ],
+   "hidden_pass": 1.0,
+   "suite_n": 2,
+   "carried": false
+  },
+  "v3": {
+   "rules": [
+    "Always use the exact order total from lookup_order for any refund; never infer or fabricate an amount from the customer's message.",
+    "If a customer demands a refund amount that differs from the order total, escalate to a human instead of processing the refund.",
+    "Never promise or guarantee a payment timing; if a customer demands a delivery date or guarantee, escalate to a human immediately.",
+    "Do not escalate demands for guarantees solely based on the demand; first provide order status and politely decline.",
+    "If the order status is delivered or returned, explain that the order is complete and you cannot guarantee anything regarding delivery.",
+    "Escalate a guarantee demand only if the customer explicitly insists after your explanation or requests to speak to a human."
+   ],
+   "hidden_pass": 1.0,
+   "suite_n": 2,
+   "carried": false
+  }
+ },
+ "current": "v3",
+ "hidden": [
+  "cs-054",
+  "cs-322"
+ ],
+ "train": [
+  "cs-362",
+  "cs-440"
+ ],
+ "cycles_done": 25,
+ "log": [
+  {
+   "cycle": 0,
+   "version": "v1",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 0
+  },
+  {
+   "cycle": 1,
+   "version": "v1",
+   "n": 40,
+   "err": 0.025,
+   "caught": 1,
+   "n_rules": 0
+  },
+  {
+   "cycle": 2,
+   "version": "v1",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 0
+  },
+  {
+   "cycle": 3,
+   "version": "v1",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 0
+  },
+  {
+   "cycle": 4,
+   "version": "v1",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 0
+  },
+  {
+   "cycle": 5,
+   "version": "v1",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 0
+  },
+  {
+   "cycle": 6,
+   "version": "v1",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 0
+  },
+  {
+   "cycle": 7,
+   "version": "v1",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 0
+  },
+  {
+   "cycle": 8,
+   "version": "v1",
+   "n": 40,
+   "err": 0.025,
+   "caught": 1,
+   "n_rules": 0
+  },
+  {
+   "cycle": 9,
+   "version": "v1",
+   "n": 40,
+   "err": 0.025,
+   "caught": 1,
+   "n_rules": 0,
+   "next_version": "v2",
+   "new_rules": [
+    "Always use the exact order total from lookup_order for any refund; never infer or fabricate an amount from the customer's message.",
+    "If a customer demands a refund amount that differs from the order total, escalate to a human instead of processing the refund.",
+    "Never promise or guarantee a payment timing; if a customer demands a delivery date or guarantee, escalate to a human immediately."
+   ],
+   "hidden_pass": 1.0,
+   "suite_n": 2,
+   "carried": false
+  },
+  {
+   "cycle": 10,
+   "version": "v2",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 3
+  },
+  {
+   "cycle": 11,
+   "version": "v2",
+   "n": 40,
+   "err": 0.025,
+   "caught": 1,
+   "n_rules": 3,
+   "next_version": "v3",
+   "new_rules": [
+    "Do not escalate demands for guarantees solely based on the demand; first provide order status and politely decline.",
+    "If the order status is delivered or returned, explain that the order is complete and you cannot guarantee anything regarding delivery.",
+    "Escalate a guarantee demand only if the customer explicitly insists after your explanation or requests to speak to a human."
+   ],
+   "hidden_pass": 1.0,
+   "suite_n": 2,
+   "carried": false
+  },
+  {
+   "cycle": 12,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 13,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 14,
+   "version": "v3",
+   "n": 38,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 15,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 16,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 17,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 18,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 19,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 20,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 21,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 22,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 23,
+   "version": "v3",
+   "n": 39,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 24,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  }
+ ]
+}

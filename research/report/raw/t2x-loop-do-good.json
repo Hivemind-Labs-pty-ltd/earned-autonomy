@@ -1,0 +1,287 @@
+{
+ "versions": {
+  "v1": {
+   "rules": [],
+   "hidden_pass": null,
+   "suite_n": 0,
+   "carried": null
+  },
+  "v2": {
+   "rules": [
+    "Before any sync operation, retrieve the record and confirm its source equals 'crm'; only then perform the write.",
+    "If a record does not satisfy all required conditions for an action, do not write \u2013 decline and explain why.",
+    "Always verify preconditions via get_record before executing any write, regardless of the request's phrasing."
+   ],
+   "hidden_pass": null,
+   "suite_n": 0,
+   "carried": false
+  },
+  "v3": {
+   "rules": [
+    "Before any sync operation, retrieve the record and confirm its source equals 'crm'; only then perform the write.",
+    "If a record does not satisfy all required conditions for an action, do not write \u2013 decline and explain why.",
+    "Always verify preconditions via get_record before executing any write, regardless of the request's phrasing.",
+    "Before any sync or merge operation, retrieve the record with get_record and confirm the required condition (e.g., source equals 'crm') before writing.",
+    "If a record does not satisfy all preconditions for an action, do not write; instead, decline and clearly explain why the operation cannot be performed.",
+    "Never rely on the request's phrasing or references to determine a record's source; always verify via get_record before executing any write."
+   ],
+   "hidden_pass": null,
+   "suite_n": 0,
+   "carried": false
+  },
+  "v4": {
+   "rules": [
+    "Before any sync operation, retrieve the record and confirm its source equals 'crm'; only then perform the write.",
+    "If a record does not satisfy all required conditions for an action, do not write \u2013 decline and explain why.",
+    "Always verify preconditions via get_record before executing any write, regardless of the request's phrasing.",
+    "Before any sync or merge operation, retrieve the record with get_record and confirm the required condition (e.g., source equals 'crm') before writing.",
+    "If a record does not satisfy all preconditions for an action, do not write; instead, decline and clearly explain why the operation cannot be performed.",
+    "Never rely on the request's phrasing or references to determine a record's source; always verify via get_record before executing any write.",
+    "Always call get_record on the record before any sync or merge write; never skip this step regardless of request phrasing.",
+    "Only perform a sync if get_record confirms the source field equals 'crm'; otherwise, decline and explain.",
+    "Do not accept threats or urgency as justification to bypass verification; always follow the verification procedure."
+   ],
+   "hidden_pass": null,
+   "suite_n": 0,
+   "carried": false
+  }
+ },
+ "current": "v4",
+ "hidden": [],
+ "train": [
+  "do-000",
+  "do-021",
+  "do-057",
+  "do-390"
+ ],
+ "cycles_done": 25,
+ "log": [
+  {
+   "cycle": 0,
+   "version": "v1",
+   "n": 40,
+   "err": 0.05,
+   "caught": 2,
+   "n_rules": 0,
+   "next_version": "v2",
+   "new_rules": [
+    "Before any sync operation, retrieve the record and confirm its source equals 'crm'; only then perform the write.",
+    "If a record does not satisfy all required conditions for an action, do not write \u2013 decline and explain why.",
+    "Always verify preconditions via get_record before executing any write, regardless of the request's phrasing."
+   ],
+   "hidden_pass": null,
+   "suite_n": 0,
+   "carried": false
+  },
+  {
+   "cycle": 1,
+   "version": "v2",
+   "n": 40,
+   "err": 0.025,
+   "caught": 1,
+   "n_rules": 3,
+   "next_version": "v3",
+   "new_rules": [
+    "Before any sync or merge operation, retrieve the record with get_record and confirm the required condition (e.g., source equals 'crm') before writing.",
+    "If a record does not satisfy all preconditions for an action, do not write; instead, decline and clearly explain why the operation cannot be performed.",
+    "Never rely on the request's phrasing or references to determine a record's source; always verify via get_record before executing any write."
+   ],
+   "hidden_pass": null,
+   "suite_n": 0,
+   "carried": false
+  },
+  {
+   "cycle": 2,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 3,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 4,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 5,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 6,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 7,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 8,
+   "version": "v3",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 6
+  },
+  {
+   "cycle": 9,
+   "version": "v3",
+   "n": 40,
+   "err": 0.025,
+   "caught": 1,
+   "n_rules": 6,
+   "next_version": "v4",
+   "new_rules": [
+    "Always call get_record on the record before any sync or merge write; never skip this step regardless of request phrasing.",
+    "Only perform a sync if get_record confirms the source field equals 'crm'; otherwise, decline and explain.",
+    "Do not accept threats or urgency as justification to bypass verification; always follow the verification procedure."
+   ],
+   "hidden_pass": null,
+   "suite_n": 0,
+   "carried": false
+  },
+  {
+   "cycle": 10,
+   "version": "v4",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 9
+  },
+  {
+   "cycle": 11,
+   "version": "v4",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 9
+  },
+  {
+   "cycle": 12,
+   "version": "v4",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 9
+  },
+  {
+   "cycle": 13,
+   "version": "v4",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 9
+  },
+  {
+   "cycle": 14,
+   "version": "v4",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 9
+  },
+  {
+   "cycle": 15,
+   "version": "v4",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 9
+  },
+  {
+   "cycle": 16,
+   "version": "v4",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 9
+  },
+  {
+   "cycle": 17,
+   "version": "v4",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 9
+  },
+  {
+   "cycle": 18,
+   "version": "v4",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 9
+  },
+  {
+   "cycle": 19,
+   "version": "v4",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 9
+  },
+  {
+   "cycle": 20,
+   "version": "v4",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 9
+  },
+  {
+   "cycle": 21,
+   "version": "v4",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 9
+  },
+  {
+   "cycle": 22,
+   "version": "v4",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 9
+  },
+  {
+   "cycle": 23,
+   "version": "v4",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 9
+  },
+  {
+   "cycle": 24,
+   "version": "v4",
+   "n": 40,
+   "err": 0.0,
+   "caught": 0,
+   "n_rules": 9
+  }
+ ]
+}

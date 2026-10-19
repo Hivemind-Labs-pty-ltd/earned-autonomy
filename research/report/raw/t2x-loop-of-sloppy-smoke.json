@@ -1,0 +1,36 @@
+{
+ "versions": {
+  "v1": {
+   "rules": [],
+   "hidden_pass": null,
+   "suite_n": 0,
+   "carried": null
+  }
+ },
+ "current": "v1",
+ "hidden": [],
+ "train": [
+  "of-014",
+  "of-016",
+  "of-019"
+ ],
+ "cycles_done": 2,
+ "log": [
+  {
+   "cycle": 0,
+   "version": "v1",
+   "n": 10,
+   "err": 0.1,
+   "caught": 0,
+   "n_rules": 0
+  },
+  {
+   "cycle": 1,
+   "version": "v1",
+   "n": 10,
+   "err": 0.3,
+   "caught": 3,
+   "n_rules": 0
+  }
+ ]
+}

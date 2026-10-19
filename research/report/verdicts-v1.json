@@ -1,0 +1,268 @@
+{
+ "verdicts": {
+  "V1 carry-over": {
+   "value": "promoted key-runs 0/400 (v0) \u2192 142/400 (v1); escapes 0.00/100 auto; H1 102/102 = 100%; 18/30 version changes passed hidden tests",
+   "verdict": "PASS"
+  },
+  "V2 one-level demotion": {
+   "value": "T1: esc/100 0.595\u21920.603, automation 27.1%\u219227.7%; T2 good-full: esc/100 0.333\u21920.332, automation 41.7%\u219241.8%; T2 sloppy-full: esc/100 0.771\u21920.771, automation 17.4%\u219217.5%",
+   "verdict": "PASS"
+  },
+  "V3 pooled trust": {
+   "value": "T1: automation 26.0% vs best 27.1%; esc/100 0.593 vs best 0.550; T2 good-full: automation 46.4% vs best 55.6%; esc/100 0.365 vs best 0.333; T2 sloppy-full: automation 9.2% vs best 17.4%; esc/100 0.736 vs best 0.728",
+   "verdict": "MIXED"
+  },
+  "V4 \u03b5 by risk": {
+   "value": "T1: reviews removed 29.2% (flat \u03b5 23.0%); esc 0.62/100 auto; T2 good-full: reviews removed 36.0% (flat \u03b5 34.4%); esc 0.49/100 auto",
+   "verdict": "FAIL"
+  },
+  "V5 peer trust-ts R1": {
+   "value": "accuracy 95.4% (equal 67.1%); calls 433 (verify-all 1000)",
+   "verdict": "PASS"
+  },
+  "V5 peer trust-ts R3": {
+   "value": "rerouted in 100% of runs; median 37.5 bad outputs first; 18.4 unverified bad outputs",
+   "verdict": "FAIL"
+  },
+  "V5 peer trust-drift R1": {
+   "value": "accuracy 96.5% (equal 67.1%); calls 501 (verify-all 1000)",
+   "verdict": "FAIL"
+  },
+  "V5 peer trust-drift R3": {
+   "value": "rerouted in 100% of runs; median 21.0 bad outputs first; 10.0 unverified bad outputs",
+   "verdict": "FAIL"
+  },
+  "V6 combined v1": {
+   "value": "T1: automation 27.1%\u219233.9%, esc/100 0.595\u21920.623, reviews removed 29.7%; T2 good-full: automation 41.7%\u219247.0%, esc/100 0.333\u21920.523, reviews removed 39.2%; T2 sloppy-full: automation 17.4%\u219221.9%, esc/100 0.771\u21920.873, reviews removed 17.8%",
+   "verdict": "MIXED"
+  }
+ },
+ "v1_rereport_T1": {
+  "H1": "1272/1362 = 93.4% promotions good PASS",
+  "H2": "reviews removed 29.7%; esc 0.62/100 auto FAIL",
+  "H3": "v1/B-matched escapes = 0.50 FAIL",
+  "H4": "median 14.0 actions (124/126 \u226450) PASS",
+  "G1": "review minutes \u221229.7%; detected \u226450 98% FAIL",
+  "G2": "ledger complete 100% PASS",
+  "G3": "auto after L1-incident 0; incidents leaving the type autonomous (L3\u2192L2) 1.26/world PASS"
+ },
+ "tiers": {
+  "T1": {
+   "A": {
+    "automation": 0.0,
+    "reviews": 4079.89,
+    "escapes": 19.67,
+    "esc_per100": 0.49174999999999996,
+    "esc_per100_auto": 0.0
+   },
+   "D": {
+    "automation": 0.27104625,
+    "reviews": 3142.825,
+    "escapes": 23.81,
+    "esc_per100": 0.59525,
+    "esc_per100_auto": 0.6196748202820644,
+    "ledger_complete": 1.0
+   },
+   "D-agent": {
+    "automation": 0.07359125,
+    "reviews": 3839.23,
+    "escapes": 22.0,
+    "esc_per100": 0.55,
+    "esc_per100_auto": 1.108297101496721
+   },
+   "V2-soft": {
+    "automation": 0.27696375,
+    "reviews": 3125.425,
+    "escapes": 24.13,
+    "esc_per100": 0.6032500000000001,
+    "esc_per100_auto": 0.6338842722235367
+   },
+   "V3-pooled": {
+    "automation": 0.25957625,
+    "reviews": 3183.085,
+    "escapes": 23.71,
+    "esc_per100": 0.59275,
+    "esc_per100_auto": 0.6281684340485989
+   },
+   "V4-riskeps": {
+    "automation": 0.3340775,
+    "reviews": 2887.35,
+    "escapes": 24.845,
+    "esc_per100": 0.6211249999999999,
+    "esc_per100_auto": 0.6239710634971931
+   },
+   "V6-v1": {
+    "automation": 0.33904125,
+    "reviews": 2868.7,
+    "escapes": 24.93,
+    "esc_per100": 0.6232500000000001,
+    "esc_per100_auto": 0.621114265934764,
+    "ledger_complete": 1.0,
+    "auto_after_incident_L1": 0.0,
+    "incidents_left_autonomous": 1.265,
+    "h1": [
+     1272,
+     1362
+    ],
+    "reg_latency_median": 14.0,
+    "reg_eligible": 126,
+    "reg_detected50": 124
+   },
+   "B-matched-v1": {
+    "automation": 0.3389125,
+    "reviews": 2696.78,
+    "escapes": 49.57,
+    "esc_per100": 1.23925,
+    "esc_per100_auto": 2.648213368382681
+   }
+  },
+  "T2 good-full": {
+   "A": {
+    "automation": 0.0,
+    "reviews": 6117.75,
+    "escapes": 21.25,
+    "esc_per100": 0.35416666666666663,
+    "esc_per100_auto": 0.0
+   },
+   "D": {
+    "automation": 0.4166833333333333,
+    "reviews": 4011.2,
+    "escapes": 19.95,
+    "esc_per100": 0.3325,
+    "esc_per100_auto": 0.193552547124389,
+    "ledger_complete": 1.0
+   },
+   "D-agent": {
+    "automation": 0.5556,
+    "reviews": 3106.05,
+    "escapes": 28.25,
+    "esc_per100": 0.4708333333333333,
+    "esc_per100_auto": 0.4792801660353404
+   },
+   "V2-soft": {
+    "automation": 0.41806666666666664,
+    "reviews": 4004.95,
+    "escapes": 19.9,
+    "esc_per100": 0.33166666666666667,
+    "esc_per100_auto": 0.19301675986867625
+   },
+   "V3-pooled": {
+    "automation": 0.46360833333333334,
+    "reviews": 3759.6,
+    "escapes": 21.9,
+    "esc_per100": 0.365,
+    "esc_per100_auto": 0.24414948532082775
+   },
+   "V4-riskeps": {
+    "automation": 0.4345,
+    "reviews": 3913.0,
+    "escapes": 28.2,
+    "esc_per100": 0.47000000000000003,
+    "esc_per100_auto": 0.490497384337346
+   },
+   "V6-v1": {
+    "automation": 0.4704416666666667,
+    "reviews": 3720.95,
+    "escapes": 31.35,
+    "esc_per100": 0.5225000000000001,
+    "esc_per100_auto": 0.5522812780738207,
+    "ledger_complete": 1.0,
+    "auto_after_incident_L1": 0.0,
+    "incidents_left_autonomous": 1.2
+   },
+   "B-matched-v1": {
+    "automation": 0.46898333333333336,
+    "reviews": 3247.5,
+    "escapes": 63.9,
+    "esc_per100": 1.065,
+    "esc_per100_auto": 1.8474639711712093
+   }
+  },
+  "T2 sloppy-full": {
+   "A": {
+    "automation": 0.0,
+    "reviews": 6117.55,
+    "escapes": 43.25,
+    "esc_per100": 0.7208333333333334,
+    "esc_per100_auto": 0.0
+   },
+   "D": {
+    "automation": 0.17416666666666666,
+    "reviews": 5255.2,
+    "escapes": 46.25,
+    "esc_per100": 0.7708333333333333,
+    "esc_per100_auto": 0.24738025813998554,
+    "ledger_complete": 1.0
+   },
+   "D-agent": {
+    "automation": 0.0009500000000000001,
+    "reviews": 6113.05,
+    "escapes": 43.65,
+    "esc_per100": 0.7275,
+    "esc_per100_auto": 1.5873015873015874
+   },
+   "V2-soft": {
+    "automation": 0.17535833333333334,
+    "reviews": 5249.2,
+    "escapes": 46.25,
+    "esc_per100": 0.7708333333333333,
+    "esc_per100_auto": 0.2503969989656011
+   },
+   "V3-pooled": {
+    "automation": 0.091925,
+    "reviews": 5681.5,
+    "escapes": 44.15,
+    "esc_per100": 0.7358333333333333,
+    "esc_per100_auto": 0.20634446475046292
+   },
+   "V4-riskeps": {
+    "automation": 0.24755833333333332,
+    "reviews": 4863.8,
+    "escapes": 54.05,
+    "esc_per100": 0.9008333333333333,
+    "esc_per100_auto": 0.8072308739686305
+   },
+   "V6-v1": {
+    "automation": 0.21895000000000003,
+    "reviews": 5029.3,
+    "escapes": 52.4,
+    "esc_per100": 0.8733333333333333,
+    "esc_per100_auto": 0.7589245178768965,
+    "ledger_complete": 1.0,
+    "auto_after_incident_L1": 0.0,
+    "incidents_left_autonomous": 0.65
+   },
+   "B-matched-v1": {
+    "automation": 0.21835833333333335,
+    "reviews": 4781.05,
+    "escapes": 181.05,
+    "esc_per100": 3.0175,
+    "esc_per100_auto": 10.98067564558673
+   }
+  }
+ },
+ "carryover": {
+  "v0": {
+   "promoted": 0,
+   "keyruns": 400,
+   "esc_per100_auto": 0.0,
+   "h1": [
+    0,
+    0
+   ],
+   "passed_versions": 18,
+   "versions": 30
+  },
+  "v1": {
+   "promoted": 142,
+   "keyruns": 400,
+   "esc_per100_auto": 0.0,
+   "h1": [
+    102,
+    102
+   ],
+   "passed_versions": 18,
+   "versions": 30
+  }
+ }
+}

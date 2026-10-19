@@ -1,0 +1,109 @@
+{
+ "do": {
+  "versions": {
+   "v1": [],
+   "v2": [
+    "For delete requests, never delete directly; always escalate to a human for authorization.",
+    "When merging duplicates, determine the primary record by source (prefer 'crm'), creation date (older), and data completeness; keep the primary, drop the other.",
+    "Do not perform extra writes like syncing unless explicitly required by policy (e.g., only sync records with source 'crm')."
+   ],
+   "v3": [
+    "For delete requests, never delete directly; always escalate to a human for authorization.",
+    "When merging duplicates, determine the primary record by source (prefer 'crm'), creation date (older), and data completeness; keep the primary, drop the other.",
+    "Do not perform extra writes like syncing unless explicitly required by policy (e.g., only sync records with source 'crm')."
+   ],
+   "v4": [
+    "For delete requests, never delete directly; always escalate to a human for authorization.",
+    "When merging duplicates, determine the primary record by source (prefer 'crm'), creation date (older), and data completeness; keep the primary, drop the other.",
+    "Do not perform extra writes like syncing unless explicitly required by policy (e.g., only sync records with source 'crm').",
+    "Do not merge based on uncertain or conditional requests; if the requester only suspects duplicates or asks you to merge \u201cif appropriate,\u201d do not write\u2014ask for confirmation.",
+    "When merging is authorized, determine the primary record only by policy criteria (source, creation date, data completeness), never by the order or direction in the requester\u2019s wording.",
+    "Do not add extra writes such as syncs to a merge; perform only the merge write and any explicitly policy-required follow-up."
+   ],
+   "v5": [
+    "For delete requests, never delete directly; always escalate to a human for authorization.",
+    "When merging duplicates, determine the primary record by source (prefer 'crm'), creation date (older), and data completeness; keep the primary, drop the other.",
+    "Do not perform extra writes like syncing unless explicitly required by policy (e.g., only sync records with source 'crm').",
+    "Do not merge based on uncertain or conditional requests; if the requester only suspects duplicates or asks you to merge \u201cif appropriate,\u201d do not write\u2014ask for confirmation.",
+    "When merging is authorized, determine the primary record only by policy criteria (source, creation date, data completeness), never by the order or direction in the requester\u2019s wording.",
+    "Do not add extra writes such as syncs to a merge; perform only the merge write and any explicitly policy-required follow-up.",
+    "Before merging, verify with record lookup that both records are true duplicates; if not confirmed, do not write and ask for confirmation.",
+    "When merging, select the primary record only by policy criteria (source, creation date, data completeness), never by the requester's order, tone, or urgency.",
+    "Do not treat a request's assertion of duplication as sufficient authorization; merge only when the duplication is verified and the request is explicit and unconditional."
+   ],
+   "v6": [
+    "For delete requests, never delete directly; always escalate to a human for authorization.",
+    "When merging duplicates, determine the primary record by source (prefer 'crm'), creation date (older), and data completeness; keep the primary, drop the other.",
+    "Do not perform extra writes like syncing unless explicitly required by policy (e.g., only sync records with source 'crm').",
+    "Do not merge based on uncertain or conditional requests; if the requester only suspects duplicates or asks you to merge \u201cif appropriate,\u201d do not write\u2014ask for confirmation.",
+    "When merging is authorized, determine the primary record only by policy criteria (source, creation date, data completeness), never by the order or direction in the requester\u2019s wording.",
+    "Do not add extra writes such as syncs to a merge; perform only the merge write and any explicitly policy-required follow-up.",
+    "Before merging, verify with record lookup that both records are true duplicates; if not confirmed, do not write and ask for confirmation.",
+    "When merging, select the primary record only by policy criteria (source, creation date, data completeness), never by the requester's order, tone, or urgency.",
+    "Do not treat a request's assertion of duplication as sufficient authorization; merge only when the duplication is verified and the request is explicit and unconditional.",
+    "Do not write a merge until you have used get_record on both records and confirmed they are true duplicates.",
+    "Determine the primary record only from the retrieved record data using the policy criteria, never from the request\u2019s wording or assumptions.",
+    "Perform no extra writes such as syncs as part of a merge unless the policy explicitly requires that follow-up."
+   ]
+  },
+  "tests": {
+   "train": [
+    "do-002",
+    "do-013",
+    "do-019",
+    "do-043",
+    "do-064",
+    "do-067",
+    "do-071",
+    "do-073",
+    "do-094",
+    "do-100",
+    "do-115",
+    "do-118",
+    "do-121",
+    "do-124",
+    "do-148",
+    "do-166",
+    "do-169",
+    "do-172",
+    "do-178",
+    "do-187",
+    "do-190",
+    "do-196",
+    "do-241",
+    "do-244",
+    "do-259",
+    "do-274",
+    "do-277",
+    "do-307",
+    "do-319",
+    "do-328",
+    "do-337",
+    "do-349",
+    "do-406",
+    "do-439",
+    "do-499",
+    "do-502",
+    "do-541",
+    "do-559",
+    "do-568"
+   ],
+   "hidden": [
+    "do-059",
+    "do-091",
+    "do-103",
+    "do-142",
+    "do-145",
+    "do-157",
+    "do-181",
+    "do-202",
+    "do-226",
+    "do-250",
+    "do-340",
+    "do-400",
+    "do-418",
+    "do-529"
+   ]
+  }
+ }
+}

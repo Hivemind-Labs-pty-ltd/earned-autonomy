@@ -1,0 +1,6 @@
+{"arch": "of", "version": "v1", "cycle": 1, "n": 100, "true_err": 0.15, "n_rules": 0, "caught": 15, "train_pass": 0.0, "train_n": 11, "hidden_pass": 0.0, "hidden_n": 4}
+{"arch": "of", "version": "v2", "cycle": 2, "n": 100, "true_err": 0.0, "n_rules": 3, "caught": 0, "train_pass": 1.0, "train_n": 11, "hidden_pass": 1.0, "hidden_n": 4}
+{"arch": "of", "version": "v3", "cycle": 3, "n": 100, "true_err": 0.0, "n_rules": 3, "caught": 0, "train_pass": 1.0, "train_n": 11, "hidden_pass": 1.0, "hidden_n": 4}
+{"arch": "of", "version": "v4", "cycle": 4, "n": 100, "true_err": 0.0, "n_rules": 3, "caught": 0, "train_pass": 1.0, "train_n": 11, "hidden_pass": 1.0, "hidden_n": 4}
+{"arch": "of", "version": "v5", "cycle": 5, "n": 100, "true_err": 0.0, "n_rules": 3, "caught": 0, "train_pass": 1.0, "train_n": 11, "hidden_pass": 1.0, "hidden_n": 4}
+{"arch": "of", "version": "v6", "cycle": 6, "n": 100, "true_err": 0.0, "n_rules": 3, "caught": 0, "train_pass": 1.0, "train_n": 11, "hidden_pass": 1.0, "hidden_n": 4}

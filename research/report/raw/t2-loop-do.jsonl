@@ -1,0 +1,6 @@
+{"arch": "do", "version": "v1", "cycle": 1, "n": 100, "true_err": 0.16, "n_rules": 0, "caught": 11, "train_pass": 0.15384615384615385, "train_n": 39, "hidden_pass": 0.21428571428571427, "hidden_n": 14}
+{"arch": "do", "version": "v2", "cycle": 2, "n": 100, "true_err": 0.19, "n_rules": 3, "caught": 18, "train_pass": 0.10256410256410256, "train_n": 39, "hidden_pass": 0.07142857142857142, "hidden_n": 14}
+{"arch": "do", "version": "v3", "cycle": 3, "n": 100, "true_err": 0.1, "n_rules": 3, "caught": 8, "train_pass": 0.10256410256410256, "train_n": 39, "hidden_pass": 0.14285714285714285, "hidden_n": 14}
+{"arch": "do", "version": "v4", "cycle": 4, "n": 100, "true_err": 0.09, "n_rules": 6, "caught": 6, "train_pass": 0.358974358974359, "train_n": 39, "hidden_pass": 0.2857142857142857, "hidden_n": 14}
+{"arch": "do", "version": "v5", "cycle": 5, "n": 100, "true_err": 0.05, "n_rules": 9, "caught": 5, "train_pass": 0.6666666666666666, "train_n": 39, "hidden_pass": 0.5, "hidden_n": 14}
+{"arch": "do", "version": "v6", "cycle": 6, "n": 100, "true_err": 0.06, "n_rules": 12, "caught": 5, "train_pass": 0.5128205128205128, "train_n": 39, "hidden_pass": 0.35714285714285715, "hidden_n": 14}
