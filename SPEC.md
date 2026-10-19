@@ -493,6 +493,29 @@ reproduces the tested results). **[implemented v0.3]**
 1. Speeding up detection of a slowly degrading reviewer (rolling canary window).
 2. A real-world pilot: every result so far is synthetic.
 
+**Known limitation: rare task types (opportunity for improvement)**
+
+Promotion needs a fixed number of judged actions (35–189, depending on consequence), so time to promotion depends on
+how often a task happens. At C2 (73 judged actions), a task done 10 times a day is promoted in about a week, 10 times a
+month in about 7 months, and twice a month in about 3 years: in practice, never. The 60-day re-entry rule (§7)
+compounds this: a rare task that is promoted steps down whenever it goes 60 days unused.
+
+**Current position [default]: rare task types stay supervised, by design.** Review cost is proportional to frequency.
+A task done twice a month costs two reviews a month to keep supervised, so there is little to gain from automating it.
+For high-consequence rare tasks, the lack of evidence is itself a reason to keep a person involved. The cost is waiting
+time on those actions, not review workload.
+
+**Candidate improvements (untested):**
+1. **Historical replay evidence:** run the agent in shadow on past, human-handled cases of the task type and grade it
+   against what the person did. Count each at a discount (e.g. 0.5 of a live judged action).
+2. **The same task type in other organisations:** evidence for the same agent version on the same task type elsewhere,
+   discounted. This differs from pooling across *different* task types, which failed (v1).
+3. **Frequency-aware re-entry:** step down only after a gap of more than 60 days *and* more than about 3× the task
+   type's usual interval.
+
+Test passes are not candidates: tests show the agent changing, not real work, so they don't count as promotion
+evidence (§8).
+
 ## Evidence
 
 **Reference numbers (combined policy, `REPORT-v3.md`):**

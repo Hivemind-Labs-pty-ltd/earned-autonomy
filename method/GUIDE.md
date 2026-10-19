@@ -201,6 +201,8 @@ agents.
 reviewed actions; a moderate one about 75; a high one about 190. Critical work never goes fully hands-off, and nothing
 goes to zero checking.
 
+**What about tasks that rarely happen?** They stay supervised, usually for good. A task done twice a month would take years to build a record, but it also costs only two reviews a month to keep checking. That's rarely worth automating.
+
 **Which tasks are safe to hand over?** You can't tell in advance. In testing, some "simple" tasks were where agents
 failed most. The framework finds out per task, from evidence.
 
