@@ -1,4 +1,4 @@
-"""Tagger protocol (SPEC §4): every proposed action gets `{task_type, confidence}`. Rules first, model second."""
+"""Tagger protocol (EA-1.8): every proposed action gets `{task_type, confidence}`. Rules first, model second."""
 from __future__ import annotations
 
 from dataclasses import dataclass

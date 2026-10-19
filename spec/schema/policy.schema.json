@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:earned-autonomy:v0.6:schema:policy.schema.json",
+  "title": "Policy",
+  "description": "An organisation's versioned rules (EA-6.5): the task catalogue, error bars, sample rates and thresholds.",
+  "type": "object",
+  "properties": {
+    "policy_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "error_bar": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Fallback for task types without a consequence level."
+    },
+    "min_judged": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "EA-3.4 (default 30)"
+    },
+    "confidence": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "exclusiveMaximum": 1
+    },
+    "rolling_window": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "EA-3.5 (default 50)"
+    },
+    "rolling_window_min": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "EA-3.5 (default 10)"
+    },
+    "reentry_gap_days": {
+      "type": "number",
+      "minimum": 0,
+      "description": "EA-3.13 (default 60)"
+    },
+    "spot_rate": {
+      "type": "object",
+      "patternProperties": {
+        "^[0-9]+$": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false,
+      "description": "Spot-check rate by level (EA-2.8): 2 → 0.25, 3 → 0.05."
+    },
+    "canary_rate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "version_discount": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "EA-4.7 (default 0.5)"
+    },
+    "carry_hidden_min": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "EA-4.6 (default 0.8)"
+    },
+    "min_hidden_tests": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "EA-4.6 (default 10)"
+    },
+    "tag_confidence_min": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "EA-1.9 (default 0.8)"
+    },
+    "alert_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "EA-5.7 (default 0.8)"
+    },
+    "require_checks": {
+      "type": "boolean",
+      "description": "EA-2.4"
+    },
+    "reviewer_error_bar": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "EA-5.10 (default 0.10)"
+    },
+    "reviewer_min_judged": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "EA-5.10 (default 30)"
+    },
+    "reviewer_canary_rate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "EA-5.9 (default 0.05)"
+    },
+    "second_check_rate": {
+      "type": "object",
+      "patternProperties": {
+        "^[0-9]+$": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false,
+      "description": "Second-check rate by reviewer level (EA-5.11): 1 → 0.25, 2 → 0.05."
+    },
+    "task_types": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "description": "A task-type catalogue entry (EA-1.1).",
+        "properties": {
+          "consequence": {
+            "enum": [
+              "C1",
+              "C2",
+              "C3",
+              "C4"
+            ]
+          },
+          "error_bar": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1,
+            "description": "May only tighten the consequence level's error bar (EA-3.9)."
+          },
+          "capped": {
+            "type": "boolean"
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "examples": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "consequence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "tool_floors": {
+      "type": "object",
+      "additionalProperties": {
+        "enum": [
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+        ]
+      },
+      "description": "Explicit tool floors (EA-1.13)."
+    },
+    "write_tools": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "strict_promotion": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Consequence levels and/or task types that use strict promotion (EA-3.14)."
+    }
+  },
+  "required": [
+    "policy_version",
+    "task_types"
+  ],
+  "additionalProperties": false
+}

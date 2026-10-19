@@ -1,0 +1,2073 @@
+{
+  "specification": "Earned Autonomy",
+  "version": "0.6",
+  "status": "Public review draft",
+  "generated_by": "scripts/build_requirements.py",
+  "rules": [
+    {
+      "id": "EA-1.1",
+      "cite": "v0.6-EA-1.1",
+      "title": "Task types are catalogue entries",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "Each task type MUST be defined as a catalogue entry with a name, a description of what is in and out of scope, three to five example requests, the tools it may use, and a consequence level.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "The tagger and the reviewers work from the description and examples, not the name. The tools and consequence level drive tool scope (EA-1.12) and the error bar (EA-3.8).",
+      "evidence": "In v4 study S2b, adversarial phrasing steered a model-based tagger to a lower-consequence type 3.3% of the time (1 of 300 without adversarial phrasing). See [research/REPORT-v4.md](../../research/REPORT-v4.md), tag `research/prereg-v4`.",
+      "implementation": "`models.py` `TaskTypePolicy`; `engine.py` `TrustEngine.add_task_type`",
+      "tests": [
+        "engine/tests/test_engine.py::test_task_type_catalogue_entry_keeps_description_and_examples"
+      ],
+      "notes": "Schema: [`schema/policy.schema.json`](../schema/policy.schema.json)."
+    },
+    {
+      "id": "EA-1.2",
+      "cite": "v0.6-EA-1.2",
+      "title": "Trust is kept per trust key",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "Trust state MUST be kept separately for each trust key (organisation, agent, task type) and MUST NOT be shared between keys.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "An agent can be reliable at one kind of work and unreliable at another. Trust per agent lets one weak task type hold back all the others.",
+      "evidence": "Trust per task type gave 27% automation against 7% for trust per agent, in simulation ([research/REPORT.md](../../research/REPORT.md), rule L3, tag `research/prereg`). Pooling evidence across an agent's task types penalised its good types ([research/REPORT-v1.md](../../research/REPORT-v1.md), V3, tag `research/prereg-v1`).",
+      "implementation": "`engine.py` `TrustEngine` (state keyed by `(organisation_id, agent_id, task_type)`)",
+      "tests": [
+        "engine/tests/test_engine.py::test_new_type_starts_supervised"
+      ],
+      "notes": "v0 found per-agent trust has fewer escapes per 100 actions (0.55 against 0.60) because it barely automates anything."
+    },
+    {
+      "id": "EA-1.3",
+      "cite": "v0.6-EA-1.3",
+      "title": "New task types start supervised with no evidence",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "A trust key MUST start at L1 Supervised with no evidence, and MUST NOT inherit evidence from the agent's other task types.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Earning trust starts from nothing, as it does for a new employee in a new role.",
+      "evidence": "Pooled evidence across task types did worse than per-type evidence ([research/REPORT-v1.md](../../research/REPORT-v1.md), V3, tag `research/prereg-v1`).",
+      "implementation": "`engine.py` `_Reducer.state`",
+      "tests": [
+        "engine/tests/test_engine.py::test_new_type_starts_supervised"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-1.4",
+      "cite": "v0.6-EA-1.4",
+      "title": "Split task types only when consequence or error rate differs",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "A task type SHOULD be split into two only when the consequence of a mistake differs or the agent's measured error rate clearly differs between them, and SHOULD NOT be split because of wording alone.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Each task type earns trust from scratch (35 to 189 judged actions, EA-3.8). Too many types slow everything down; too few mix good and bad work.",
+      "evidence": "Too coarse: 7% automation against 27% ([research/REPORT.md](../../research/REPORT.md), L3). Borrowing across types hurt ([research/REPORT-v1.md](../../research/REPORT-v1.md), V3). Too fine is a consequence of EA-3.8's evidence floors.",
+      "implementation": "none (a catalogue practice)",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-1.5",
+      "cite": "v0.6-EA-1.5",
+      "title": "Task-type names are keys only",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "Task-type names SHOULD follow the shape `<domain>.<object>.<verb>` (for example `customer_service.refund.issue`), and the name MUST NOT affect the trust calculation.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST",
+        "SHOULD"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "The shape lets reports roll up by domain and object, maps naturally to tools and permissions, and lets defaults be set per domain. It is a convention, not a rule of the maths.",
+      "evidence": "none; a naming convention.",
+      "implementation": "`models.py` `Policy.task_types` (names are dictionary keys)",
+      "tests": [
+        "conformance/test_evidence_rules.py::test_the_task_type_name_has_no_effect_on_the_maths"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-1.6",
+      "cite": "v0.6-EA-1.6",
+      "title": "No parameters in task-type names",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "Task-type names SHOULD NOT encode parameters such as amounts; risk that depends on arguments SHOULD be expressed with an argument-dependent tool floor (EA-1.13).",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "`refund.issue_over_200` multiplies the catalogue and splits evidence. An argument-dependent floor holds the large refunds without a new type.",
+      "evidence": "none yet.",
+      "implementation": "`engine.py` `TrustEngine(tool_floor_function=...)`",
+      "tests": [
+        "conformance/test_tool_floor.py::test_explicit_floor_override_and_argument_dependent_hook"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-1.7",
+      "cite": "v0.6-EA-1.7",
+      "title": "The AI owner maintains the task catalogue",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "The AI owner for an area MUST maintain its task catalogue and assign each task type's consequence level; a tagger MAY propose new task types, which take effect only when the AI owner accepts them.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST",
+        "MAY"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "The person accountable for the work decides how it is divided and how much proof each part needs.",
+      "evidence": "none; an accountability decision.",
+      "implementation": "`governance.py` (`add_task_type`, `set_consequence` allowed for the AI owner)",
+      "tests": [
+        "engine/tests/test_engine.py::test_catalogue_owned_by_ai_owner"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-1.8",
+      "cite": "v0.6-EA-1.8",
+      "title": "Every proposed action is tagged",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "Every proposed action MUST be tagged with a task type and a confidence before a decision is made.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Trust is looked up by task type; an untagged action has no trust to look up.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.tag`; `tagging.py` `Tagger`, `RuleTagger`",
+      "tests": [
+        "engine/tests/test_engine.py::test_tagger_used_when_type_missing"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-1.9",
+      "cite": "v0.6-EA-1.9",
+      "title": "Low-confidence tags are held",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "A proposed action MUST be held when its tag confidence is below the policy's minimum (default 0.8), whatever the task type's level.",
+      "condition": "The tagger returns a confidence below `tag_confidence_min`.",
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "A tagger that isn't sure what kind of work this is shouldn't decide which trust applies.",
+      "evidence": "A partial defence: it held 4 of 10 adversarial downgrades in v4 study S2b ([research/REPORT-v4.md](../../research/REPORT-v4.md), tag `research/prereg-v4`). The tool floor (EA-1.14) is the main defence.",
+      "implementation": "`engine.py` `TrustEngine.decide` (`why = low_confidence`)",
+      "tests": [
+        "engine/tests/test_engine.py::test_unknown_type_and_low_confidence_hold"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-1.10",
+      "cite": "v0.6-EA-1.10",
+      "title": "Unknown task types are held",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "A proposed action tagged with a task type that isn't in the catalogue MUST be held and SHOULD be logged as a candidate new task type.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST",
+        "SHOULD"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Work nobody has defined can't have earned trust.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.decide` (`why = unknown_type`)",
+      "tests": [
+        "engine/tests/test_engine.py::test_unknown_type_and_low_confidence_hold"
+      ],
+      "notes": "The reference engine records the `unknown_type` decision; a separate candidate list is not implemented."
+    },
+    {
+      "id": "EA-1.11",
+      "cite": "v0.6-EA-1.11",
+      "title": "Bundled actions take the most restrictive decision",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "When one proposal contains several actions, each action MUST be tagged and decided separately, and actions that must happen together MUST all be held if any one of them is held.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "A trusted reply mustn't carry an untrusted record update through with it.",
+      "evidence": "none yet.",
+      "implementation": "`engine.py` `TrustEngine.decide_bundle`",
+      "tests": [
+        "engine/tests/test_engine.py::test_bundle_most_restrictive"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-1.12",
+      "cite": "v0.6-EA-1.12",
+      "title": "Tool scope per task type",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "An agent working on a task type MUST be offered only the tools listed for that task type.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Tools the work doesn't need are a source of mistakes and an attack surface for injected instructions.",
+      "evidence": "Wrong or unneeded tool calls fell 73% (0.519 to 0.141 per task) with no loss of task success (96.2% to 95.6%); serious errors fell from 2.0% to 0.67% ([research/REPORT.md](../../research/REPORT.md), L1, tag `research/prereg`). On the commercial harness, tool scope plus the learning loop cut serious errors 82–87% ([research/REPORT-10x.md](../../research/REPORT-10x.md), X6, tag `research/prereg-10x-d`).",
+      "implementation": "`engine.py` `TrustEngine.tools_for`",
+      "tests": [
+        "engine/tests/test_engine.py::test_tools_for_task_type"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-1.13",
+      "cite": "v0.6-EA-1.13",
+      "title": "Every write tool has a floor consequence",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "Every write tool MUST have a floor consequence equal to the highest consequence level of any task type that lists it, or C4 Critical if no task type lists it, unless the policy owner sets an explicit floor or an argument-dependent floor function applies.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "A tool that can do high-consequence things carries that consequence wherever it is used.",
+      "evidence": "See EA-1.14.",
+      "implementation": "`models.py` `Policy.tool_floor`; `engine.py` `TrustEngine(tool_floor_function=...)`",
+      "tests": [
+        "conformance/test_tool_floor.py::test_explicit_floor_override_and_argument_dependent_hook",
+        "conformance/test_tool_floor.py::test_tool_listed_by_capped_type_has_floor_c4",
+        "conformance/test_tool_floor.py::test_unlisted_write_tool_has_floor_c4"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-1.14",
+      "cite": "v0.6-EA-1.14",
+      "title": "Floor mismatches are held",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "A proposed action MUST be held when the floor of any write tool it will call is above the consequence level of its tagged task type.",
+      "condition": "The action declares at least one write tool.",
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Stops a risky action borrowing a low-consequence task type's trust by being tagged, by mistake or on purpose, as that type.",
+      "evidence": "Removed 100% of autonomous escapes from deliberately mis-tagged actions in all six scenarios, at 0.3–1.8 points of automation; it held all 8 adversarial downgrades that came with a risky write on a real model-based tagger ([research/REPORT-v4.md](../../research/REPORT-v4.md), S2, tag `research/prereg-v4`).",
+      "implementation": "`engine.py` `TrustEngine.decide` (`why = tool_floor_mismatch`)",
+      "tests": [
+        "conformance/test_tool_floor.py::test_floor_at_or_below_tag_does_not_hold",
+        "conformance/test_tool_floor.py::test_floor_check_runs_before_checks_and_level",
+        "conformance/test_tool_floor.py::test_mis_tagged_refund_as_status_is_held_even_when_status_is_trusted"
+      ],
+      "notes": "The action's effective consequence is the highest of its tag's level and every write tool's floor."
+    },
+    {
+      "id": "EA-1.15",
+      "cite": "v0.6-EA-1.15",
+      "title": "Don't share write tools across consequence levels",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "A write tool SHOULD NOT be listed by task types of different consequence levels; implementations SHOULD warn when one is.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "A shared tool pulls every task that uses it up to its highest consequence, so the low-consequence task can never earn autonomy.",
+      "evidence": "In v4, a shared `send_email` (used for C1 reminders and C3 offers) pushed reminders to C3 ([research/REPORT-v4.md](../../research/REPORT-v4.md), recommended change 2). Split such tools (`send_reminder`, `send_offer`) or give them argument-dependent floors.",
+      "implementation": "`models.py` `lint_shared_write_tools`",
+      "tests": [
+        "conformance/test_tool_floor.py::test_shared_write_tool_lint"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-1.16",
+      "cite": "v0.6-EA-1.16",
+      "title": "Tag from descriptions and examples",
+      "area": "1. Task types",
+      "file": "spec/requirements/01-task-types.md",
+      "statement": "A tagger SHOULD classify actions using the task types' descriptions and examples, not their names alone.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Open",
+      "lifecycle": "Development",
+      "rationale": "Descriptions and examples say what's in scope; names don't.",
+      "evidence": "Indirect: v4 study S2b measured mis-tagging under adversarial phrasing ([research/REPORT-v4.md](../../research/REPORT-v4.md)). A study comparing names-only against descriptions-and-examples is future work.",
+      "implementation": "`tagging.py` (interface only; the reference `RuleTagger` uses rules)",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-2.1",
+      "cite": "v0.6-EA-2.1",
+      "title": "Decision order",
+      "area": "2. The decision",
+      "file": "spec/requirements/02-decision.md",
+      "statement": "The decision for a proposed action MUST apply these rules in this order, and the first that matches MUST determine the result: paused (EA-2.2), low tag confidence or unknown type (EA-1.9, EA-1.10), tool floor mismatch (EA-1.14), checks missing or failed (EA-2.3, EA-2.4), capped type (EA-2.5), then level (EA-2.6).",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "A fixed order makes every decision reproducible and its reason unambiguous.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.decide`",
+      "tests": [
+        "conformance/test_tool_floor.py::test_floor_check_runs_before_checks_and_level"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-2.2",
+      "cite": "v0.6-EA-2.2",
+      "title": "Paused work is held",
+      "area": "2. The decision",
+      "file": "spec/requirements/02-decision.md",
+      "statement": "A proposed action MUST be held while its agent or its task type is paused.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Pause is the owner's stop button (EA-5.6).",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.decide` (`why = paused`); `TrustEngine.pause`, `TrustEngine.resume`",
+      "tests": [
+        "conformance/test_conformance.py::test_c2_no_autonomous_execution_when_not_allowed",
+        "engine/tests/test_engine.py::test_pause_and_resume_per_type_and_agent"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-2.3",
+      "cite": "v0.6-EA-2.3",
+      "title": "Checks run at every level",
+      "area": "2. The decision",
+      "file": "spec/requirements/02-decision.md",
+      "statement": "Checks MUST run on every proposed action at every trust level, and an action with any failed check MUST be held.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Trust is about the agent's record; checks catch the obvious mistake in this particular action.",
+      "evidence": "Earned trust plus checks let through 66–69% fewer serious errors than checks alone at the same automation on real agents ([research/REPORT.md](../../research/REPORT.md), H3, tag `research/prereg`); checks are part of every policy tested since.",
+      "implementation": "`engine.py` `TrustEngine.decide` (`why = check_failed`)",
+      "tests": [
+        "conformance/test_conformance.py::test_c2_no_autonomous_execution_when_not_allowed",
+        "engine/tests/test_engine.py::test_checks_missing_or_failed_hold_at_every_level"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-2.4",
+      "cite": "v0.6-EA-2.4",
+      "title": "A missing checks result is a hold",
+      "area": "2. The decision",
+      "file": "spec/requirements/02-decision.md",
+      "statement": "A proposed action MUST be held when no checks result is supplied, unless the policy explicitly allows actions without checks.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "\"No checks ran\" must never be read as \"checks passed\".",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.decide` (`why = checks_missing`; `require_checks`)",
+      "tests": [
+        "engine/tests/test_engine.py::test_checks_missing_or_failed_hold_at_every_level"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-2.5",
+      "cite": "v0.6-EA-2.5",
+      "title": "Critical work is always held",
+      "area": "2. The decision",
+      "file": "spec/requirements/02-decision.md",
+      "statement": "A proposed action whose task type is C4 Critical or otherwise capped MUST be held, and such task types MUST NOT be promoted.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Some actions, such as moving money, deleting records or anything legal or irreversible, are never handed over.",
+      "evidence": "Consequence levels including \"C4 never promotes\" were tested in v2 ([research/REPORT-v2.md](../../research/REPORT-v2.md), C2, tag `research/prereg-v2`).",
+      "implementation": "`engine.py` `TrustEngine.decide` (`why = capped`); `models.py` `CONSEQUENCE`",
+      "tests": [
+        "conformance/test_conformance.py::test_c2_no_autonomous_execution_when_not_allowed",
+        "engine/tests/test_engine.py::test_c4_never_promotes"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-2.6",
+      "cite": "v0.6-EA-2.6",
+      "title": "The level decides the rest",
+      "area": "2. The decision",
+      "file": "spec/requirements/02-decision.md",
+      "statement": "A proposed action that passes every earlier rule MUST be held if its trust key is at L1 Supervised, and MUST go ahead if its trust key is at L2 Trusted or L3 Senior.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "The core of the ladder.",
+      "evidence": "92–100% of promotions were deserved across tiers ([research/REPORT-v3.md](../../research/REPORT-v3.md), reference numbers, tag `research/prereg-v3`).",
+      "implementation": "`engine.py` `TrustEngine.decide` (`why = level_L1` or `trusted`)",
+      "tests": [
+        "conformance/test_conformance.py::test_c2_no_autonomous_execution_when_not_allowed",
+        "engine/tests/test_engine.py::test_new_type_starts_supervised"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-2.7",
+      "cite": "v0.6-EA-2.7",
+      "title": "A decision never reveals sampling",
+      "area": "2. The decision",
+      "file": "spec/requirements/02-decision.md",
+      "statement": "A decision MUST be either hold or act, and MUST NOT indicate whether the action will be spot-checked.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "An agent that knows when it is watched can behave well only then.",
+      "evidence": "See EA-2.9.",
+      "implementation": "`models.py` `Decision.mode`",
+      "tests": [
+        "conformance/test_conformance.py::test_sampling_is_unpredictable_and_hidden_from_the_agent"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-2.8",
+      "cite": "v0.6-EA-2.8",
+      "title": "Spot-checks are drawn after execution",
+      "area": "2. The decision",
+      "file": "spec/requirements/02-decision.md",
+      "statement": "Whether an autonomous action is spot-checked MUST be decided after it executes, at random, at the rate set for its level (default 25% at L2 Trusted and 5% at L3 Senior), using a source of randomness the agent cannot predict.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Checking never stops, and nobody can tell in advance which actions will be checked.",
+      "evidence": "With random hidden sampling, the measured error rate matched the true rate (ratio 0.98) and a watch-aware agent was caught in a median of 14 actions ([research/REPORT-v4.md](../../research/REPORT-v4.md), S3, tag `research/prereg-v4`).",
+      "implementation": "`engine.py` `TrustEngine.mark_executed` (operating-system random source by default)",
+      "tests": [
+        "conformance/test_conformance.py::test_sampling_is_unpredictable_and_hidden_from_the_agent",
+        "engine/tests/test_engine.py::test_spot_sampling_rate_and_queue"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-2.9",
+      "cite": "v0.6-EA-2.9",
+      "title": "No fixed sampling schedule",
+      "area": "2. The decision",
+      "file": "spec/requirements/02-decision.md",
+      "statement": "Spot-check selection MUST NOT follow a fixed cadence or any other pattern the agent could learn.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Predictable checks let a watch-aware agent hide.",
+      "evidence": "Under a predictable schedule, a watch-aware agent showed reviewers a 1% error rate while really making 18.5%. Without incidents, it went a median of 498 actions before step-down, against 54 under random sampling ([research/REPORT-v4.md](../../research/REPORT-v4.md), S3, tag `research/prereg-v4`).",
+      "implementation": "`engine.py` `TrustEngine.mark_executed`",
+      "tests": [
+        "conformance/test_conformance.py::test_sampling_is_unpredictable_and_hidden_from_the_agent"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-2.10",
+      "cite": "v0.6-EA-2.10",
+      "title": "Re-decide at execution time",
+      "area": "2. The decision",
+      "file": "spec/requirements/02-decision.md",
+      "statement": "A decision SHOULD be re-evaluated when the action is about to execute, and the newer decision MUST apply if the trust state, a pause or the policy has changed since the action was proposed.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST",
+        "SHOULD"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "An action approved before a step-down or a pause shouldn't slip through after it.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.decide` (callable again before `mark_executed`); `TrustEngine.execute`",
+      "tests": [
+        "conformance/test_evidence_rules.py::test_the_newest_decision_applies_at_execution_time"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-2.11",
+      "cite": "v0.6-EA-2.11",
+      "title": "Every decision is recorded and explainable",
+      "area": "2. The decision",
+      "file": "spec/requirements/02-decision.md",
+      "statement": "Every decision MUST be written to the trust record with its result, its reason, the trust level, the evidence counts, the bound and error bar used, the effective consequence and tool floor, the checks result, and the policy and agent versions.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Anyone can see why any action was allowed.",
+      "evidence": "100% of autonomous actions were explainable from the record in every tier ([research/REPORT.md](../../research/REPORT.md), G2; [research/REPORT-10x.md](../../research/REPORT-10x.md)).",
+      "implementation": "`engine.py` `TrustEngine.decide`, `TrustEngine.explain`; `models.py` `Decision`",
+      "tests": [
+        "conformance/test_conformance.py::test_c1_every_autonomous_execution_is_explained"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-3.1",
+      "cite": "v0.6-EA-3.1",
+      "title": "Only judged actions are evidence",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "Only judged actions (pre-review outcomes, spot-check outcomes and incidents) MUST count as evidence, and autonomous actions nobody judged MUST NOT count as evidence of good work.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Silence isn't approval.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.record_outcome`, `TrustEngine.report_incident`",
+      "tests": [
+        "conformance/test_evidence_rules.py::test_unjudged_autonomous_actions_are_not_evidence"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-3.2",
+      "cite": "v0.6-EA-3.2",
+      "title": "Pre-review and spot-check outcomes weigh the same",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "An outcome from a spot-check MUST carry the same weight as an outcome from a pre-review.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Both are a person judging real work.",
+      "evidence": "The policy tested in every round weighs them equally ([research/REPORT.md](../../research/REPORT.md); [research/REPORT-v3.md](../../research/REPORT-v3.md)).",
+      "implementation": "`engine.py` `TrustEngine.record_outcome`",
+      "tests": [
+        "conformance/test_evidence_rules.py::test_spot_check_and_pre_review_outcomes_weigh_the_same"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-3.3",
+      "cite": "v0.6-EA-3.3",
+      "title": "What counts as a serious error",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "An outcome MUST count as a serious error when it is labelled `material_edit` or `rejected` with a serious reason code, or when it is an incident, and cosmetic edits and `incomplete` outcomes MUST NOT count as serious errors.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Trust is about consequential mistakes: a wrong or unauthorised action, a made-up fact or amount, a promise the policy doesn't allow, or obeying an instruction hidden in a message. Wording and tone are taste.",
+      "evidence": "The definition used in every tier ([research/REPORT.md](../../research/REPORT.md)).",
+      "implementation": "`models.py` `is_serious`, `SERIOUS_REASONS`, `COSMETIC_REASONS`",
+      "tests": [
+        "engine/tests/test_engine.py::test_cosmetic_and_incomplete_are_not_serious"
+      ],
+      "notes": "Reason codes are listed in EA-5.3."
+    },
+    {
+      "id": "EA-3.4",
+      "cite": "v0.6-EA-3.4",
+      "title": "Promotion",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "A trust key below L3 Senior MUST be promoted one level when it has at least `min_judged` (default 30) judged actions since its last level change and the upper bound of its serious-error rate (95% Wilson score interval by default) is at or below its error bar, and MUST NOT be promoted otherwise.",
+      "condition": "The task type is not C4 Critical or otherwise capped (EA-2.5).",
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Promote only when even the plausible worst case is under the bar. With no errors, the worst case is roughly 4 ÷ the number judged.",
+      "evidence": "93.3% of promotions were deserved in simulation and 99.6–100% on real agents, with the combined policy on fresh seeds ([research/REPORT-v3.md](../../research/REPORT-v3.md), H1, tag `research/prereg-v3`). The reference engine reproduces the simulation (93.9%).",
+      "implementation": "`engine.py` (promotion in the state reducer); `stats.py` `WilsonBound`",
+      "tests": [
+        "conformance/test_conformance.py::test_c7_trust_gym_t1_parity",
+        "engine/tests/test_engine.py::test_promotion_matches_consequence_floor",
+        "engine/tests/test_stats.py::test_edges",
+        "engine/tests/test_stats.py::test_reviews_needed_table",
+        "engine/tests/test_stats.py::test_worked_example_numbers"
+      ],
+      "notes": "The upper bound uses all of the key's evidence; the 30-action minimum counts only since the last level change."
+    },
+    {
+      "id": "EA-3.5",
+      "cite": "v0.6-EA-3.5",
+      "title": "Step-down on recent errors",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "A trust key at L2 Trusted or above MUST step down one level when at least `rolling_window_min` (default 10) of its last `rolling_window` (default 50) judged actions are available and the lower bound of their serious-error rate is above its error bar.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Step down when even the most generous reading of recent work is over the bar. Slow to promote, quick to step down.",
+      "evidence": "Regressions were caught in a median of 14 actions, 98% within 50 ([research/REPORT-v3.md](../../research/REPORT-v3.md), H4, tag `research/prereg-v3`).",
+      "implementation": "`engine.py` (step-down in the state reducer); `stats.py` `WilsonBound.lower`",
+      "tests": [
+        "conformance/test_conformance.py::test_c7_trust_gym_t1_parity",
+        "engine/tests/test_engine.py::test_rolling_bound_steps_down_one_level",
+        "engine/tests/test_strict.py::test_strict_promotion_still_steps_down_on_errors_and_replays"
+      ],
+      "notes": "At a 5% bar, 6 serious errors in the last 50 trigger a step-down (the lower bound is 5.6%); 5 do not (4.3%)."
+    },
+    {
+      "id": "EA-3.6",
+      "cite": "v0.6-EA-3.6",
+      "title": "Step-down before promotion, one level at a time",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "On each new outcome, step-down MUST be evaluated before promotion, and a trust key MUST move at most one level per outcome.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Dropping all the way to the bottom added nothing over one level, and cost reviews.",
+      "evidence": "Hard demotion (straight to L1) cut escapes by only 1% against one-level demotion ([research/REPORT.md](../../research/REPORT.md), L4, tag `research/prereg`); one-level demotion was non-inferior ([research/REPORT-v1.md](../../research/REPORT-v1.md), V2, tag `research/prereg-v1`).",
+      "implementation": "`engine.py` (state reducer)",
+      "tests": [
+        "engine/tests/test_engine.py::test_rolling_bound_steps_down_one_level"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-3.7",
+      "cite": "v0.6-EA-3.7",
+      "title": "Incidents step down immediately",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "An incident MUST count as one serious error and MUST step the action's trust key down one level before the next decision for that key.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "A mistake found after the fact is the clearest evidence there is, and a signal the agent can't game.",
+      "evidence": "Incidents contained watch-aware agents even when sampling was predictable (median 16 actions) ([research/REPORT-v4.md](../../research/REPORT-v4.md), S3); one level is enough ([research/REPORT-v1.md](../../research/REPORT-v1.md), V2).",
+      "implementation": "`engine.py` `TrustEngine.report_incident`",
+      "tests": [
+        "conformance/test_conformance.py::test_c3_incident_steps_down_before_next_decision",
+        "engine/tests/test_engine.py::test_incident_applies_to_the_actions_version"
+      ],
+      "notes": "An incident adds to the totals but not to the rolling window."
+    },
+    {
+      "id": "EA-3.8",
+      "cite": "v0.6-EA-3.8",
+      "title": "Consequence levels set the error bar",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "A task type's error bar MUST be set by its consequence level: 0.10 for C1 Low, 0.05 for C2 Moderate and 0.02 for C3 High, while C4 Critical MUST NOT be promoted.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "The more a mistake costs, the more proof is needed before the agent acts alone. Judged actions needed with no errors: 35 (C1), 73 (C2) and 189 (C3).",
+      "evidence": "The C1 floor freed 45–63% of C1 reviews at 0.60–0.84 escapes per 100 autonomous actions ([research/REPORT-v2.md](../../research/REPORT-v2.md), C2, tag `research/prereg-v2`); the combined policy's reference numbers are in [research/REPORT-v3.md](../../research/REPORT-v3.md).",
+      "implementation": "`models.py` `CONSEQUENCE`; `engine.py` `TrustEngine.error_bar_for`",
+      "tests": [
+        "engine/tests/test_engine.py::test_c4_never_promotes",
+        "engine/tests/test_engine.py::test_promotion_matches_consequence_floor",
+        "engine/tests/test_stats.py::test_reviews_needed_table"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-3.9",
+      "cite": "v0.6-EA-3.9",
+      "title": "Error bars can only be tightened",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "The policy owner MAY set a task type's error bar below its consequence level's error bar, and MUST NOT set it above.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST",
+        "MAY"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "An owner can demand more proof than the default; nobody can demand less.",
+      "evidence": "none; a governance decision.",
+      "implementation": "`engine.py` `TrustEngine.set_task_error_bar`",
+      "tests": [
+        "engine/tests/test_engine.py::test_error_bar_can_only_tighten"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-3.10",
+      "cite": "v0.6-EA-3.10",
+      "title": "Consequence sets the bar, not the expectation",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "A task type's consequence level MUST NOT be used to predict how accurate the agent will be, only to set how much accuracy is required.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Measured errors decide whether the agent meets the bar.",
+      "evidence": "\"Low-risk\" task types had the highest error rates (3.8% against 1.3% medium and 1.9% high), so error bars derived from a risk label promoted the most error-prone work ([research/REPORT-v1.md](../../research/REPORT-v1.md), V4, tag `research/prereg-v1`).",
+      "implementation": "none (a policy practice)",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-3.11",
+      "cite": "v0.6-EA-3.11",
+      "title": "Task success is an alert, not a gate",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "Implementations SHOULD alert the AI owner when a task type's task success falls below 85% (C1), 90% (C2) or 95% (C3), and MUST NOT use task success as a condition for promotion.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST",
+        "SHOULD"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "An agent that does harmless but incomplete work needs attention, not a frozen ladder.",
+      "evidence": "As a promotion gate it cost up to 11.8 points of automation for little gain on real agents ([research/REPORT-v2.md](../../research/REPORT-v2.md), C3, tag `research/prereg-v2`).",
+      "implementation": "`engine.py` `TrustEngine.get_state` (alerts)",
+      "tests": [
+        "engine/tests/test_engine.py::test_success_alert_is_not_a_gate"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-3.12",
+      "cite": "v0.6-EA-3.12",
+      "title": "Evidence doesn't fade with time",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "Evidence MUST NOT be discounted because of its age.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "At L3 only 5% of actions are judged, so fading evidence demotes good task types on time alone.",
+      "evidence": "Fading with a 90- or 180-day half-life cost 3.9–6.0 points of automation ([research/REPORT-v2.md](../../research/REPORT-v2.md), F1, tag `research/prereg-v2`).",
+      "implementation": "`engine.py` (no decay)",
+      "tests": [
+        "conformance/test_evidence_rules.py::test_evidence_does_not_fade_with_time"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-3.13",
+      "cite": "v0.6-EA-3.13",
+      "title": "Re-entry after a long gap",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "A trust key at L2 Trusted or above MUST step down one level when its task type is used again after a gap of more than `reentry_gap_days` (default 60).",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "After a long break the world may have changed.",
+      "evidence": "Cut escapes after drift by 17% at no automation cost, on fresh seeds ([research/REPORT-v3.md](../../research/REPORT-v3.md), F1', tag `research/prereg-v3`).",
+      "implementation": "`engine.py` `TrustEngine.decide` (re-entry check)",
+      "tests": [
+        "engine/tests/test_engine.py::test_no_reentry_within_gap",
+        "engine/tests/test_engine.py::test_reentry_after_60_days_steps_down"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-3.14",
+      "cite": "v0.6-EA-3.14",
+      "title": "Strict promotion (optional)",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "A policy MAY require strict promotion for chosen consequence levels or task types, in which case promotion MUST use an anytime-valid upper bound (a Beta-binomial mixture confidence sequence with prior Beta(1, 1/ε − 1) and significance 0.05) in place of the Wilson bound.",
+      "condition": "The policy lists the task type or its consequence level under `strict_promotion`.",
+      "strength": "MUST",
+      "keywords": [
+        "MUST",
+        "MAY"
+      ],
+      "status": "Open",
+      "lifecycle": "Development",
+      "rationale": "The engine re-checks after every outcome. A bound that stays valid under continuous checking cuts undeserved promotions of steady agents. Recommended for C3 task types and agents with a weak record. Judged actions needed with no errors: 46 (C1), 93 (C2), 236 (C3).",
+      "evidence": "On real-agent streams it cut undeserved promotions from 2.0% to 0.2% at 28% more evidence; in simulation it barely helped (−6%), because undeserved promotions there came from agents getting worse after promotion ([research/REPORT-v4.md](../../research/REPORT-v4.md), S1, tag `research/prereg-v4`). A fixed 99% Wilson bound or a flat prior cost more evidence for less benefit.",
+      "implementation": "`stats.py` `ConfidenceSequenceBound`; `models.py` `Policy.strict_promotion`",
+      "tests": [
+        "engine/tests/test_strict.py::test_anytime_validity_under_continuous_monitoring",
+        "engine/tests/test_strict.py::test_bounds_bracket_the_rate_and_tighten",
+        "engine/tests/test_strict.py::test_clean_floors_match_report_v4",
+        "engine/tests/test_strict.py::test_default_is_wilson_everywhere",
+        "engine/tests/test_strict.py::test_parity_with_trust_gym_v4",
+        "engine/tests/test_strict.py::test_strict_promotion_still_steps_down_on_errors_and_replays",
+        "engine/tests/test_strict.py::test_strict_selected_by_consequence_level_delays_promotion",
+        "engine/tests/test_strict.py::test_strict_selected_by_task_type_only_affects_that_type"
+      ],
+      "notes": "Step-down keeps the rolling Wilson lower bound (EA-3.5)."
+    },
+    {
+      "id": "EA-3.15",
+      "cite": "v0.6-EA-3.15",
+      "title": "Serialised updates per trust key",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "Updates to one trust key MUST be applied one at a time, and decisions MUST read the latest committed state.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Two simultaneous outcomes mustn't both read a stale count.",
+      "evidence": "none; structural.",
+      "implementation": "`models.py` `TrustState.state_version`; `engine.py` (single-writer reducer)",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-3.16",
+      "cite": "v0.6-EA-3.16",
+      "title": "Late incidents apply to the original version",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "An incident MUST be applied to the trust key and the agent version of the action it refers to, even if the agent has since changed version.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Evidence belongs to the version that earned it.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.report_incident`",
+      "tests": [
+        "engine/tests/test_engine.py::test_incident_applies_to_the_actions_version"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-3.17",
+      "cite": "v0.6-EA-3.17",
+      "title": "Rare task types (known limitation)",
+      "area": "3. Trust calculation",
+      "file": "spec/requirements/03-trust-calculation.md",
+      "statement": "Implementations MAY keep rare task types supervised indefinitely, and SHOULD NOT promote a task type on evidence other than judged actions until a method for rare task types is tested.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD",
+        "MAY"
+      ],
+      "status": "Open",
+      "lifecycle": "Development",
+      "rationale": "Time to promotion depends on frequency. At C2 (73 judged actions), a task done 10 times a day is promoted in about a week, 10 times a month in about 7 months, and twice a month in about 3 years: in practice, never. The re-entry rule (EA-3.13) compounds this. Review cost is proportional to frequency, so rare task types cost little to keep supervised, and for high-consequence rare work the lack of evidence is itself a reason to keep a person involved.",
+      "evidence": "none yet. Candidates to test: - **Historical replay:** the agent in shadow on past human-handled cases, counted at a discount (e.g. 0.5). - **Other organisations:** evidence for the same agent version on the same task type elsewhere, discounted. This differs from pooling across different task types, which failed. - **Frequency-aware re-entry:** step down only after more than 60 days *and* more than about 3× the task type's usual interval.",
+      "implementation": "none",
+      "tests": [],
+      "notes": "Test passes are not a candidate. Tests show the agent changing, not real work (EA-4.12)."
+    },
+    {
+      "id": "EA-4.1",
+      "cite": "v0.6-EA-4.1",
+      "title": "Any change is a new version",
+      "area": "4. Versions and learning",
+      "file": "spec/requirements/04-versions-and-learning.md",
+      "statement": "Any change to an agent's instructions, model, tools or tool scope, rules, checks or knowledge MUST create a new agent version.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Each of these changes what the agent does, knowledge included.",
+      "evidence": "none; a definition. Because versions change often, hidden suites (EA-4.5) must run automatically and cheaply.",
+      "implementation": "`engine.py` `TrustEngine.on_version_published`; `models.py` `ProposedAction.agent_version`",
+      "tests": [
+        "conformance/test_evidence_rules.py::test_version_changes_apply_per_agent_across_organisations_including_rollback"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-4.2",
+      "cite": "v0.6-EA-4.2",
+      "title": "Corrections become draft rules and tests",
+      "area": "4. Versions and learning",
+      "file": "spec/requirements/04-versions-and-learning.md",
+      "statement": "Every serious error SHOULD produce a draft rule and a draft test whose expected result is the person's corrected action, and both MUST be approved by a person before use.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST",
+        "SHOULD"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "The same mistake shouldn't happen twice, and people stay in control of what the agent learns.",
+      "evidence": "Serious errors fell to about 0% within two to three cycles in five of six agent types ([research/REPORT.md](../../research/REPORT.md), learning loop); on the commercial harness the loop plus tool scope cut serious errors 82–87% ([research/REPORT-10x.md](../../research/REPORT-10x.md), X6, tag `research/prereg-10x-d`). Synthetic tasks; the weak agent was missing rules by design.",
+      "implementation": "`suites.py` `SuiteStore.add_correction_test` (rule drafting is the caller's)",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-4.3",
+      "cite": "v0.6-EA-4.3",
+      "title": "Training and hidden split",
+      "area": "4. Versions and learning",
+      "file": "spec/requirements/04-versions-and-learning.md",
+      "statement": "Approved correction tests MUST be assigned at random, about two thirds to the training suite and one third to the hidden suite.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "The hidden third judges new versions on mistakes the improver never saw.",
+      "evidence": "Hidden-test pass rates tracked the true error rate (Spearman ρ = −0.81 across 36 versions), and 117% of the training gain carried over to hidden tests: no sign of test-gaming ([research/REPORT.md](../../research/REPORT.md), H6 and H7, tag `research/prereg`).",
+      "implementation": "`suites.py` `SuiteStore.add_correction_test`",
+      "tests": [
+        "engine/tests/test_engine.py::test_correction_tests_split_and_seeded_hidden"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-4.4",
+      "cite": "v0.6-EA-4.4",
+      "title": "Hidden tests stay hidden",
+      "area": "4. Versions and learning",
+      "file": "spec/requirements/04-versions-and-learning.md",
+      "statement": "Hidden tests MUST NOT be readable by the agent or by anyone or anything that changes the agent.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "A test the improver can see stops measuring anything.",
+      "evidence": "See EA-4.3.",
+      "implementation": "`suites.py` `SuiteStore.hidden` (policy owner and auditor only)",
+      "tests": [
+        "conformance/test_conformance.py::test_c6_hidden_tests_unreadable_by_agent_and_builder"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-4.5",
+      "cite": "v0.6-EA-4.5",
+      "title": "New versions are tested before going live",
+      "area": "4. Versions and learning",
+      "file": "spec/requirements/04-versions-and-learning.md",
+      "statement": "A new agent version MUST run its training and hidden suites for every task type before it goes live, and the results MUST be recorded.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Carry-over (EA-4.6) depends on them.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.on_version_published`; `suites.py` `SuiteStore.run_hidden`",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-4.6",
+      "cite": "v0.6-EA-4.6",
+      "title": "Carry-over",
+      "area": "4. Versions and learning",
+      "file": "spec/requirements/04-versions-and-learning.md",
+      "statement": "A trust key MUST keep all its evidence through a version change when the new version passes at least `carry_hidden_min` (default 0.8) of that task type's hidden tests and the hidden suite has at least 10 tests.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "An improvement that passes tests it has never seen shouldn't cost the agent its record.",
+      "evidence": "Learning agents went from 0 of 400 to 142 of 400 task types promoted, with every promotion deserved and no escapes ([research/REPORT-v1.md](../../research/REPORT-v1.md), V1, tag `research/prereg-v1`). On fresh seeds it was safe, but kept only about half the autonomy with realistic hidden tests and about 90% with sharp ones ([research/REPORT-v3.md](../../research/REPORT-v3.md), K1', tag `research/prereg-v3`). On the commercial harness, suites never reached 10 tests, so it never applied ([research/REPORT-10x.md](../../research/REPORT-10x.md)).",
+      "implementation": "`engine.py` `TrustEngine.on_version_published`",
+      "tests": [
+        "engine/tests/test_engine.py::test_carry_over_keeps_evidence",
+        "engine/tests/test_engine.py::test_failed_or_small_hidden_suite_discounts"
+      ],
+      "notes": "An earlier condition, \"no worse than the previous version's score\", was removed in v0.3: it added noise without safety."
+    },
+    {
+      "id": "EA-4.7",
+      "cite": "v0.6-EA-4.7",
+      "title": "Version discount",
+      "area": "4. Versions and learning",
+      "file": "spec/requirements/04-versions-and-learning.md",
+      "statement": "When carry-over doesn't apply, a trust key's judged-action and serious-error counts MUST be multiplied by `version_discount` (default 0.5), and the key MUST drop to L1 if its upper bound then exceeds its error bar.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "A changed agent is a new hire with a CV: some credit, not all. A long record survives a failed change; a fresh promotion doesn't.",
+      "evidence": "Part of every policy tested from v0 ([research/REPORT.md](../../research/REPORT.md)); see EA-4.6.",
+      "implementation": "`engine.py` `TrustEngine.on_version_published`",
+      "tests": [
+        "engine/tests/test_engine.py::test_failed_or_small_hidden_suite_discounts"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-4.8",
+      "cite": "v0.6-EA-4.8",
+      "title": "Unannounced versions are untested",
+      "area": "4. Versions and learning",
+      "file": "spec/requirements/04-versions-and-learning.md",
+      "statement": "An action from an agent version that was never published through the version process MUST be treated as coming from an untested version, with the version discount applied.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Skipping the tests mustn't keep the trust.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.decide` (unannounced version handling)",
+      "tests": [
+        "engine/tests/test_engine.py::test_unannounced_version_is_discounted"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-4.9",
+      "cite": "v0.6-EA-4.9",
+      "title": "Version results apply per agent",
+      "area": "4. Versions and learning",
+      "file": "spec/requirements/04-versions-and-learning.md",
+      "statement": "A version's test results MUST apply to that agent's trust keys in every organisation, and task types missing from the results MUST receive the version discount.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "The same agent version behaves the same everywhere; untested task types are untested.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.on_version_published`",
+      "tests": [
+        "conformance/test_evidence_rules.py::test_version_changes_apply_per_agent_across_organisations_including_rollback"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-4.10",
+      "cite": "v0.6-EA-4.10",
+      "title": "Seeded hidden tests per version (optional)",
+      "area": "4. Versions and learning",
+      "file": "spec/requirements/04-versions-and-learning.md",
+      "statement": "An organisation MAY seed each task type's hidden suite with scenarios written for a new version, and seeded tests MUST have the same protections as correction-based hidden tests.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST",
+        "MAY"
+      ],
+      "status": "Open",
+      "lifecycle": "Development",
+      "rationale": "Correction-based suites dry up once an agent gets good: few mistakes means few new tests, so carry-over can't apply.",
+      "evidence": "On the commercial harness no hidden suite reached the 10-test minimum, so every version change halved the record ([research/REPORT-10x.md](../../research/REPORT-10x.md)). Whether written tests predict real errors as well as correction-based ones needs its own study.",
+      "implementation": "`suites.py` `SuiteStore.seed_hidden` (origin `authored`)",
+      "tests": [
+        "engine/tests/test_engine.py::test_correction_tests_split_and_seeded_hidden"
+      ],
+      "notes": "A seeded test is a realistic request plus the expected outcome, written by the policy owner or AI owner or drawn from past human-handled cases, and never written by the agent or its improver. Replace a share each release."
+    },
+    {
+      "id": "EA-4.11",
+      "cite": "v0.6-EA-4.11",
+      "title": "Batch changes into releases",
+      "area": "4. Versions and learning",
+      "file": "spec/requirements/04-versions-and-learning.md",
+      "statement": "Knowledge edits and corrections SHOULD be batched into regular, tested releases, for example weekly.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Each version change is a chance to lose evidence. Fewer, better-tested versions keep more of it.",
+      "evidence": "With 20% of edits making the agent worse, automation stayed near 13% whatever the carry-over rule ([research/REPORT-v2.md](../../research/REPORT-v2.md), K1).",
+      "implementation": "none (an operating practice)",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-4.12",
+      "cite": "v0.6-EA-4.12",
+      "title": "Test passes are not promotion evidence",
+      "area": "4. Versions and learning",
+      "file": "spec/requirements/04-versions-and-learning.md",
+      "statement": "Passing tests MUST NOT count as judged actions for promotion.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Tests show the agent changing; spot-checks show the world changing. Only real work earns promotion.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` (tests only feed carry-over)",
+      "tests": [
+        "conformance/test_evidence_rules.py::test_passing_tests_is_not_promotion_evidence"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-4.13",
+      "cite": "v0.6-EA-4.13",
+      "title": "Rollback is a new version",
+      "area": "4. Versions and learning",
+      "file": "spec/requirements/04-versions-and-learning.md",
+      "statement": "Republishing an earlier agent version MUST be treated as a new version change.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "The world may have moved since that version last ran.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.on_version_published`",
+      "tests": [
+        "conformance/test_evidence_rules.py::test_version_changes_apply_per_agent_across_organisations_including_rollback"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-4.14",
+      "cite": "v0.6-EA-4.14",
+      "title": "The agent can't change what it's judged by",
+      "area": "4. Versions and learning",
+      "file": "spec/requirements/04-versions-and-learning.md",
+      "statement": "An agent, and any automated process that improves it, MUST NOT be able to change its tests, checks, policy or trust record.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "No marking its own homework.",
+      "evidence": "All 28 self-promotion and rule-loosening attempts were blocked, with all 8 legitimate requests allowed ([research/REPORT.md](../../research/REPORT.md), G4).",
+      "implementation": "`governance.py` `GovernanceGuard`",
+      "tests": [
+        "conformance/test_conformance.py::test_c5_governance_attacks_blocked_and_logged"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-5.1",
+      "cite": "v0.6-EA-5.1",
+      "title": "Held actions are reviewable",
+      "area": "5. Oversight and reviewers",
+      "file": "spec/requirements/05-oversight-and-reviewers.md",
+      "statement": "A held action MUST be shown to reviewers with the proposed action, its checks result, its task type and trust level, and the reason it was held.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "A reviewer can only judge what they can see.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.review_queue`",
+      "tests": [
+        "engine/tests/test_engine.py::test_spot_sampling_rate_and_queue"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-5.2",
+      "cite": "v0.6-EA-5.2",
+      "title": "Every judgement has a label, and every correction a reason",
+      "area": "5. Oversight and reviewers",
+      "file": "spec/requirements/05-oversight-and-reviewers.md",
+      "statement": "A reviewer MUST label every judged action with an outcome, and MUST give a reason code for every edit and rejection.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "A reason turns a correction into a rule or test (EA-4.2). Without one, it's only a statistic.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.record_outcome`",
+      "tests": [
+        "conformance/test_evidence_rules.py::test_edits_and_rejections_need_a_reason_code"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-5.3",
+      "cite": "v0.6-EA-5.3",
+      "title": "Reason codes",
+      "area": "5. Oversight and reviewers",
+      "file": "spec/requirements/05-oversight-and-reviewers.md",
+      "statement": "Implementations SHOULD use these reason codes: serious ones are `wrong_fact`, `wrong_amount`, `wrong_record`, `wrong_recipient`, `unauthorised_action`, `promise_beyond_policy`, `missing_info_not_asked`, `followed_injected_instruction`, `policy_breach` and `other_serious`; cosmetic ones are `tone`, `wording`, `formatting` and `other_cosmetic`.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "A shared vocabulary makes outcomes comparable across reviewers and organisations.",
+      "evidence": "none; a vocabulary.",
+      "implementation": "`models.py` `SERIOUS_REASONS`, `COSMETIC_REASONS`",
+      "tests": [
+        "engine/tests/test_engine.py::test_cosmetic_and_incomplete_are_not_serious"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-5.4",
+      "cite": "v0.6-EA-5.4",
+      "title": "Anyone can report an incident",
+      "area": "5. Oversight and reviewers",
+      "file": "spec/requirements/05-oversight-and-reviewers.md",
+      "statement": "Every executed action MUST offer a way to report that it was wrong, which records an incident.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Incidents are the signal an agent can't game (EA-3.7).",
+      "evidence": "See EA-3.7.",
+      "implementation": "`engine.py` `TrustEngine.report_incident`",
+      "tests": [
+        "conformance/test_conformance.py::test_c3_incident_steps_down_before_next_decision"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-5.5",
+      "cite": "v0.6-EA-5.5",
+      "title": "Anyone affected can challenge",
+      "area": "5. Oversight and reviewers",
+      "file": "spec/requirements/05-oversight-and-reviewers.md",
+      "statement": "An affected customer or staff member SHOULD be able to challenge any executed action, which opens a review by a person.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Contestability, and a second channel of evidence.",
+      "evidence": "none yet.",
+      "implementation": "none (a product feature; a confirmed challenge becomes an incident)",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-5.6",
+      "cite": "v0.6-EA-5.6",
+      "title": "Pause",
+      "area": "5. Oversight and reviewers",
+      "file": "spec/requirements/05-oversight-and-reviewers.md",
+      "statement": "An authorised person MUST be able to pause an agent or a single task type, which holds every new and not-yet-executed action without undoing executed ones.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "The stop button.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.pause`, `TrustEngine.resume`",
+      "tests": [
+        "engine/tests/test_engine.py::test_pause_and_resume_per_type_and_agent"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-5.7",
+      "cite": "v0.6-EA-5.7",
+      "title": "Alerts before the bar is crossed",
+      "area": "5. Oversight and reviewers",
+      "file": "spec/requirements/05-oversight-and-reviewers.md",
+      "statement": "Implementations SHOULD alert the AI owner when a trust key's rolling upper bound passes 80% of its error bar.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Warn before an automatic step-down.",
+      "evidence": "none yet.",
+      "implementation": "`engine.py` `TrustEngine.get_state` (alerts); `models.py` `Policy.alert_fraction`",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-5.8",
+      "cite": "v0.6-EA-5.8",
+      "title": "Periodic agent review",
+      "area": "5. Oversight and reviewers",
+      "file": "spec/requirements/05-oversight-and-reviewers.md",
+      "statement": "The AI owner SHOULD review each agent at least quarterly: its levels per task type, incidents, drift and scope.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Is the scope still right, and is the agent still needed?",
+      "evidence": "none; an operating practice.",
+      "implementation": "none",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-5.9",
+      "cite": "v0.6-EA-5.9",
+      "title": "Canaries in review queues",
+      "area": "5. Oversight and reviewers",
+      "file": "spec/requirements/05-oversight-and-reviewers.md",
+      "statement": "Implementations SHOULD place known-bad canary items in review queues at random, at about 5% of review items.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "People rubber-stamp when they rarely see errors. Canaries keep them sharp and measure them.",
+      "evidence": "Canaries cut missed errors by 15% in simulation (assumed reviewer model) ([research/REPORT.md](../../research/REPORT.md), G5). At 2%, a poor reviewer stayed trusted for a median of 174 reviews; at 5% they were sorted correctly ([research/REPORT-v2.md](../../research/REPORT-v2.md); [research/REPORT-v3.md](../../research/REPORT-v3.md), R1', tag `research/prereg-v3`).",
+      "implementation": "`engine.py` `TrustEngine.should_insert_canary`, `TrustEngine.record_canary`; `models.py` `Policy.reviewer_canary_rate`",
+      "tests": [],
+      "notes": "The policy also has an older `canary_rate` field (0.02); `reviewer_canary_rate` (0.05) is the tested value."
+    },
+    {
+      "id": "EA-5.10",
+      "cite": "v0.6-EA-5.10",
+      "title": "Reviewers earn trust too",
+      "area": "5. Oversight and reviewers",
+      "file": "spec/requirements/05-oversight-and-reviewers.md",
+      "statement": "Each reviewer MUST have a trust key (organisation, reviewer, `review.<task_type>`) whose evidence comes from canaries and second checks, with an error bar of 10% and at least 30 judged items before promotion.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "People follow the same framework as agents. It finds reviewers who need support before their misses reach customers.",
+      "evidence": "A poor reviewer (60% catch rate) was ever trusted in 9% of simulated organisations; a good one (95%) ended trusted in 100%; escapes fell 15% for 21% more review time ([research/REPORT-v3.md](../../research/REPORT-v3.md), R1', tag `research/prereg-v3`).",
+      "implementation": "`engine.py` `reviewer_key`, `TrustEngine.record_second_check`, `TrustEngine.reviewer_level`; `models.py` `Policy.reviewer_error_bar`, `Policy.reviewer_min_judged`",
+      "tests": [
+        "engine/tests/test_engine.py::test_reviewer_trust_sorts_reviewers"
+      ],
+      "notes": "Clean second checks count as evidence. Counting only canaries and disagreements never trusted anyone (v2)."
+    },
+    {
+      "id": "EA-5.11",
+      "cite": "v0.6-EA-5.11",
+      "title": "Second-check rates",
+      "area": "5. Oversight and reviewers",
+      "file": "spec/requirements/05-oversight-and-reviewers.md",
+      "statement": "A share of each reviewer's decisions MUST be second-checked: about 25% for reviewers at R1 (new) and about 5% for reviewers at R2 (trusted).",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "New reviewers are checked more, like new agents.",
+      "evidence": "See EA-5.10.",
+      "implementation": "`engine.py` `TrustEngine.should_second_check`; `models.py` `Policy.second_check_rate`",
+      "tests": [
+        "engine/tests/test_engine.py::test_reviewer_trust_sorts_reviewers"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-5.12",
+      "cite": "v0.6-EA-5.12",
+      "title": "Reviewers step down on misses",
+      "area": "5. Oversight and reviewers",
+      "file": "spec/requirements/05-oversight-and-reviewers.md",
+      "statement": "A reviewer MUST step down through the same evidence rules as agents (EA-3.5) when they miss canaries or approve actions that later become incidents, and the AI owner SHOULD be told.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST",
+        "SHOULD"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Quality control rather than blame.",
+      "evidence": "See EA-5.10.",
+      "implementation": "`engine.py` `TrustEngine.report_incident` (gives the approving reviewer a miss), `TrustEngine.record_canary`",
+      "tests": [
+        "engine/tests/test_engine.py::test_reviewer_miss_on_incident_after_approval"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-5.13",
+      "cite": "v0.6-EA-5.13",
+      "title": "A second check measures the reviewer only",
+      "area": "5. Oversight and reviewers",
+      "file": "spec/requirements/05-oversight-and-reviewers.md",
+      "statement": "A second check MUST update only the first reviewer's trust; the corrected agent outcome MUST be recorded separately.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Keeps reviewer evidence and agent evidence apart.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.record_second_check`",
+      "tests": [
+        "conformance/test_evidence_rules.py::test_a_second_check_updates_only_the_reviewer"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-5.14",
+      "cite": "v0.6-EA-5.14",
+      "title": "Agents can't see when they're watched",
+      "area": "5. Oversight and reviewers",
+      "file": "spec/requirements/05-oversight-and-reviewers.md",
+      "statement": "An agent's view of its own trust record MUST exclude spot-check selections, canaries and second checks.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "An agent that can read its record mustn't learn which of its actions are watched.",
+      "evidence": "See EA-2.9.",
+      "implementation": "`record.py` `TrustRecord.read_for`",
+      "tests": [
+        "conformance/test_conformance.py::test_sampling_is_unpredictable_and_hidden_from_the_agent"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-5.15",
+      "cite": "v0.6-EA-5.15",
+      "title": "Slowly degrading reviewers (known limitation)",
+      "area": "5. Oversight and reviewers",
+      "file": "spec/requirements/05-oversight-and-reviewers.md",
+      "statement": "Implementations MAY add a faster check for reviewers whose catch rate declines gradually, such as a rolling window over recent canaries.",
+      "condition": null,
+      "strength": "MAY",
+      "keywords": [
+        "MAY"
+      ],
+      "status": "Open",
+      "lifecycle": "Development",
+      "rationale": "Reviewer trust catches a consistently poor reviewer quickly, but a gradually declining one slowly.",
+      "evidence": "A reviewer declining from 95% to 50% catch spent a median of about 189 reviews still trusted after falling below 80% ([research/REPORT-v3.md](../../research/REPORT-v3.md), R1').",
+      "implementation": "none",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-6.1",
+      "cite": "v0.6-EA-6.1",
+      "title": "Roles and a named owner",
+      "area": "6. Governance and the trust record",
+      "file": "spec/requirements/06-governance-and-record.md",
+      "statement": "Every agent MUST have a named AI owner, and implementations MUST distinguish the roles AI owner, policy owner, reviewer, auditor and builder.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Accountability belongs to a person, never to \"the system\".",
+      "evidence": "none; a governance decision.",
+      "implementation": "`governance.py` `Actor`, `GovernanceGuard`",
+      "tests": [
+        "engine/tests/test_engine.py::test_catalogue_owned_by_ai_owner"
+      ],
+      "notes": "- **AI owner:** a team lead, department head or similar. Owns the agent, its task catalogue and consequence levels. - **Policy owner:** sets error bars, caps, tool scope and sample rates. - **Reviewer:** judges outcomes. - **Auditor:** reads everything and changes nothing. - **Builder:** changes agent versions."
+    },
+    {
+      "id": "EA-6.2",
+      "cite": "v0.6-EA-6.2",
+      "title": "Agents can't govern themselves",
+      "area": "6. Governance and the trust record",
+      "file": "spec/requirements/06-governance-and-record.md",
+      "statement": "An agent MUST NOT be able to change its own trust, tests, checks, policy or trust record, though it MAY read its own record as filtered by EA-5.14.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST",
+        "MAY"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "No self-promotion.",
+      "evidence": "All 28 attacks blocked ([research/REPORT.md](../../research/REPORT.md), G4).",
+      "implementation": "`governance.py` `GovernanceGuard`",
+      "tests": [
+        "conformance/test_conformance.py::test_c5_governance_attacks_blocked_and_logged"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-6.3",
+      "cite": "v0.6-EA-6.3",
+      "title": "Separation of duties",
+      "area": "6. Governance and the trust record",
+      "file": "spec/requirements/06-governance-and-record.md",
+      "statement": "A builder of an agent MUST NOT approve that agent's promotions, change its error bars, caps or sample rates, or edit its tests or checks.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Nobody approves their own work.",
+      "evidence": "See EA-6.2.",
+      "implementation": "`governance.py` `SEPARATION_OF_DUTIES_OPERATIONS`",
+      "tests": [
+        "conformance/test_conformance.py::test_c5_governance_attacks_blocked_and_logged"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-6.4",
+      "cite": "v0.6-EA-6.4",
+      "title": "Every governance request is logged",
+      "area": "6. Governance and the trust record",
+      "file": "spec/requirements/06-governance-and-record.md",
+      "statement": "Every request to change policy, trust, tests or checks MUST name the person or system making it and MUST be written to the trust record, whether it is allowed or blocked.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Blocked attempts are evidence too.",
+      "evidence": "See EA-6.2.",
+      "implementation": "`governance.py` `GovernanceGuard.request`",
+      "tests": [
+        "conformance/test_conformance.py::test_c5_governance_attacks_blocked_and_logged"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-6.5",
+      "cite": "v0.6-EA-6.5",
+      "title": "Policy is versioned and takes effect immediately",
+      "area": "6. Governance and the trust record",
+      "file": "spec/requirements/06-governance-and-record.md",
+      "statement": "Every policy change MUST create a new policy version that takes effect immediately; a lower error bar MUST be re-evaluated against every affected trust key at once, dropping keys whose bound no longer holds to L1, while a higher error bar MUST only take effect at each key's next outcome.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "A stricter rule protects immediately; a looser one is earned.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.set_policy`, `TrustEngine.set_task_error_bar`; `models.py` `Policy.evolve`",
+      "tests": [
+        "engine/tests/test_engine.py::test_lowering_error_bar_reevaluates_trusted_keys"
+      ],
+      "notes": "A newly capped task type also drops to L1."
+    },
+    {
+      "id": "EA-6.6",
+      "cite": "v0.6-EA-6.6",
+      "title": "The record is append-only",
+      "area": "6. Governance and the trust record",
+      "file": "spec/requirements/06-governance-and-record.md",
+      "statement": "The trust record MUST be append-only, with no way to edit or delete an entry.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "It is the agent's whole employment history.",
+      "evidence": "none; structural.",
+      "implementation": "`record.py` `TrustRecord` (no edit API; SQLite triggers refuse updates and deletes)",
+      "tests": [
+        "conformance/test_conformance.py::test_c5_record_has_no_edit_api",
+        "conformance/test_conformance.py::test_sqlite_refuses_update_delete_and_detects_tampering"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-6.7",
+      "cite": "v0.6-EA-6.7",
+      "title": "The record is tamper-evident",
+      "area": "6. Governance and the trust record",
+      "file": "spec/requirements/06-governance-and-record.md",
+      "statement": "Each record entry MUST include a SHA-256 hash of its canonical JSON and of the previous entry's hash, and verification MUST detect any edited, deleted or reordered entry.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Regulated buyers need history that provably hasn't been altered.",
+      "evidence": "none; a cryptographic construction.",
+      "implementation": "`record.py` `entry_hash`, `TrustRecord.verify`",
+      "tests": [
+        "conformance/test_conformance.py::test_sqlite_refuses_update_delete_and_detects_tampering",
+        "conformance/test_conformance.py::test_tamper_delete_and_reorder_detected",
+        "conformance/test_conformance.py::test_tamper_edit_detected",
+        "conformance/test_conformance.py::test_tamper_rehash_one_entry_detected",
+        "conformance/test_timestamps.py::test_external_rehash_of_the_stored_record_matches_the_chain"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-6.8",
+      "cite": "v0.6-EA-6.8",
+      "title": "State is rebuilt from the record",
+      "area": "6. Governance and the trust record",
+      "file": "spec/requirements/06-governance-and-record.md",
+      "statement": "Replaying the trust record from empty MUST reproduce every trust state exactly.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "The record is the truth; state is only a cache of it.",
+      "evidence": "none; structural.",
+      "implementation": "`engine.py` `TrustEngine.rebuild_state`, `TrustEngine.live_state`",
+      "tests": [
+        "conformance/test_conformance.py::test_c4_replay_reproduces_state_exactly",
+        "conformance/test_conformance.py::test_c4_replay_sqlite_reopen",
+        "conformance/test_tool_floor.py::test_tool_floor_decisions_replay_and_keep_args_out_of_the_record"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-6.9",
+      "cite": "v0.6-EA-6.9",
+      "title": "Sequence, not time, orders the record",
+      "area": "6. Governance and the trust record",
+      "file": "spec/requirements/06-governance-and-record.md",
+      "statement": "The trust record's order MUST be each entry's sequence number in the hash chain, and replay, scans and audits MUST NOT order entries by timestamp.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Clocks drift and servers disagree.",
+      "evidence": "none; structural.",
+      "implementation": "`record.py` (scans ordered by `sequence`)",
+      "tests": [
+        "conformance/test_timestamps.py::test_replay_follows_sequence_not_timestamps_under_clock_skew"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-6.10",
+      "cite": "v0.6-EA-6.10",
+      "title": "One exact timestamp format",
+      "area": "6. Governance and the trust record",
+      "file": "spec/requirements/06-governance-and-record.md",
+      "statement": "Every timestamp in the trust record MUST be ISO 8601 in UTC with exactly three digits of milliseconds and a `Z` suffix (`YYYY-MM-DDTHH:MM:SS.sssZ`), other ISO 8601 forms with a time zone MUST be normalised to it when read, and timestamps with no time zone MUST be rejected.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "- Auditors can read it at a glance. - UTC has no daylight-saving ambiguity: Melbourne's local clock repeats an hour each April. - One fixed format keeps the hash chain stable, since the same moment always produces the same bytes.",
+      "evidence": "none; a format decision.",
+      "implementation": "`models.py` `format_timestamp`, `parse_timestamp`, `normalise_timestamp`",
+      "tests": [
+        "conformance/test_schema.py::test_record_entries_validate_against_the_schema",
+        "conformance/test_timestamps.py::test_every_record_timestamp_uses_the_canonical_format",
+        "conformance/test_timestamps.py::test_external_rehash_of_the_stored_record_matches_the_chain",
+        "conformance/test_timestamps.py::test_format_is_exact_even_at_zero_milliseconds",
+        "conformance/test_timestamps.py::test_naive_datetimes_and_strings_are_rejected",
+        "conformance/test_timestamps.py::test_old_forms_normalise_to_the_canonical_string",
+        "conformance/test_timestamps.py::test_round_trip"
+      ],
+      "notes": "Products show local time; storage is UTC. A zero-millisecond moment still prints `.000Z`."
+    },
+    {
+      "id": "EA-6.11",
+      "cite": "v0.6-EA-6.11",
+      "title": "Epoch time stays at the edges",
+      "area": "6. Governance and the trust record",
+      "file": "spec/requirements/06-governance-and-record.md",
+      "statement": "Epoch milliseconds MAY be used in interfaces and internal code if the name says so in full (for example `created_at_epoch_milliseconds`), and MUST be converted before anything enters the trust record.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST",
+        "MAY"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Convenient for maths, unreadable in an audit.",
+      "evidence": "none; a format decision.",
+      "implementation": "none needed",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-6.12",
+      "cite": "v0.6-EA-6.12",
+      "title": "The record is kept permanently",
+      "area": "6. Governance and the trust record",
+      "file": "spec/requirements/06-governance-and-record.md",
+      "statement": "The trust record and every decision MUST be retained permanently.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "It is the evidence behind every level, for agents and reviewers alike.",
+      "evidence": "none; a governance decision.",
+      "implementation": "none needed (no deletion path)",
+      "tests": [
+        "conformance/test_conformance.py::test_c5_record_has_no_edit_api"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-6.13",
+      "cite": "v0.6-EA-6.13",
+      "title": "References and labels, not customer content",
+      "area": "6. Governance and the trust record",
+      "file": "spec/requirements/06-governance-and-record.md",
+      "statement": "The trust record MUST hold references, labels and hashes only (action identifiers, task types, outcomes, reason codes, versions, actor identifiers and a payload hash), and MUST NOT hold customer content such as messages, names or amounts.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Privacy law (in Australia, Australian Privacy Principle 11.2) requires personal information to be destroyed or de-identified once it's no longer needed. Content stays in the source system under its normal retention; the permanent record loses nothing it needs when that content is deleted.",
+      "evidence": "none; a legal and design decision.",
+      "implementation": "`models.py` `payload_hash`; `record.py`",
+      "tests": [
+        "conformance/test_conformance.py::test_record_holds_no_customer_content",
+        "conformance/test_tool_floor.py::test_tool_floor_decisions_replay_and_keep_args_out_of_the_record"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-6.14",
+      "cite": "v0.6-EA-6.14",
+      "title": "Records follow the schema",
+      "area": "6. Governance and the trust record",
+      "file": "spec/requirements/06-governance-and-record.md",
+      "statement": "Proposed actions, decisions, outcome events, trust states, policies and record entries MUST validate against the JSON Schemas in [`schema/`](../schema/).",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "One source of truth for the data model, so other implementations interoperate.",
+      "evidence": "none; structural.",
+      "implementation": "`models.py` (`to_dict` on each model)",
+      "tests": [
+        "conformance/test_schema.py::test_engine_objects_validate_against_the_schemas",
+        "conformance/test_schema.py::test_record_entries_validate_against_the_schema"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-6.15",
+      "cite": "v0.6-EA-6.15",
+      "title": "Approval for Senior",
+      "area": "6. Governance and the trust record",
+      "file": "spec/requirements/06-governance-and-record.md",
+      "statement": "A policy MAY require the policy owner to approve promotions to L3 Senior.",
+      "condition": null,
+      "strength": "MAY",
+      "keywords": [
+        "MAY"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Some organisations want a person to sign off the highest level of autonomy.",
+      "evidence": "none; a governance option.",
+      "implementation": "`governance.py` (`promote` operation, policy owner)",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-7.1",
+      "cite": "v0.6-EA-7.1",
+      "title": "Delegation never adds authority",
+      "area": "7. Multiple agents (preview)",
+      "file": "spec/requirements/07-multi-agent.md",
+      "statement": "When agent A delegates an action of task type T to agent B, B's effective level for that action MUST be the lower of A's and B's levels for T, and the action MUST be held if A has no level for T.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "A trusted agent can't use a junior one to do what it couldn't do itself, and vice versa.",
+      "evidence": "none yet.",
+      "implementation": "`engine.py` `TrustEngine.decide` (delegation cap via `parent_action_id`)",
+      "tests": [
+        "engine/tests/test_engine.py::test_delegation_cap"
+      ],
+      "notes": null
+    },
+    {
+      "id": "EA-7.2",
+      "cite": "v0.6-EA-7.2",
+      "title": "Delegated actions carry their provenance",
+      "area": "7. Multiple agents (preview)",
+      "file": "spec/requirements/07-multi-agent.md",
+      "statement": "Every delegated action MUST carry the identifier of the action that delegated it, and serious errors SHOULD count against the agent whose output was changed.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST",
+        "SHOULD"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Blame follows the edit. Agents further up the chain get a \"missed it\" mark, tracked but not yet counted.",
+      "evidence": "none yet.",
+      "implementation": "`models.py` `ProposedAction.parent_action_id`",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-7.3",
+      "cite": "v0.6-EA-7.3",
+      "title": "Peer reliability with exploration",
+      "area": "7. Multiple agents (preview)",
+      "file": "spec/requirements/07-multi-agent.md",
+      "statement": "When an agent routes work to peer agents by reliability, routing SHOULD use Thompson sampling over per-(agent, skill) Beta posteriors with a forgetting factor of 0.98, SHOULD verify answers whose lower bound is under 0.85, and SHOULD audit 10% of answers at random.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Always routing to the most-trusted peer never tests the others, so a peer that turns bad stays first choice.",
+      "evidence": "95–96% accuracy with under half the verification calls ([research/REPORT-v1.md](../../research/REPORT-v1.md), V5, tag `research/prereg-v1`). A peer that turns bad is caught only after a median of 21 bad outputs with forgetting (37.5 without), above the 10 targeted.",
+      "implementation": "none in the reference engine (see `research/t1/peer.py`)",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-7.4",
+      "cite": "v0.6-EA-7.4",
+      "title": "Keep consequential peer work supervised",
+      "area": "7. Multiple agents (preview)",
+      "file": "spec/requirements/07-multi-agent.md",
+      "statement": "Actions one agent takes on another agent's output SHOULD stay at L1 Supervised for C2 and higher consequence levels.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Default",
+      "lifecycle": "Development",
+      "rationale": "Peer reliability tracking is slow to detect a peer that turns bad (EA-7.3).",
+      "evidence": "See EA-7.3.",
+      "implementation": "none",
+      "tests": [],
+      "notes": null
+    },
+    {
+      "id": "EA-7.5",
+      "cite": "v0.6-EA-7.5",
+      "title": "Reviewer agents earn trust as their own task type",
+      "area": "7. Multiple agents (preview)",
+      "file": "spec/requirements/07-multi-agent.md",
+      "statement": "An agent that reviews another agent's work MUST be treated as performing its own task type (`review.<agent>`) with its own trust key, SHOULD be used only to triage agents with low error rates, and MUST NOT be assumed more reliable because it uses a different model.",
+      "condition": null,
+      "strength": "MUST",
+      "keywords": [
+        "MUST",
+        "SHOULD"
+      ],
+      "status": "Tested",
+      "lifecycle": "Development",
+      "rationale": "Reviewing is work that earns trust like any other.",
+      "evidence": "- **Low-error agent:** a reviewer agent removed 71% of human reviews safely. - **High-error agent:** not safe; escapes rose from 0.86 to 2.56 per 100. - **Different model:** recall was lower (82.9% against 87.4%) with nearly double the false alarms. Source: [research/REPORT.md](../../research/REPORT.md), M1 and M2, tag `research/prereg`.",
+      "implementation": "none beyond ordinary trust keys",
+      "tests": [],
+      "notes": null
+    }
+  ]
+}

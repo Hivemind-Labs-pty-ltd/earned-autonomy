@@ -1,4 +1,4 @@
-"""Bounds used to decide promotion and step-down (SPEC §7).
+"""Bounds used to decide promotion and step-down (EA-3.4, EA-3.5, EA-3.14).
 
 The engine only talks to a `BoundStrategy`. Wilson score bounds are the default and the tested choice. An
 anytime-valid strategy (a confidence sequence, safe under continuous monitoring) can be swapped in by
@@ -16,16 +16,16 @@ class BoundStrategy(Protocol):
     name: str
 
     def upper(self, serious_errors: float, judged: float) -> float:
-        """Worst-case (upper) error rate. Promotion needs upper ≤ the error bar (SPEC §7)."""
+        """Worst-case (upper) error rate. Promotion needs upper ≤ the error bar (EA-3.4)."""
         ...
 
     def lower(self, serious_errors: float, judged: float) -> float:
-        """Best-case (lower) error rate. Step-down fires when the rolling lower > the error bar (SPEC §7)."""
+        """Best-case (lower) error rate. Step-down fires when the rolling lower > the error bar (EA-3.5)."""
         ...
 
 
 class WilsonBound:
-    """Wilson score interval (SPEC §7). Default confidence 95% (z = 1.96). [tested]"""
+    """Wilson score interval (EA-3.4). Default confidence 95% (z = 1.96). [tested]"""
 
     name = "wilson"
 
@@ -58,7 +58,7 @@ def _log_beta(first: float, second: float) -> float:
 
 
 class ConfidenceSequenceBound:
-    """Strict promotion (SPEC §7, [exploratory v4]): a Beta-binomial mixture confidence sequence for a Bernoulli
+    """Strict promotion (EA-3.14): a Beta-binomial mixture confidence sequence for a Bernoulli
     error rate (Robbins 1970; Howard et al. 2021). It stays valid under continuous monitoring, so re-checking after
     every outcome doesn't inflate false promotions.
 
@@ -67,7 +67,7 @@ class ConfidenceSequenceBound:
     M(p) = B(a+e, b+n−e) / B(a, b) / (p^e (1−p)^(n−e)) < 1/significance, where e = serious errors and n = judged.
     Clean floors (0 errors): 10% → 46, 5% → 93, 2% → 236 judged actions (Wilson: 35 / 73 / 189).
 
-    Used only for the promotion side (`upper`). Step-down keeps the rolling Wilson lower bound (SPEC §7).
+    Used only for the promotion side (`upper`). Step-down keeps the rolling Wilson lower bound (EA-3.5).
     """
 
     name = "confidence_sequence"
@@ -114,7 +114,7 @@ class ConfidenceSequenceBound:
 
 
 def clean_floor(bound: BoundStrategy, error_bar: float, limit: int = 100_000) -> int:
-    """Judged actions needed with no errors before upper ≤ the error bar (SPEC §7 table)."""
+    """Judged actions needed with no errors before upper ≤ the error bar (EA-3.8; spec/examples.md)."""
     judged = 1
     while bound.upper(0, judged) > error_bar:
         judged += 1

@@ -1,8 +1,8 @@
-"""The trust engine (SPEC §6–§12).
+"""The trust engine (spec/requirements/, reference API in spec/api.md).
 
 Design: the trust record is the only source of truth. Every change is first appended to the record as an entry,
 then applied by a deterministic reducer (`_Reducer.apply`). Live state is therefore always identical to a replay
-of the record from empty (SPEC §5, §13.4). Randomness (spot-check sampling, canaries, second checks) happens in
+of the record from empty (EA-6.8). Randomness (spot-check sampling, canaries, second checks) happens in
 the engine, never in the reducer, and only its outcome is recorded.
 """
 from __future__ import annotations
@@ -31,7 +31,7 @@ def _key(key) -> TrustKey:
 
 
 def reviewer_key(organisation_id: str, reviewer_id: str, task_type: str) -> TrustKey:
-    """SPEC §9: a reviewer's trust key is (organisation, reviewer_id, review.<task_type>)."""
+    """EA-5.10: a reviewer's trust key is (organisation, reviewer_id, review.<task_type>)."""
     return (organisation_id, reviewer_id, f"review.{task_type}")
 
 
@@ -63,7 +63,7 @@ class _Reducer:
 
     def promotion_upper_bound(self, policy: Policy | None, task_type: str, serious_errors: float, judged: float,
                               error_bar: float) -> float:
-        """Upper bound used for promotion and for "does the bound still hold" (SPEC §7). Strict promotion types use
+        """Upper bound used for promotion and for "does the bound still hold" (EA-3.4, EA-3.14). Strict promotion types use
         the anytime-valid confidence sequence; everything else uses the engine's default bound (Wilson)."""
         if policy is not None and error_bar > 0 and policy.is_strict(task_type):
             return ConfidenceSequenceBound(error_bar).upper(serious_errors, judged)
@@ -81,7 +81,7 @@ class _Reducer:
 
     def _observe(self, state: TrustState, serious: bool, fail: bool, timestamp: str, error_bar: float, capped: bool,
                  min_judged: int, rolling_window: int, rolling_window_min: int, top: int = L3):
-        """SPEC §7 update: evidence, then demotion first, then promotion."""
+        """EA-3.4 to EA-3.6: evidence, then step-down first, then promotion."""
         state.judged_count += 1
         state.serious_error_count += 1 if serious else 0
         state.incomplete_count += 1 if fail else 0
@@ -111,7 +111,7 @@ class _Reducer:
             new = Policy.from_dict(body["policy"])
             self.policy = new
             self.policies[new.policy_version] = body["policy"]
-            # SPEC §10: policy changes take effect immediately; a trusted key whose bound no longer holds
+            # EA-6.5: policy changes take effect immediately; a trusted key whose bound no longer holds
             # (or whose type became capped) drops to L1.
             for state in self.states.values():
                 task_type = state.trust_key[2]
@@ -154,7 +154,7 @@ class _Reducer:
         elif entry_type == "incident":
             key = _key(body["trust_key"])
             state = self.state(key)
-            # SPEC §7: counts as one serious outcome AND steps the key down one level immediately.
+            # EA-3.7: counts as one serious outcome AND steps the key down one level immediately.
             state.judged_count += 1
             state.serious_error_count += 1
             if state.level >= L2:
@@ -202,7 +202,7 @@ class _Reducer:
 
 
 class TrustEngine:
-    """Reference implementation of the Earned Autonomy trust engine (SPEC §12 API)."""
+    """Reference implementation of the Earned Autonomy trust engine (spec/api.md)."""
 
     def __init__(self, policy: Policy | None = None, record: TrustRecord | None = None, tagger: Tagger | None = None,
                  bounds: BoundStrategy | None = None, clock: Callable[[], datetime] = utcnow,
@@ -211,10 +211,10 @@ class TrustEngine:
         self.tagger = tagger
         self.bounds = bounds or WilsonBound()
         self.clock = clock
-        # SPEC §4: optional argument-dependent tool floors, e.g. send_email -> C1 for a reminder, C3 for an offer.
+        # EA-1.13: optional argument-dependent tool floors, e.g. send_email -> C1 for a reminder, C3 for an offer.
         # Returns a consequence level, or None to fall back to the policy's floor for that tool.
         self.tool_floor_function = tool_floor_function
-        # SPEC §6/§9: sampling must be unpredictable to the agent. Default: the OS CSPRNG.
+        # EA-2.8, EA-2.9: sampling must be unpredictable to the agent. Default: the OS CSPRNG.
         self._sampler = sampler or secrets.SystemRandom()
         self._lock = threading.RLock()
         self.governance = GovernanceGuard(self._log)
@@ -241,7 +241,7 @@ class TrustEngine:
     def policy(self) -> Policy:
         return self._reducer.policy
 
-    # ---- tagging (SPEC §4) ---------------------------------------------------------------------------------
+    # ---- tagging (EA-1.8) ----------------------------------------------------------------------------------
     def tag(self, action: ProposedAction):
         if self.tagger is None:
             raise RuntimeError("no tagger configured")
@@ -249,7 +249,7 @@ class TrustEngine:
         action.task_type, action.tag_confidence = result.task_type, result.confidence
         return result
 
-    # ---- decide (SPEC §6) ----------------------------------------------------------------------------------
+    # ---- decide (EA-2.1) -----------------------------------------------------------------------------------
     def decide(self, action: ProposedAction, checks: ChecksResult | None = None) -> Decision:
         """Decide hold or act. Call again at execution time; the newest decision is the one that counts."""
         with self._lock:
@@ -265,7 +265,7 @@ class TrustEngine:
                 self._maintain(key, action)
             state = self._reducer.states.get(key) or TrustState(trust_key=key)
             level = state.level
-            if action.parent_action_id:                  # delegation cap (SPEC §11)
+            if action.parent_action_id:                  # delegation cap (EA-7.1)
                 parent = self._reducer.actions.get(action.parent_action_id)
                 parent_key = (action.organisation_id, parent["agent_id"], task_type) if parent else None
                 parent_state = self._reducer.states.get(parent_key) if parent_key else None
@@ -292,7 +292,7 @@ class TrustEngine:
             return decision
 
     def tool_floor(self, action: ProposedAction) -> str | None:
-        """SPEC §4: the highest floor among the action's write tools (hook first, then the policy's floor)."""
+        """EA-1.13: the highest floor among the action's write tools (hook first, then the policy's floor)."""
         policy = self.policy
         levels = []
         for tool in action.write_tools:
@@ -310,7 +310,7 @@ class TrustEngine:
         if action.tag_confidence is None or action.tag_confidence < policy.tag_confidence_min:
             return "low_confidence", "hold"
         if floor is not None and RANK[floor] > RANK[policy.task_types[action.task_type].consequence]:
-            return "tool_floor_mismatch", "hold"          # SPEC §6 step 2b [tested v4]
+            return "tool_floor_mismatch", "hold"          # EA-1.14
         if checks is None and policy.require_checks:
             return "checks_missing", "hold"
         if checks is not None and not checks.ok:
@@ -334,11 +334,11 @@ class TrustEngine:
         if state.level >= L2 and state.last_activity_at is not None:
             gap = self.clock() - parse_timestamp(state.last_activity_at)
             if gap > timedelta(days=self.policy.reentry_gap_days):
-                # SPEC §7 re-entry rule [tested v3]
+                # EA-3.13 re-entry rule
                 self._emit("level_change", {"trust_key": list(key), "to": state.level - 1, "why": "reentry_gap"})
 
     def decide_bundle(self, actions: list[tuple[ProposedAction, ChecksResult | None]]) -> list[Decision]:
-        """SPEC §4: actions that must happen together get the most restrictive decision."""
+        """EA-1.11: actions that must happen together get the most restrictive decision."""
         decisions = [self.decide(action, checks) for action, checks in actions]
         if any(not decision.allowed for decision in decisions):
             for decision in decisions:
@@ -357,7 +357,7 @@ class TrustEngine:
 
     def mark_executed(self, action_id: str) -> None:
         """Record that an action ran. Autonomous actions are then spot-sampled with an unpredictable RNG; the result
-        goes to the review queue and is never returned to the caller (SPEC §6 step 6, §9)."""
+        goes to the review queue and is never returned to the caller (EA-2.8, EA-5.14)."""
         with self._lock:
             if not self.may_execute(action_id):
                 raise PermissionError(f"action {action_id} is not allowed to execute")
@@ -383,7 +383,7 @@ class TrustEngine:
         never expose this to agents."""
         return list(self._reducer.queue.values())
 
-    # ---- outcomes and incidents (SPEC §7) ----------------------------------------------------------------
+    # ---- outcomes and incidents (EA-3.1 to EA-3.7)------------------------------------------------------------
     def record_outcome(self, action_id: str, label: str, reason_code: str | None, source: str, actor_id: str,
                        diff_reference: str | None = None) -> dict:
         with self._lock:
@@ -392,7 +392,7 @@ class TrustEngine:
             if source not in ("pre_review", "spot_check"):
                 raise ValueError("outcomes come from pre_review or spot_check; use report_incident / record_canary")
             if label in ("material_edit", "rejected") and reason_code not in REASON_CODES:
-                raise ValueError("material_edit and rejected need a reason code (SPEC §9)")
+                raise ValueError("material_edit and rejected need a reason code (EA-5.2)")
             if reason_code is not None and reason_code not in REASON_CODES:
                 raise ValueError(f"unknown reason code {reason_code}")
             action_record = self._reducer.actions.get(action_id)
@@ -406,7 +406,7 @@ class TrustEngine:
             return body
 
     def report_incident(self, action_id: str, severity: str, actor_id: str, note: str | None = None) -> dict:
-        """A serious problem found after the fact. Applied to the key and agent version *of that action* (SPEC §7)."""
+        """A serious problem found after the fact. Applied to the key and agent version *of that action* (EA-3.16)."""
         with self._lock:
             action_record = self._reducer.actions.get(action_id)
             if action_record is None:
@@ -416,12 +416,12 @@ class TrustEngine:
                     "note_hash": payload_hash(note) if note else None}
             self._emit("incident", body)
             reviewer = action_record.get("approved_by")
-            if reviewer:   # SPEC §9: a reviewer whose approval led to an incident gets a miss
+            if reviewer:   # EA-5.12: a reviewer whose approval led to an incident gets a miss
                 self._emit("reviewer_evidence", {"reviewer_key": list(reviewer_key(action_record["organisation_id"], reviewer, action_record["task_type"])),
                                                  "miss": True, "source": "incident", "action_id": action_id})
             return body
 
-    # ---- versions (SPEC §8) --------------------------------------------------------------------------------
+    # ---- versions (EA-4.5 to EA-4.9)----------------------------------------------------------------------------
     def on_version_published(self, agent_id: str, version: str, results: dict[str, dict] | None = None,
                              actor: Actor | None = None) -> dict:
         """`results[task_type] = {training_pass, hidden_pass, hidden_test_count?}`. A task type keeps its evidence when
@@ -480,7 +480,7 @@ class TrustEngine:
                                             "why": "manual_promote"})
             return True
 
-    # ---- policy and catalogue (SPEC §4, §10) -------------------------------------------------------------
+    # ---- policy and catalogue (EA-1.7, EA-6.5) ------------------------------------------------------------
     def set_policy(self, actor: Actor, operation: str = "set_policy", **changes) -> bool:
         """Policy-as-code: every change is a new policy version, logged and applied immediately."""
         with self._lock:
@@ -493,7 +493,7 @@ class TrustEngine:
 
     def add_task_type(self, actor: Actor, task_type: str, consequence: str, tools: list[str] | None = None,
                       description: str = "", examples: list[str] | None = None) -> bool:
-        """Add a catalogue entry (SPEC §4): name, consequence, tools, and the description and examples the tagger
+        """Add a catalogue entry (EA-1.1): name, consequence, tools, and the description and examples the tagger
         and reviewers work from."""
         if consequence not in CONSEQUENCE:
             raise ValueError("consequence must be C1..C4")
@@ -523,7 +523,7 @@ class TrustEngine:
             return True
 
     def set_task_error_bar(self, actor: Actor, task_type: str, error_bar: float) -> bool:
-        """Tighten a type's bar below its consequence level's ε (never loosen; SPEC §7)."""
+        """Tighten a type's bar below its consequence level's ε (never loosen; EA-3.9)."""
         with self._lock:
             if not self.governance.request(actor, "set_error_bar", None, {"task_type": task_type, "error_bar": error_bar}):
                 return False
@@ -545,11 +545,11 @@ class TrustEngine:
                 raise ValueError(f"{task_type}: error bar {type_policy.error_bar} looser than {type_policy.consequence}'s {base} (only tightening allowed)")
 
     def tools_for(self, task_type: str) -> list[str]:
-        """Tool scope per task type (SPEC §4, [tested]): offer the agent only these tools."""
+        """Tool scope per task type (EA-1.12): offer the agent only these tools."""
         type_policy = self.policy.type_policy(task_type)
         return list(type_policy.tools) if type_policy else []
 
-    # ---- reviewer trust (SPEC §9, [tested v3]) -------------------------------------------------------------
+    # ---- reviewer trust (EA-5.9 to EA-5.13) -------------------------------------------------------------
     def reviewer_level(self, organisation_id: str, reviewer_id: str, task_type: str) -> int:
         state = self._reducer.reviewers.get(reviewer_key(organisation_id, reviewer_id, task_type))
         return state.level if state else L1
@@ -583,7 +583,7 @@ class TrustEngine:
                        {"reviewer_key": list(reviewer_key(organisation_id, first_reviewer_id, task_type)),
                         "miss": bool(found_error), "source": "second_check", "action_id": action_id})
 
-    # ---- reading (SPEC §12) --------------------------------------------------------------------------------
+    # ---- reading (spec/api.md) -----------------------------------------------------------------------------
     def get_state(self, organisation_id: str, agent_id: str, task_type: str | None = None) -> list[dict]:
         out = []
         policy = self.policy
@@ -635,7 +635,7 @@ class TrustEngine:
         return {"action_id": action_id, "decisions": decisions, "outcomes": outcomes, "executed": executed,
                 "policy_version": policy_version, "policy": self._reducer.policies.get(policy_version)}
 
-    # ---- integrity (SPEC §13.4) --------------------------------------------------------------------------
+    # ---- integrity (EA-6.8) -------------------------------------------------------------------------------
     def rebuild_state(self) -> dict:
         """Replay the record from empty and return the derived state."""
         reducer = _Reducer(self.bounds)

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "earned-autonomy"
-version = "0.4.0"
+version = "0.6.0"
 description = "Reference trust engine for the Earned Autonomy Framework: AI agents earn autonomy like employees."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -17,5 +17,6 @@ test = ["pytest>=7"]
 where = ["src"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["src"]
+testpaths = ["tests", "../conformance"]
+pythonpath = ["src", "tests", "../conformance"]
+markers = ["covers(*rule_ids): the spec rules (EA-x.y) this test checks"]

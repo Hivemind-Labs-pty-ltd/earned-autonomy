@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:earned-autonomy:v0.6:schema:trust-state.schema.json",
+  "title": "TrustState",
+  "description": "The derived state of one trust key. Always rebuildable by replaying the trust record (EA-6.8).",
+  "type": "object",
+  "properties": {
+    "trust_key": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "string",
+          "description": "organisation"
+        },
+        {
+          "type": "string",
+          "description": "agent"
+        },
+        {
+          "type": "string",
+          "description": "task type"
+        }
+      ],
+      "minItems": 3,
+      "maxItems": 3,
+      "description": "The trust key: (organisation, agent, task type) (EA-1.2)."
+    },
+    "level": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3
+    },
+    "judged_count": {
+      "type": "number",
+      "minimum": 0
+    },
+    "serious_error_count": {
+      "type": "number",
+      "minimum": 0
+    },
+    "incomplete_count": {
+      "type": "number",
+      "minimum": 0
+    },
+    "since_change": {
+      "type": "number",
+      "minimum": 0
+    },
+    "recent": {
+      "type": "array",
+      "items": {
+        "type": [
+          "boolean",
+          "integer"
+        ]
+      },
+      "description": "Serious flags of the last rolling_window judged actions, cleared on a level change (EA-3.5)."
+    },
+    "agent_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "paused": {
+      "type": "boolean"
+    },
+    "state_version": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "last_activity_at": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+          "description": "ISO 8601 UTC with milliseconds and a Z suffix (EA-6.10)."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+          "description": "ISO 8601 UTC with milliseconds and a Z suffix (EA-6.10)."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "trust_key",
+    "level",
+    "judged_count",
+    "serious_error_count",
+    "since_change",
+    "recent",
+    "paused",
+    "state_version"
+  ],
+  "additionalProperties": false
+}

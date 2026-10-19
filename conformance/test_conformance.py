@@ -1,4 +1,4 @@
-"""SPEC §13 conformance suite. A build is compliant if all of these pass.
+"""Core conformance suite. Each test names the rules it checks; see conformance/compliance-matrix.md.
 
 1. Every executed autonomous action has a Decision explaining why it was allowed.
 2. No action executes autonomously at L1, while paused, after a failed check, or in a capped type.
@@ -59,6 +59,7 @@ def busy_engine(seed=0, n=1500):
 
 
 # ---- 1 ---------------------------------------------------------------------------------------------------------
+@pytest.mark.covers("EA-2.11")
 def test_c1_every_autonomous_execution_is_explained():
     trust_engine = busy_engine()
     decisions = {}
@@ -78,6 +79,7 @@ def test_c1_every_autonomous_execution_is_explained():
 
 
 # ---- 2 ---------------------------------------------------------------------------------------------------------
+@pytest.mark.covers("EA-2.2", "EA-2.3", "EA-2.5", "EA-2.6")
 def test_c2_no_autonomous_execution_when_not_allowed():
     trust_engine = engine()
     action = act()
@@ -121,6 +123,7 @@ def test_c2_no_autonomous_execution_when_not_allowed():
 
 # ---- 3 ---------------------------------------------------------------------------------------------------------
 @pytest.mark.parametrize("start", [L2, L3])
+@pytest.mark.covers("EA-3.7", "EA-5.4")
 def test_c3_incident_steps_down_before_next_decision(start):
     trust_engine = engine()
     promote_to(trust_engine, start)
@@ -133,6 +136,7 @@ def test_c3_incident_steps_down_before_next_decision(start):
 
 
 # ---- 4 ---------------------------------------------------------------------------------------------------------
+@pytest.mark.covers("EA-6.8")
 def test_c4_replay_reproduces_state_exactly():
     trust_engine = busy_engine()
     assert trust_engine.rebuild_state() == trust_engine.live_state()
@@ -141,6 +145,7 @@ def test_c4_replay_reproduces_state_exactly():
     assert e2.live_state() == trust_engine.live_state()
 
 
+@pytest.mark.covers("EA-6.8")
 def test_c4_replay_sqlite_reopen(tmp_path):
     path = str(tmp_path / "trust.db")
     trust_engine = engine(record=TrustRecord(SQLiteBackend(path)))
@@ -180,6 +185,7 @@ LEGIT = [
 ]
 
 
+@pytest.mark.covers("EA-4.14", "EA-6.2", "EA-6.3", "EA-6.4")
 def test_c5_governance_attacks_blocked_and_logged():
     trust_engine = engine()
     before = len(trust_engine.record)
@@ -197,12 +203,14 @@ def test_c5_governance_attacks_blocked_and_logged():
     assert trust_engine.get_state("organisation", "customer_service_agent", "customer_service.status.update") == []
 
 
+@pytest.mark.covers("EA-6.6", "EA-6.12")
 def test_c5_record_has_no_edit_api():
     rec = TrustRecord()
     assert not any(hasattr(rec, m) for m in ("update", "delete", "edit", "remove", "replace"))
 
 
 # ---- 6 ---------------------------------------------------------------------------------------------------------
+@pytest.mark.covers("EA-4.4")
 def test_c6_hidden_tests_unreadable_by_agent_and_builder():
     trust_engine = engine()
     trust_engine.suites.seed_hidden("customer_service.reply.send", [("h1", {"expect": "secret"})])
@@ -217,6 +225,7 @@ def test_c6_hidden_tests_unreadable_by_agent_and_builder():
 
 
 # ---- 7 ---------------------------------------------------------------------------------------------------------
+@pytest.mark.covers("EA-3.4", "EA-3.5")
 def test_c7_trust_gym_t1_parity():
     good = total = 0
     lat = []
@@ -242,6 +251,7 @@ def _tampered(edit):
     return TrustRecord(be).verify()
 
 
+@pytest.mark.covers("EA-6.7")
 def test_tamper_edit_detected():
     def edit(rows):
         result = rows[50]
@@ -253,6 +263,7 @@ def test_tamper_edit_detected():
     assert not v.ok and v.first_bad_sequence == 50
 
 
+@pytest.mark.covers("EA-6.7")
 def test_tamper_rehash_one_entry_detected():
     # an attacker who recomputes the edited entry's own hash still breaks the next link
     def edit(rows):
@@ -265,12 +276,14 @@ def test_tamper_rehash_one_entry_detected():
     assert not v.ok and v.first_bad_sequence == 51
 
 
+@pytest.mark.covers("EA-6.7")
 def test_tamper_delete_and_reorder_detected():
     assert not _tampered(lambda rows: rows[:40] + rows[41:]).ok
     assert not _tampered(lambda rows: rows[:40] + [rows[41], rows[40]] + rows[42:]).ok
     assert not _tampered(lambda rows: rows[:-1] + [rows[-1], rows[-1]]).ok
 
 
+@pytest.mark.covers("EA-6.6", "EA-6.7")
 def test_sqlite_refuses_update_delete_and_detects_tampering(tmp_path):
     path = str(tmp_path / "t.db")
     trust_engine = engine(record=TrustRecord(SQLiteBackend(path)))
@@ -288,6 +301,7 @@ def test_sqlite_refuses_update_delete_and_detects_tampering(tmp_path):
 
 
 # ---- privacy -----------------------------------------------------------------------------------------------
+@pytest.mark.covers("EA-6.13")
 def test_record_holds_no_customer_content():
     trust_engine = engine()
     secret = "Jane Citizen, 12 Example St, card 4111"
@@ -302,6 +316,7 @@ def test_record_holds_no_customer_content():
 
 
 # ---- unpredictable sampling --------------------------------------------------------------------------------
+@pytest.mark.covers("EA-2.7", "EA-2.8", "EA-2.9", "EA-5.14")
 def test_sampling_is_unpredictable_and_hidden_from_the_agent():
     trust_engine = TrustEngine(e_policy := engine().policy)          # default sampler
     assert isinstance(trust_engine._sampler, secrets.SystemRandom)

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:earned-autonomy:v0.6:schema:proposed-action.schema.json",
+  "title": "ProposedAction",
+  "description": "An action an agent wants to take, captured before it happens (EA-1.8). The payload stays with the caller; only its hash enters the trust record (EA-6.13).",
+  "type": "object",
+  "properties": {
+    "action_id": {
+      "type": "string"
+    },
+    "organisation_id": {
+      "type": "string"
+    },
+    "agent_id": {
+      "type": "string"
+    },
+    "agent_version": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "description": "e.g. message.send, tool.call, delegate"
+    },
+    "payload": {
+      "description": "The action itself. Never written to the trust record."
+    },
+    "task_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tag_confidence": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "counterparty_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "parent_action_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Set when another agent delegated this action (EA-7.2)."
+    },
+    "created_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+      "description": "ISO 8601 UTC with milliseconds and a Z suffix (EA-6.10)."
+    },
+    "write_tools": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Write tools this action will call (EA-1.14)."
+    },
+    "write_tool_arguments": {
+      "type": "object",
+      "description": "Arguments per write tool, for argument-dependent floors (EA-1.13). Never written to the trust record."
+    }
+  },
+  "required": [
+    "action_id",
+    "organisation_id",
+    "agent_id",
+    "agent_version",
+    "kind",
+    "created_at"
+  ],
+  "additionalProperties": false
+}

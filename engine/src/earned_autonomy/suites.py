@@ -1,4 +1,4 @@
-"""Training and hidden test suites (SPEC §8).
+"""Training and hidden test suites (EA-4.3, EA-4.4, EA-4.10).
 
 - Corrections become tests and are split at random: about 2/3 training, 1/3 hidden.
 - Hidden suites can also be seeded when a version is created (authored scenarios), so carry-over can work for a
@@ -35,7 +35,7 @@ class SuiteStore:
         self._tests.setdefault(task_type, []).append(SuiteCase(test_id, task_type, scenario, visibility, "correction", created_at))
 
     def seed_hidden(self, task_type: str, cases: list[tuple[str, dict]], created_at: str = "") -> None:
-        """Authored hidden tests added at version creation (SPEC §8 'seed hidden suites')."""
+        """Authored hidden tests added at version creation (EA-4.10)."""
         for test_id, scenario in cases:
             self._tests.setdefault(task_type, []).append(
                 SuiteCase(test_id, task_type, scenario, "hidden", "authored", created_at))
@@ -48,7 +48,7 @@ class SuiteStore:
         return [test for test in self._tests.get(task_type, []) if test.visibility == "training"]
 
     def hidden(self, actor: Actor, task_type: str, agent_id: str | None = None) -> list[SuiteCase]:
-        """Hidden tests: policy owner and auditor only; never the agent or its builder (SPEC §8, §13.6)."""
+        """Hidden tests: policy owner and auditor only; never the agent or its builder (EA-4.4)."""
         if not self.guard.request(actor, "read_hidden_tests", agent_id, {"task_type": task_type}):
             raise PermissionError("hidden tests are not readable by this actor")
         return [test for test in self._tests.get(task_type, []) if test.visibility == "hidden"]

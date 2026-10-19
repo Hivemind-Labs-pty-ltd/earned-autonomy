@@ -1,4 +1,4 @@
-"""Strict promotion (SPEC §7, [exploratory v4]): the Beta-binomial mixture confidence sequence."""
+"""Strict promotion (EA-3.14): the Beta-binomial mixture confidence sequence."""
 import random
 import sys
 from pathlib import Path
@@ -16,11 +16,13 @@ def level(trust_engine, task_type="customer_service.status.update"):
     return state[0]["level"] if state else L1
 
 
+@pytest.mark.covers("EA-3.14")
 def test_clean_floors_match_report_v4():
     assert [clean_floor(ConfidenceSequenceBound(error_bar), error_bar) for error_bar in (0.10, 0.05, 0.02)] == [46, 93, 236]
     assert [clean_floor(WilsonBound(), error_bar) for error_bar in (0.10, 0.05, 0.02)] == [35, 73, 189]
 
 
+@pytest.mark.covers("EA-3.14")
 def test_bounds_bracket_the_rate_and_tighten():
     confidence_sequence = ConfidenceSequenceBound(0.05)
     assert confidence_sequence.lower(5, 100) < 0.05 < confidence_sequence.upper(5, 100)
@@ -33,6 +35,7 @@ def test_bounds_bracket_the_rate_and_tighten():
 
 
 @pytest.mark.skipif(not (GYM / "gym/engine_v4.py").exists(), reason="Trust Gym not present")
+@pytest.mark.covers("EA-3.14")
 def test_parity_with_trust_gym_v4():
     sys.path.insert(0, str(GYM))
     from gym.engine_v4 import cs_upper
@@ -44,6 +47,7 @@ def test_parity_with_trust_gym_v4():
                     assert confidence_sequence.upper(err, n) == pytest.approx(cs_upper(err, n, 1.0, 1.0 / error_bar - 1.0), abs=1e-9)
 
 
+@pytest.mark.covers("EA-3.14")
 def test_strict_selected_by_consequence_level_delays_promotion():
     trust_engine = engine(policy=policy(strict_promotion=["C1"]))
     run_clean(trust_engine, 45)
@@ -54,6 +58,7 @@ def test_strict_selected_by_consequence_level_delays_promotion():
     assert state_rows["bound"] == "confidence_sequence"
 
 
+@pytest.mark.covers("EA-3.14")
 def test_strict_selected_by_task_type_only_affects_that_type():
     trust_engine = engine(policy=policy(strict_promotion=["customer_service.status.update"]))
     assert trust_engine.policy.is_strict("customer_service.status.update") and not trust_engine.policy.is_strict("customer_service.reply.send")
@@ -63,6 +68,7 @@ def test_strict_selected_by_task_type_only_affects_that_type():
     assert decision.upper_bound == pytest.approx(WilsonBound().upper(0, 0))
 
 
+@pytest.mark.covers("EA-3.14")
 def test_default_is_wilson_everywhere():
     trust_engine = engine()
     run_clean(trust_engine, 35)
@@ -70,6 +76,7 @@ def test_default_is_wilson_everywhere():
     assert trust_engine.get_state("organisation", "customer_service_agent", "customer_service.status.update")[0]["bound"] == "wilson"
 
 
+@pytest.mark.covers("EA-3.5", "EA-3.14")
 def test_strict_promotion_still_steps_down_on_errors_and_replays():
     trust_engine = engine(policy=policy(strict_promotion=["C1"]))
     promote_to(trust_engine, L2)
@@ -86,6 +93,7 @@ def test_strict_promotion_still_steps_down_on_errors_and_replays():
     assert trust_engine.rebuild_state() == trust_engine.live_state()
 
 
+@pytest.mark.covers("EA-3.14")
 def test_anytime_validity_under_continuous_monitoring():
     """An agent whose true error rate is above the bar should almost never be promoted, even though the bound is
     re-checked after every outcome. With the confidence sequence that probability is ≤ α (0.05)."""

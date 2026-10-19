@@ -1,4 +1,4 @@
-"""The trust record (SPEC §5, §10): append-only, kept forever, tamper-evident.
+"""The trust record (EA-6.6 to EA-6.13): append-only, kept forever, tamper-evident.
 
 The order of truth is each entry's sequence number in the hash chain, never its timestamp: clocks drift, so
 replay and scans always run in sequence order. Timestamps are stored in one exact UTC format.
@@ -22,7 +22,7 @@ from .models import normalise_timestamp
 
 GENESIS = "sha256:" + "0" * 64
 
-# Entry types an agent must never see in its own record (unpredictable sampling, SPEC §6 / §9).
+# Entry types an agent must never see in its own record (EA-5.14).
 PRIVATE_TYPES = frozenset({"spot_sample", "canary", "second_check_sample"})
 
 
@@ -126,7 +126,7 @@ class TrustRecord:
             last = self.backend.last()
             sequence = 0 if last is None else last.sequence + 1
             previous = GENESIS if last is None else last.hash
-            timestamp = normalise_timestamp(timestamp)   # one exact UTC format (SPEC §5 Timestamps)
+            timestamp = normalise_timestamp(timestamp)   # one exact UTC format (EA-6.10)
             body = json.loads(canonical(body))          # freeze to plain JSON
             entry = Entry(sequence, timestamp, entry_type, body, previous, entry_hash(sequence, timestamp, entry_type, body, previous))
             self.backend.append(entry)

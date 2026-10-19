@@ -1,4 +1,4 @@
-"""Replay a committed Trust Gym T1 stream subset through the engine (SPEC §13.7 parity).
+"""Replay a committed Trust Gym T1 stream subset through the engine (rule EA-3.4, EA-3.5: Trust Gym parity).
 
 The fixture holds 12 T1 worlds (seeds 90 000–90 011, the v3 reference seeds) with each action's true error, check
 flag, consequence level, true error rate and day. The reviewer model, incident model and metrics are ported from the
@@ -16,7 +16,7 @@ from pathlib import Path
 
 from earned_autonomy import ChecksResult, Policy, ProposedAction, TaskTypePolicy, TrustEngine
 
-FIXTURE = Path(__file__).resolve().parent.parent / "fixtures" / "t1_worlds.jsonl.gz"
+FIXTURE = Path(__file__).resolve().parent / "fixtures" / "t1_worlds.jsonl.gz"
 CONSEQUENCE_ERROR_BAR = {"C1": 0.10, "C2": 0.05, "C3": 0.02, "C4": 0.0}
 REGRESSIONS = {"bad_update", "defector"}
 BASE = datetime(2026, 1, 1, tzinfo=timezone.utc)

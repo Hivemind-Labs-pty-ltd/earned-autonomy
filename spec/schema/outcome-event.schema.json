@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:earned-autonomy:v0.6:schema:outcome-event.schema.json",
+  "title": "OutcomeEvent",
+  "description": "One judgement of one action: the evidence trust is built from (EA-3.1, EA-5.2).",
+  "type": "object",
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "action_id": {
+      "type": "string"
+    },
+    "decision_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "trust_key": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "string",
+          "description": "organisation"
+        },
+        {
+          "type": "string",
+          "description": "agent"
+        },
+        {
+          "type": "string",
+          "description": "task type"
+        }
+      ],
+      "minItems": 3,
+      "maxItems": 3,
+      "description": "The trust key: (organisation, agent, task type) (EA-1.2)."
+    },
+    "agent_version": {
+      "type": "string"
+    },
+    "source": {
+      "enum": [
+        "pre_review",
+        "spot_check",
+        "incident",
+        "canary"
+      ]
+    },
+    "label": {
+      "enum": [
+        "approved",
+        "cosmetic_edit",
+        "material_edit",
+        "rejected",
+        "incomplete"
+      ]
+    },
+    "reason_code": {
+      "anyOf": [
+        {
+          "enum": [
+            "wrong_fact",
+            "wrong_amount",
+            "wrong_record",
+            "wrong_recipient",
+            "unauthorised_action",
+            "promise_beyond_policy",
+            "missing_info_not_asked",
+            "followed_injected_instruction",
+            "policy_breach",
+            "other_serious",
+            "tone",
+            "wording",
+            "formatting",
+            "other_cosmetic"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Required for material_edit and rejected (EA-5.2, EA-5.3)."
+    },
+    "serious": {
+      "type": "boolean",
+      "description": "EA-3.3"
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "diff_reference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+      "description": "ISO 8601 UTC with milliseconds and a Z suffix (EA-6.10)."
+    }
+  },
+  "required": [
+    "event_id",
+    "action_id",
+    "trust_key",
+    "agent_version",
+    "source",
+    "label",
+    "reason_code",
+    "serious",
+    "actor_id",
+    "created_at"
+  ],
+  "additionalProperties": false
+}

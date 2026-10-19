@@ -1,4 +1,4 @@
-"""Governance guard (SPEC §10). Roles, separation of duties, every request logged (allowed or not).
+"""Governance guard (EA-6.1 to EA-6.4). Roles, separation of duties, every request logged (allowed or not).
 
 Roles: ai_owner, policy_owner, reviewer, auditor, builder, agent.
 """
@@ -10,13 +10,13 @@ ROLES = frozenset({"ai_owner", "policy_owner", "reviewer", "auditor", "builder",
 
 # operation -> roles allowed to perform it
 ALLOWED: dict[str, set] = {
-    # policy (SPEC §10: the policy owner sets ε, caps, tools per type and sample rates)
+    # policy (EA-6.1: the policy owner sets ε, caps, tools per type and sample rates)
     "set_policy": {"policy_owner"},
     "set_error_bar": {"policy_owner"},
     "set_cap": {"policy_owner"},
     "set_spot_rate": {"policy_owner"},
     "set_tools": {"policy_owner"},
-    # catalogue (SPEC §4: the AI owner maintains task types and assigns consequence levels)
+    # catalogue (EA-1.7: the AI owner maintains task types and assigns consequence levels)
     "add_task_type": {"ai_owner"},
     "set_consequence": {"ai_owner"},
     # levels
@@ -24,7 +24,7 @@ ALLOWED: dict[str, set] = {
     "demote": {"policy_owner", "ai_owner", "reviewer"},
     "pause": {"policy_owner", "ai_owner", "reviewer"},
     "resume": {"policy_owner", "ai_owner"},
-    # tests and checks (SPEC §8: the agent and any improver never edit these)
+    # tests and checks (EA-4.14: the agent and any improver never edit these)
     "edit_tests": {"policy_owner"},
     "edit_checks": {"policy_owner"},
     "read_hidden_tests": {"policy_owner", "auditor"},
@@ -68,7 +68,7 @@ class GovernanceGuard:
         if operation not in ALLOWED:
             return GovernanceResult(False, "unknown_op")
         if actor.agent_id is not None or "agent" in actor.roles:
-            # an agent may read its own record and nothing else (SPEC §10)
+            # an agent may read its own record and nothing else (EA-6.2, EA-5.14)
             if operation == "read_record" and (target_agent is None or target_agent == actor.agent_id):
                 return GovernanceResult(True, "ok")
             return GovernanceResult(False, "agent_cannot_govern")
