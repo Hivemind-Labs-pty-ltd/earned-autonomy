@@ -40,14 +40,29 @@ def utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def iso(moment: datetime) -> str:
-    if moment.tzinfo is None:
-        moment = moment.replace(tzinfo=timezone.utc)
-    return moment.astimezone(timezone.utc).isoformat()
+def format_timestamp(moment: datetime) -> str:
+    """The one timestamp format written to the trust record and every model (SPEC §5 Timestamps):
+    ISO 8601 in UTC, always milliseconds, always a `Z` suffix, e.g. `2026-10-19T03:20:00.123Z`.
+    Sub-millisecond digits are truncated, not rounded. Naive datetimes are rejected: a moment without a timezone is
+    ambiguous, and guessing would put local time into the record."""
+    if moment.tzinfo is None or moment.tzinfo.utcoffset(moment) is None:
+        raise ValueError("naive datetime: pass a timezone-aware datetime (UTC preferred)")
+    utc = moment.astimezone(timezone.utc)
+    return utc.strftime("%Y-%m-%dT%H:%M:%S.") + f"{utc.microsecond // 1000:03d}Z"
 
 
-def parse_iso(text: str) -> datetime:
-    return datetime.fromisoformat(text)
+def parse_timestamp(text: str) -> datetime:
+    """Read a timestamp into an aware UTC datetime. Accepts the canonical `...sssZ` form and, for old records, other
+    ISO 8601 forms with an offset (`+00:00`, `+11:00`) or without milliseconds. A string with no offset is rejected."""
+    value = datetime.fromisoformat(text[:-1] + "+00:00" if text.endswith("Z") else text)
+    if value.tzinfo is None:
+        raise ValueError(f"timestamp without a timezone: {text!r}")
+    return value.astimezone(timezone.utc)
+
+
+def normalise_timestamp(text: str) -> str:
+    """Any accepted timestamp string → the canonical format."""
+    return format_timestamp(parse_timestamp(text))
 
 
 def payload_hash(payload: Any) -> str:

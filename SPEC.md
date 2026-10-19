@@ -1,6 +1,6 @@
 # Earned Autonomy Framework: build spec
 
-**Version 0.4 (preview), 2026-10-18.** Companion to the explainer (the loop, the ladder, the five stages). This
+**Version 0.5 (preview), 2026-10-19.** Companion to the explainer (the loop, the ladder, the five stages). This
 document is for the engineer or AI agent building it. It is product-neutral: any agent platform can implement it.
 
 Every rule carries a status:
@@ -116,8 +116,23 @@ The tagger works from the descriptions and examples, and reviewers use them to j
 
 ## 5. Data model
 
-All timestamps UTC. All records carry `organisation_id`. The trust record is **append-only**: no updates or deletes,
-ever.
+All records carry `organisation_id`. The trust record is **append-only**: no updates or deletes, ever.
+
+**Timestamps** **[default]**
+- **One exact format in the record:** ISO 8601 in UTC, always with milliseconds and a `Z` suffix:
+  `YYYY-MM-DDTHH:MM:SS.sssZ`, e.g. `2026-10-19T03:20:00.123Z`. A zero-millisecond moment still prints `.000Z`.
+  Sub-millisecond digits are truncated.
+- **Why:** auditors can read it at a glance; UTC has no daylight-saving ambiguity (Melbourne's local clock repeats an
+  hour each April, so local times can't be ordered or compared safely); and one fixed format keeps the hash chain
+  stable, since the same moment always produces the same bytes.
+- **Old records:** other ISO 8601 forms with an offset (`+00:00`, `+11:00`) or without milliseconds are accepted when
+  reading and normalised to the canonical form. A timestamp or datetime with no timezone is **rejected**, never
+  assumed.
+- **Epoch milliseconds** are fine in APIs and internal code if the name says so in full (e.g.
+  `created_at_epoch_milliseconds`) and they're converted at the boundary. They never enter the record.
+- **Products show local time; storage is UTC.**
+- **Ordering:** the record's order of truth is each entry's **sequence number** in the hash chain, not its timestamp.
+  Clocks drift and servers disagree, so replay, scans and audits always run in sequence order.
 
 **ProposedAction**
 ```json
@@ -453,6 +468,9 @@ reproduces the tested results). **[implemented v0.3]**
     ε = 0.
 13. **Every governance operation names an actor,** including pause, resume and manual promotion or demotion, and is
     logged to the record.
+14. **Timestamps (v0.5):** one exact UTC format (`2026-10-19T03:20:00.123Z`) for everything written to the record or a
+    model; old `+00:00` and no-millisecond forms are normalised on read; naive datetimes are rejected; order is by
+    sequence number, never by timestamp (§5 Timestamps).
 
 ## 15. Decisions
 

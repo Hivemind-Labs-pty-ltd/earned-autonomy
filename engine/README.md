@@ -31,7 +31,7 @@ What it gives you:
 
 ```bash
 pip install -e engine          # from the repo root
-pytest engine                  # 62+ tests, about 20 s (the Trust Gym parity test replays 40 worlds)
+pytest engine                  # 69 tests, about 20 s (the Trust Gym parity test replays 40 worlds)
 ```
 
 ## Quickstart: wrap any agent

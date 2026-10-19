@@ -1,5 +1,8 @@
 """The trust record (SPEC §5, §10): append-only, kept forever, tamper-evident.
 
+The order of truth is each entry's sequence number in the hash chain, never its timestamp: clocks drift, so
+replay and scans always run in sequence order. Timestamps are stored in one exact UTC format.
+
 Every entry is hash-chained: `hash = sha256(canonical_json({sequence, timestamp, type, body, previous_hash}))`. `verify()`
 recomputes the chain and detects any edited, deleted, inserted or reordered entry. Entries hold references and
 labels only, never customer content (payloads are stored as hashes).
@@ -14,6 +17,8 @@ import sqlite3
 import threading
 from dataclasses import dataclass
 from typing import Iterator, Protocol
+
+from .models import normalise_timestamp
 
 GENESIS = "sha256:" + "0" * 64
 
@@ -102,7 +107,7 @@ class SQLiteBackend:
         return self._row(row) if row else None
 
     def scan(self) -> Iterator[Entry]:
-        for row in self.connection.execute("SELECT * FROM trust_record ORDER BY rowid"):
+        for row in self.connection.execute("SELECT * FROM trust_record ORDER BY sequence"):
             yield self._row(row)
 
     def count(self) -> int:
@@ -121,6 +126,7 @@ class TrustRecord:
             last = self.backend.last()
             sequence = 0 if last is None else last.sequence + 1
             previous = GENESIS if last is None else last.hash
+            timestamp = normalise_timestamp(timestamp)   # one exact UTC format (SPEC §5 Timestamps)
             body = json.loads(canonical(body))          # freeze to plain JSON
             entry = Entry(sequence, timestamp, entry_type, body, previous, entry_hash(sequence, timestamp, entry_type, body, previous))
             self.backend.append(entry)

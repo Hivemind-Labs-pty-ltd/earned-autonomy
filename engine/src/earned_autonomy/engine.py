@@ -18,8 +18,8 @@ from typing import Any, Callable
 
 from .governance import Actor, GovernanceGuard
 from .models import (CONSEQUENCE, COSMETIC_REASONS, L1, L2, L3, LABELS, LEVEL_NAMES, RANK, REASON_CODES,
-                     ChecksResult, Decision, Policy, ProposedAction, TaskTypePolicy, TrustKey, TrustState, iso,
-                     is_serious, max_consequence, parse_iso, payload_hash, utcnow)
+                     ChecksResult, Decision, Policy, ProposedAction, TaskTypePolicy, TrustKey, TrustState, format_timestamp,
+                     is_serious, max_consequence, parse_timestamp, payload_hash, utcnow)
 from .record import TrustRecord
 from .stats import BoundStrategy, ConfidenceSequenceBound, WilsonBound
 from .suites import SuiteStore
@@ -227,7 +227,7 @@ class TrustEngine:
 
     # ---- plumbing ----------------------------------------------------------------------------------------
     def _now(self) -> str:
-        return iso(self.clock())
+        return format_timestamp(self.clock())
 
     def _emit(self, entry_type: str, body: dict):
         entry = self.record.append(entry_type, body, self._now())
@@ -332,7 +332,7 @@ class TrustEngine:
             # a version nobody published through on_version_published: treat as untested (discount)
             self._emit("version_unannounced", {"trust_key": list(key), "version": action.agent_version})
         if state.level >= L2 and state.last_activity_at is not None:
-            gap = self.clock() - parse_iso(state.last_activity_at)
+            gap = self.clock() - parse_timestamp(state.last_activity_at)
             if gap > timedelta(days=self.policy.reentry_gap_days):
                 # SPEC §7 re-entry rule [tested v3]
                 self._emit("level_change", {"trust_key": list(key), "to": state.level - 1, "why": "reentry_gap"})

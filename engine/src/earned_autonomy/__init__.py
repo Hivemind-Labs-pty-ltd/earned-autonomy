@@ -6,7 +6,8 @@ from .engine import TrustEngine, reviewer_key
 from .governance import Actor, GovernanceGuard
 from .models import (CONSEQUENCE, RANK, COSMETIC_REASONS, L0, L1, L2, L3, LABELS, LEVEL_NAMES, REASON_CODES,
                      SERIOUS_REASONS, ChecksResult, Decision, OutcomeEvent, Policy, ProposedAction, TaskTypePolicy,
-                     TrustState, is_serious, lint_shared_write_tools, max_consequence, payload_hash)
+                     TrustState, format_timestamp, is_serious, lint_shared_write_tools, max_consequence,
+                     normalise_timestamp, parse_timestamp, payload_hash)
 from .record import MemoryBackend, SQLiteBackend, TrustRecord, VerifyResult
 from .stats import BoundStrategy, ConfidenceSequenceBound, WilsonBound, clean_floor
 from .suites import SuiteCase, SuiteStore
@@ -16,7 +17,7 @@ __version__ = "0.4.0"
 __all__ = [
     "TrustEngine", "reviewer_key", "Actor", "GovernanceGuard", "CONSEQUENCE", "COSMETIC_REASONS", "L0", "L1", "L2",
     "L3", "LABELS", "LEVEL_NAMES", "REASON_CODES", "SERIOUS_REASONS", "ChecksResult", "Decision", "OutcomeEvent",
-    "Policy", "ProposedAction", "TaskTypePolicy", "TrustState", "is_serious", "payload_hash", "RANK", "lint_shared_write_tools", "max_consequence", "MemoryBackend",
+    "Policy", "ProposedAction", "TaskTypePolicy", "TrustState", "format_timestamp", "normalise_timestamp", "parse_timestamp", "is_serious", "payload_hash", "RANK", "lint_shared_write_tools", "max_consequence", "MemoryBackend",
     "SQLiteBackend", "TrustRecord", "VerifyResult", "BoundStrategy", "ConfidenceSequenceBound", "WilsonBound", "clean_floor", "SuiteCase", "SuiteStore",
     "RuleTagger", "Tagger", "TagResult",
 ]
