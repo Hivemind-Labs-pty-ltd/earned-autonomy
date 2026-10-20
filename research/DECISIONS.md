@@ -170,3 +170,12 @@ Append-only. Newest at the bottom.
 - **Promotions deserved** and **regression latency** as in `analyze_v3.ref_t1/ref_t2` (T2 future = the key's later stream rows).
 - **Tool scope:** Core run on `good-scoped` and on `good-full` restricted to the same task ids, in `good-scoped` order; 20 seeds.
 - A one-seed crash check was run before this entry (it checked only that the code executes; no metrics were read).
+
+## 2026-10-21 — round "core": verdicts (REPORT-core.md)
+- **Q1 MIXED** (1 of 5 streams): Core lets through more serious escapes than Full on T1, T2 good-full, 10x-D good and 10x-D sloppy; it passes on sloppy-full.
+- **Q2 PASS:** Core's whole-stream multiple is 1.04–1.06 × Full's on every stream (no canary minutes).
+- **Q3 MIXED** (2 of 5): Core keeps 72–100% of Full's escape reduction against acting freely.
+- **Q4:** the whole Q1 gap is canaries. Core + canaries (a pre-registered ablation arm) matches Full: escapes within +0.02 per 100 on every stream, multiple 0.99–1.01 × Full, reduction kept 0.97–1.00. Re-entry: no effect (it cannot act on these streams). Wilson step-down: under 1% effect on escapes and the multiple, but demotes T1 regressions faster (median 13 vs 19 actions). Carry-over: +6.3% multiple on T1 versioned; no effect on the 10x D streams (suites under the 10-test minimum).
+- **Pre-registered placement rule:** canaries → **Core**; carry-over → **Standard**; re-entry and Wilson step-down → **Advanced**.
+- **Caveat:** the canary effect comes entirely from the assumed reviewer complacency model (catch probability falls when errors are rare; canaries restore it). Real-reviewer data is needed.
+- The Core + canaries Q1–Q3 check is computed from the pre-registered ablation arm and reported as such; it was not a pre-registered hypothesis.
