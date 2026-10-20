@@ -136,3 +136,11 @@ Append-only. Newest at the bottom.
   - **S2a:** the defence removes 100% of *autonomous* downgrade escapes in every scenario; the residual is reviewer misses on held actions, which the prereg metric counted.
   - **S1 T1:** all 72 undeserved W95 promotions are in defector / bad-update / drift keys (none in steady, learning or early). T1's undeserved promotions are post-promotion change, not peeking.
   - **S3 incidents-off sensitivity** (pre-registered as a sensitivity, not a bar): predictable sampling, median 498 actions to demotion vs 54, escapes 1.9×.
+
+## 2026-10-21 — contracts round: operationalisations (after induction smoke, before any arm was run)
+- **Provenance candidate added: `linked_field`.** This is a field of a record that the primary target references by id, one hop (e.g. an invoice's supplier → the supplier's default GL code). It's tried after `target_field`. I read it as part of "a field of the primary target" in PREREG-contracts; without it, accounts-payable coding can't form a clause.
+- **Judged evidence for arm C from the base policy's own holds:** a judged run is "serious" when the base engine's `blocked` count rose on that step, i.e. the reviewer caught it. An error the reviewer missed counts as clean, as with every judgement in the engine.
+- **Incidents on the contract path** trigger with probability 0.3 at the moment of escape (no delay), then demote the clause.
+- **Holds don't demote:** a disagreement or fact-check hold under a promoted clause doesn't demote it. Only a caught serious error on a spot-check, or an incident, does.
+- **Minutes:** the base engine's canary reviews count toward minutes in every arm, as in the v3 reference.
+- **Clause identity** is (task type, tree leaf). The tree is fixed after the training window.
