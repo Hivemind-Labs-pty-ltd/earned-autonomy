@@ -179,3 +179,27 @@ Append-only. Newest at the bottom.
 - **Pre-registered placement rule:** canaries → **Core**; carry-over → **Standard**; re-entry and Wilson step-down → **Advanced**.
 - **Caveat:** the canary effect comes entirely from the assumed reviewer complacency model (catch probability falls when errors are rare; canaries restore it). Real-reviewer data is needed.
 - The Core + canaries Q1–Q3 check is computed from the pre-registered ablation arm and reported as such; it was not a pre-registered hypothesis.
+
+## 2026-10-21 — playbooks round: approval and runtime choices (frozen before any task run)
+- **Drafts:** 17 of 20 drafted successfully within 4 attempts. `it:access`, `do:sync` and `ap:coding` returned no JSON after 4 attempts, so the approver wrote those three from the policy and logged 15 minutes each.
+- **Approval:** every edit and its minutes are in `playbooks/approved/_review_log.json` and `playbooks/approve.py`; 157 minutes in total for 20 task types.
+  - **Recurring draft errors fixed:**
+    - promise requests were read as compensation demands and escalated;
+    - a refund was declined when the requested amount differed (policy says refund exactly the total);
+    - multi-intent drafts were scoped down to their own task type;
+    - the merge draft applied the sync rule (CRM source only);
+    - the reminder template was taken from the message;
+    - an ownership check (the order's email matches the requester's) was missing.
+- **Disclosure:** the approver (Claude) had read `t2/archetypes.py`, generators included, in earlier rounds. The approval used only the written rules, and every branch cites its rule number. The approver never saw these test tasks' messages or truth during approval. An approver who knew the generator is still a bias toward the playbook arm; it is reported as a limit.
+- **Runtime choices:**
+  - **The writer sees the required facts with their values:** "must include these values exactly as written".
+  - **Message validation:**
+    - every `$` amount must equal a numeric fact;
+    - every id matching the id pattern (`O-`, `B-`, `T-`, `INV-`, `S-`, `C-`, `R-`, `U###`, `E#####`) must appear in the facts or the extracted slots;
+    - required facts must be present (numbers in common formats);
+    - the reply must not be empty;
+    - the two-stage commitment judge must not flag it.
+  - **One retry with the reasons;** if validation still fails, the action is held (`check_flag`).
+- **Interpreter:** `email` matching returns "ask" with the candidate ids when more than one record matches (rule 5). Unsupported expressions (method calls, slices) were removed from playbooks at approval.
+- **Minutes:** escalation hand-offs (an executed `escalate_to_human`) count +1.0 minute in *every* arm, the free-form arms included.
+- **Ledger and caches:** the round uses its own spend ledger (`report/raw/playbooks-spend.jsonl`) and its own commitment-judge cache (`report/raw/playbooks-commit-grades.jsonl`); existing files are untouched. Drafting cost = the ledger's `playbooks-author` stage. Runtime cost = the `playbooks-extract`, `playbooks-write` and `t2-commit-grader` stages.

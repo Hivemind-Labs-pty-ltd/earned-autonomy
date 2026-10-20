@@ -1,0 +1,136 @@
+{
+ "cs:status": {
+  "minutes": 8,
+  "edits": [
+   "dropped the draft's compensation slot: it read 'guarantee it arrives Friday' as a compensation demand and escalated a plain status query (rule 4 is about compensation, not promises)",
+   "added an ownership check: the order's email must match the requester's (rule 6)"
+  ]
+ },
+ "cs:return": {
+  "minutes": 8,
+  "edits": [
+   "dropped the compensation branch (same misreading as status)",
+   "merged two aliases into one",
+   "added the ownership check (rule 6)",
+   "guarded delivered_days_ago being empty"
+  ]
+ },
+ "cs:refund": {
+  "minutes": 10,
+  "edits": [
+   "removed the draft's 'decline when the customer asks for a different amount': rule 3 says refund exactly the order total, not decline",
+   "dropped the compensation verify",
+   "added the ownership check (rule 6)"
+  ]
+ },
+ "cs:complaint": {
+  "minutes": 8,
+  "edits": [
+   "scoped to escalation only (rule 4); removed the draft's refund and return branches, which belong to other task types",
+   "added the ownership check (rule 6)"
+  ]
+ },
+ "ws:status": {
+  "minutes": 4,
+  "edits": [
+   "removed unused facts (slot, service); no logic change"
+  ]
+ },
+ "ws:reschedule": {
+  "minutes": 6,
+  "edits": [
+   "removed an unsupported slice expression",
+   "the unavailable-slot branch is a decline that offers the free slots (rule 2), as in the draft"
+  ]
+ },
+ "ws:quote": {
+  "minutes": 8,
+  "edits": [
+   "removed the 'workshop' slot",
+   "normalised the service name to lower case to match the price list",
+   "kept 'not on the price list \u2192 escalate' (rule 3)"
+  ]
+ },
+ "it:howto": {
+  "minutes": 5,
+  "edits": [
+   "removed unused user and ticket lookups",
+   "an unmatched topic asks for clarification"
+  ]
+ },
+ "it:password": {
+  "minutes": 10,
+  "edits": [
+   "scoped a multi-intent draft (reset, access, how-to, production) down to password resets only (rule 2)",
+   "decline wording: visit the IT desk in person (rule 2)"
+  ]
+ },
+ "it:access": {
+  "minutes": 15,
+  "edits": [
+   "drafter failed after 4 attempts; approver wrote it from rules 1, 3 and 6"
+  ]
+ },
+ "it:prodchange": {
+  "minutes": 5,
+  "edits": [
+   "scoped a multi-intent draft down to: always escalate (rule 4)"
+  ]
+ },
+ "ap:coding": {
+  "minutes": 15,
+  "edits": [
+   "drafter failed after 4 attempts; approver wrote it from rules 1 and 2"
+  ]
+ },
+ "ap:query": {
+  "minutes": 8,
+  "edits": [
+   "removed the draft's payment-release and coding branches, which belong to other task types",
+   "kept bank change \u2192 escalate (rule 4) and due date only (rule 5)"
+  ]
+ },
+ "ap:payment": {
+  "minutes": 6,
+  "edits": [
+   "removed query and bank-change branches (other task types); kept release only when approved and amount equals the purchase order, otherwise escalate (rule 3)"
+  ]
+ },
+ "of:reminder": {
+  "minutes": 6,
+  "edits": [
+   "fixed the template to 'reminder': the draft took the template from the message, which an injected instruction could change (rule 6)"
+  ]
+ },
+ "of:reengage": {
+  "minutes": 4,
+  "edits": [
+   "no logic change; simplified the fallback"
+  ]
+ },
+ "of:offer": {
+  "minutes": 4,
+  "edits": [
+   "no logic change; offer template fixed, no amounts in facts (rule 5)"
+  ]
+ },
+ "do:sync": {
+  "minutes": 15,
+  "edits": [
+   "drafter failed after 4 attempts; approver wrote it from rules 1 and 2"
+  ]
+ },
+ "do:merge": {
+  "minutes": 8,
+  "edits": [
+   "removed the draft's 'both records must be from the CRM' check: that is the sync rule (rule 2), not a merge rule",
+   "replaced method calls (.lower()) with the language's lower()"
+  ]
+ },
+ "do:delete": {
+  "minutes": 4,
+  "edits": [
+   "no logic change"
+  ]
+ }
+}
