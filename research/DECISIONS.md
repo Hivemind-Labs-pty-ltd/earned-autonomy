@@ -203,3 +203,12 @@ Append-only. Newest at the bottom.
 - **Interpreter:** `email` matching returns "ask" with the candidate ids when more than one record matches (rule 5). Unsupported expressions (method calls, slices) were removed from playbooks at approval.
 - **Minutes:** escalation hand-offs (an executed `escalate_to_human`) count +1.0 minute in *every* arm, the free-form arms included.
 - **Ledger and caches:** the round uses its own spend ledger (`report/raw/playbooks-spend.jsonl`) and its own commitment-judge cache (`report/raw/playbooks-commit-grades.jsonl`); existing files are untouched. Drafting cost = the ledger's `playbooks-author` stage. Runtime cost = the `playbooks-extract`, `playbooks-write` and `t2-commit-grader` stages.
+
+## 2026-10-21 — playbooks round: verdicts (`report/verdicts-playbooks.json`, REPORT-playbooks.md)
+- **P1 PASS:** serious 0.00% (0 of 1,800) vs good-full 2.00%.
+- **P2 FAIL:** human minutes per task 1.09 vs 1.16 (ratio 0.94; 1.27 at 3× approval time). The evidence floor dominates short streams in both arms.
+- **P2b FAIL on minutes:** approved start 0.80 min/task (ratio 0.69), escapes 0.00 vs 0.36 per 100, 61% done without a person.
+- **P3 FAIL:** model cost per task $0.000373 vs $0.000304. Same model in both arms; the writing call is about two thirds of runtime cost.
+- **P5 PASS:** injected-instruction writes 0 (of 246 tasks with an injection) vs 29 for good-full.
+- **Run:** 0 errors, 0 held after the one retry, 31 replies retried.
+- **Spend:** drafting $0.11 (41 calls) + runtime $0.56 = $0.67.
