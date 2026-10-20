@@ -144,3 +144,13 @@ Append-only. Newest at the bottom.
 - **Holds don't demote:** a disagreement or fact-check hold under a promoted clause doesn't demote it. Only a caught serious error on a spot-check, or an incident, does.
 - **Minutes:** the base engine's canary reviews count toward minutes in every arm, as in the v3 reference.
 - **Clause identity** is (task type, tree leaf). The tree is fixed after the training window.
+
+## 2026-10-21 — contracts round: verdicts (`report/verdicts-contracts.json`)
+- **K1 PASS:** escapes per 100: good A 0.35 / B 0.29 / C 0.34; sloppy A 0.91 / B 1.08 / C 0.86.
+- **K2 FAIL:** human minutes per task, C/A = 1.04 (good) and 1.03 (sloppy). Arm C's extra judged reviews (about 200–230 per seed) and sign-offs outweigh the small number of contract-run tasks.
+- **K3 MIXED:**
+  - **sloppy:** B locked in 4.1% of scored episodes (e.g. customer-service returns opened outside policy); C locked in 0%.
+  - **good:** neither arm locked any in. The second half of K3 is therefore "not shown", scored as not passing for that stream, per the PREREG wording.
+- **K4 FAIL:** without a person, good A 40.4% / C 41.0%; sloppy A 25.1% / C 25.9%.
+- **Why:** contracts formed mostly on low-consequence information replies (workshop status, IT how-to) that v3 already automates. Judgement-heavy and higher-consequence types formed few or no pure, fully-sourced clauses.
+- REPORT-contracts.md was blocked for the sub-agent; its content was returned to the parent to save.

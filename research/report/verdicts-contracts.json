@@ -1,0 +1,733 @@
+{
+ "verdicts": {
+  "K1": {
+   "verdict": "PASS",
+   "per_stream": [
+    "PASS",
+    "PASS"
+   ],
+   "value": "good-full: escapes/100 A 0.35 \u00b7 B 0.29 \u00b7 C 0.34 | sloppy-full: escapes/100 A 0.91 \u00b7 B 1.08 \u00b7 C 0.86"
+  },
+  "K2": {
+   "verdict": "FAIL",
+   "per_stream": [
+    "FAIL",
+    "FAIL"
+   ],
+   "value": "good-full: minutes/task A 0.694 \u00b7 B 0.697 \u00b7 C 0.725 (C/A 1.04); manual 4.17 | sloppy-full: minutes/task A 0.830 \u00b7 B 0.811 \u00b7 C 0.854 (C/A 1.03); manual 4.17"
+  },
+  "K3": {
+   "verdict": "MIXED",
+   "per_stream": [
+    "FAIL",
+    "PASS"
+   ],
+   "value": "good-full: locked-in share B 0.0 (0.0/10.0 per seed) \u00b7 C 0.0 (0.0/2.2) | sloppy-full: locked-in share B 0.041 (0.4/9.8 per seed) \u00b7 C 0.0 (0.0/2.4)"
+  },
+  "K4": {
+   "verdict": "FAIL",
+   "per_stream": [
+    "FAIL",
+    "FAIL"
+   ],
+   "value": "good-full: without a person A 40.4% \u00b7 B 40.3% \u00b7 C 41.0% | sloppy-full: without a person A 25.1% \u00b7 B 27.2% \u00b7 C 25.9%"
+  }
+ },
+ "streams": {
+  "good-full": {
+   "arms": {
+    "A": {
+     "minutes_per_task": [
+      0.6943083333333333,
+      0.690275,
+      0.6981833333333334
+     ],
+     "without_person": [
+      0.4040583333333333,
+      0.40023333333333333,
+      0.40758333333333335
+     ],
+     "escapes_per100": [
+      0.35416666666666663,
+      0.3333333333333333,
+      0.37416666666666665
+     ],
+     "manual_minutes_per_task": [
+      4.165333333333334,
+      4.165333333333334,
+      4.165333333333334
+     ],
+     "promotions": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "demotions": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "episodes_scored": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "episodes_locked": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "contract_exec": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "contract_held": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "judged_extra": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "signoffs": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "locked_share": null,
+     "locked_examples": [],
+     "exec_by_type_mean": {}
+    },
+    "B": {
+     "minutes_per_task": [
+      0.6970166666666666,
+      0.6948083333333333,
+      0.6992166666666667
+     ],
+     "without_person": [
+      0.4034416666666667,
+      0.400975,
+      0.40586666666666665
+     ],
+     "escapes_per100": [
+      0.2891666666666667,
+      0.2633333333333333,
+      0.3175
+     ],
+     "manual_minutes_per_task": [
+      4.165333333333334,
+      4.165333333333334,
+      4.165333333333334
+     ],
+     "promotions": [
+      13.0,
+      13.0,
+      13.0
+     ],
+     "demotions": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "episodes_scored": [
+      10.0,
+      10.0,
+      10.0
+     ],
+     "episodes_locked": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "contract_exec": [
+      713.0,
+      713.0,
+      713.0
+     ],
+     "contract_held": [
+      38.0,
+      38.0,
+      38.0
+     ],
+     "judged_extra": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "signoffs": [
+      13.0,
+      13.0,
+      13.0
+     ],
+     "locked_share": 0.0,
+     "locked_examples": [],
+     "exec_by_type_mean": {
+      "ws:status": 173.00000000000006,
+      "it:howto": 145.0,
+      "cs:status": 84.00000000000003,
+      "do:sync": 94.00000000000003,
+      "of:reengage": 47.000000000000014,
+      "of:reminder": 75.99999999999997,
+      "of:offer": 37.999999999999986,
+      "cs:return": 55.0,
+      "it:access": 1.0000000000000002
+     }
+    },
+    "C": {
+     "minutes_per_task": [
+      0.7245333333333333,
+      0.7220500000000001,
+      0.7271916666666667
+     ],
+     "without_person": [
+      0.40968333333333334,
+      0.4062,
+      0.4130583333333333
+     ],
+     "escapes_per100": [
+      0.33916666666666667,
+      0.30666666666666664,
+      0.3691666666666667
+     ],
+     "manual_minutes_per_task": [
+      4.165333333333334,
+      4.165333333333334,
+      4.165333333333334
+     ],
+     "promotions": [
+      2.45,
+      2.2,
+      2.7
+     ],
+     "demotions": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "episodes_scored": [
+      2.2,
+      2.0,
+      2.45
+     ],
+     "episodes_locked": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "contract_exec": [
+      175.9,
+      154.05,
+      198.65
+     ],
+     "contract_held": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "judged_extra": [
+      230.25,
+      222.0,
+      238.75
+     ],
+     "signoffs": [
+      2.45,
+      2.2,
+      2.7
+     ],
+     "locked_share": 0.0,
+     "locked_examples": [],
+     "exec_by_type_mean": {
+      "ws:status": 134.45000000000002,
+      "it:howto": 36.050000000000004,
+      "do:sync": 4.05,
+      "cs:status": 1.3499999999999999
+     }
+    }
+   },
+   "contracts": {
+    "cs:status": {
+     "clauses": 2,
+     "leaves": 3,
+     "post_training_tasks": 175
+    },
+    "it:howto": {
+     "clauses": 1,
+     "leaves": 1,
+     "post_training_tasks": 175
+    },
+    "ap:coding": {
+     "clauses": 2,
+     "leaves": 7,
+     "post_training_tasks": 233
+    },
+    "of:reminder": {
+     "clauses": 2,
+     "leaves": 6,
+     "post_training_tasks": 233
+    },
+    "do:sync": {
+     "clauses": 1,
+     "leaves": 4,
+     "post_training_tasks": 233
+    },
+    "do:merge": {
+     "clauses": 0,
+     "leaves": 3,
+     "post_training_tasks": 233
+    },
+    "ap:query": {
+     "clauses": 0,
+     "leaves": 7,
+     "post_training_tasks": 233
+    },
+    "it:password": {
+     "clauses": 0,
+     "leaves": 3,
+     "post_training_tasks": 175
+    },
+    "of:reengage": {
+     "clauses": 2,
+     "leaves": 5,
+     "post_training_tasks": 233
+    },
+    "it:access": {
+     "clauses": 2,
+     "leaves": 4,
+     "post_training_tasks": 175
+    },
+    "of:offer": {
+     "clauses": 1,
+     "leaves": 5,
+     "post_training_tasks": 233
+    },
+    "cs:return": {
+     "clauses": 3,
+     "leaves": 4,
+     "post_training_tasks": 175
+    },
+    "cs:refund": {
+     "clauses": 1,
+     "leaves": 6,
+     "post_training_tasks": 175
+    },
+    "ws:status": {
+     "clauses": 2,
+     "leaves": 3,
+     "post_training_tasks": 233
+    },
+    "ws:reschedule": {
+     "clauses": 0,
+     "leaves": 5,
+     "post_training_tasks": 233
+    },
+    "cs:complaint": {
+     "clauses": 0,
+     "leaves": 5,
+     "post_training_tasks": 175
+    },
+    "ws:quote": {
+     "clauses": 0,
+     "leaves": 5,
+     "post_training_tasks": 233
+    }
+   },
+   "coverage_C": {
+    "cs:status": 0.0077142857142857135,
+    "it:howto": 0.20600000000000002,
+    "ap:coding": 0.0,
+    "of:reminder": 0.0,
+    "do:sync": 0.017381974248927037,
+    "do:merge": 0.0,
+    "ap:query": 0.0,
+    "it:password": 0.0,
+    "ap:payment": 0.0,
+    "of:reengage": 0.0,
+    "do:delete": 0.0,
+    "it:access": 0.0,
+    "of:offer": 0.0,
+    "cs:return": 0.0,
+    "cs:refund": 0.0,
+    "it:prodchange": 0.0,
+    "ws:status": 0.5770386266094422,
+    "ws:reschedule": 0.0,
+    "cs:complaint": 0.0,
+    "ws:quote": 0.0
+   }
+  },
+  "sloppy-full": {
+   "arms": {
+    "A": {
+     "minutes_per_task": [
+      0.8297083333333333,
+      0.8250666666666667,
+      0.8345666666666667
+     ],
+     "without_person": [
+      0.25145,
+      0.2462083333333333,
+      0.2565166666666666
+     ],
+     "escapes_per100": [
+      0.9075,
+      0.8591666666666666,
+      0.9525
+     ],
+     "manual_minutes_per_task": [
+      4.165333333333334,
+      4.165333333333334,
+      4.165333333333334
+     ],
+     "promotions": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "demotions": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "episodes_scored": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "episodes_locked": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "contract_exec": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "contract_held": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "judged_extra": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "signoffs": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "locked_share": null,
+     "locked_examples": [],
+     "exec_by_type_mean": {}
+    },
+    "B": {
+     "minutes_per_task": [
+      0.8110916666666667,
+      0.8076000000000001,
+      0.8150083333333333
+     ],
+     "without_person": [
+      0.2719333333333333,
+      0.26835,
+      0.2753583333333333
+     ],
+     "escapes_per100": [
+      1.0833333333333335,
+      1.0166666666666666,
+      1.1475
+     ],
+     "manual_minutes_per_task": [
+      4.165333333333334,
+      4.165333333333334,
+      4.165333333333334
+     ],
+     "promotions": [
+      13.35,
+      13.15,
+      13.55
+     ],
+     "demotions": [
+      4.3,
+      4.1,
+      4.5
+     ],
+     "episodes_scored": [
+      9.8,
+      9.45,
+      10.2
+     ],
+     "episodes_locked": [
+      0.4,
+      0.15,
+      0.7
+     ],
+     "contract_exec": [
+      733.15,
+      727.5,
+      738.9
+     ],
+     "contract_held": [
+      33.15,
+      32.7,
+      33.7
+     ],
+     "judged_extra": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "signoffs": [
+      13.35,
+      13.15,
+      13.55
+     ],
+     "locked_share": 0.04081632653061224,
+     "locked_examples": [
+      {
+       "type": "of:reengage",
+       "leaf": 3,
+       "tasks": 11,
+       "wrong": 11
+      },
+      {
+       "type": "cs:return",
+       "leaf": 6,
+       "tasks": 20,
+       "wrong": 11
+      },
+      {
+       "type": "cs:return",
+       "leaf": 6,
+       "tasks": 13,
+       "wrong": 7
+      },
+      {
+       "type": "cs:return",
+       "leaf": 6,
+       "tasks": 18,
+       "wrong": 8
+      },
+      {
+       "type": "of:reengage",
+       "leaf": 3,
+       "tasks": 10,
+       "wrong": 10
+      },
+      {
+       "type": "cs:return",
+       "leaf": 6,
+       "tasks": 10,
+       "wrong": 6
+      },
+      {
+       "type": "cs:return",
+       "leaf": 6,
+       "tasks": 11,
+       "wrong": 8
+      },
+      {
+       "type": "cs:return",
+       "leaf": 6,
+       "tasks": 11,
+       "wrong": 8
+      }
+     ],
+     "exec_by_type_mean": {
+      "ws:status": 170.0,
+      "ap:coding": 146.0,
+      "it:howto": 113.00000000000004,
+      "of:reminder": 81.99999999999999,
+      "of:reengage": 57.50000000000001,
+      "cs:return": 8.650000000000002,
+      "do:sync": 113.00000000000004,
+      "cs:status": 42.999999999999986
+     }
+    },
+    "C": {
+     "minutes_per_task": [
+      0.8544,
+      0.85135,
+      0.8574249999999999
+     ],
+     "without_person": [
+      0.25905,
+      0.25565000000000004,
+      0.26285
+     ],
+     "escapes_per100": [
+      0.8608333333333332,
+      0.8074999999999999,
+      0.9125
+     ],
+     "manual_minutes_per_task": [
+      4.165333333333334,
+      4.165333333333334,
+      4.165333333333334
+     ],
+     "promotions": [
+      2.75,
+      2.45,
+      3.05
+     ],
+     "demotions": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "episodes_scored": [
+      2.4,
+      2.15,
+      2.65
+     ],
+     "episodes_locked": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "contract_exec": [
+      194.65,
+      173.9,
+      216.85
+     ],
+     "contract_held": [
+      7.6,
+      6.35,
+      8.85
+     ],
+     "judged_extra": [
+      201.25,
+      192.2,
+      209.65
+     ],
+     "signoffs": [
+      2.75,
+      2.45,
+      3.05
+     ],
+     "locked_share": 0.0,
+     "locked_examples": [],
+     "exec_by_type_mean": {
+      "ws:status": 142.99999999999997,
+      "ap:coding": 38.54999999999999,
+      "it:howto": 12.750000000000002,
+      "cs:status": 0.2,
+      "of:reminder": 0.15
+     }
+    }
+   },
+   "contracts": {
+    "cs:status": {
+     "clauses": 2,
+     "leaves": 3,
+     "post_training_tasks": 175
+    },
+    "it:howto": {
+     "clauses": 3,
+     "leaves": 3,
+     "post_training_tasks": 175
+    },
+    "ap:coding": {
+     "clauses": 3,
+     "leaves": 4,
+     "post_training_tasks": 233
+    },
+    "of:reminder": {
+     "clauses": 2,
+     "leaves": 6,
+     "post_training_tasks": 233
+    },
+    "do:sync": {
+     "clauses": 2,
+     "leaves": 3,
+     "post_training_tasks": 233
+    },
+    "do:merge": {
+     "clauses": 0,
+     "leaves": 3,
+     "post_training_tasks": 233
+    },
+    "ap:query": {
+     "clauses": 0,
+     "leaves": 7,
+     "post_training_tasks": 233
+    },
+    "it:password": {
+     "clauses": 0,
+     "leaves": 3,
+     "post_training_tasks": 175
+    },
+    "of:reengage": {
+     "clauses": 2,
+     "leaves": 5,
+     "post_training_tasks": 233
+    },
+    "it:access": {
+     "clauses": 0,
+     "leaves": 4,
+     "post_training_tasks": 175
+    },
+    "of:offer": {
+     "clauses": 2,
+     "leaves": 6,
+     "post_training_tasks": 233
+    },
+    "cs:return": {
+     "clauses": 2,
+     "leaves": 4,
+     "post_training_tasks": 175
+    },
+    "cs:refund": {
+     "clauses": 0,
+     "leaves": 5,
+     "post_training_tasks": 175
+    },
+    "ws:status": {
+     "clauses": 2,
+     "leaves": 3,
+     "post_training_tasks": 233
+    },
+    "ws:reschedule": {
+     "clauses": 0,
+     "leaves": 5,
+     "post_training_tasks": 233
+    },
+    "cs:complaint": {
+     "clauses": 0,
+     "leaves": 5,
+     "post_training_tasks": 175
+    },
+    "ws:quote": {
+     "clauses": 0,
+     "leaves": 5,
+     "post_training_tasks": 233
+    }
+   },
+   "coverage_C": {
+    "cs:status": 0.001142857142857143,
+    "it:howto": 0.07285714285714287,
+    "ap:coding": 0.165450643776824,
+    "of:reminder": 0.0006437768240343348,
+    "do:sync": 0.0,
+    "do:merge": 0.0,
+    "ap:query": 0.0,
+    "it:password": 0.0,
+    "ap:payment": 0.0,
+    "of:reengage": 0.0,
+    "do:delete": 0.0,
+    "it:access": 0.0,
+    "of:offer": 0.0,
+    "cs:return": 0.0,
+    "cs:refund": 0.0,
+    "it:prodchange": 0.0,
+    "ws:status": 0.613733905579399,
+    "ws:reschedule": 0.0,
+    "cs:complaint": 0.0,
+    "ws:quote": 0.0
+   }
+  }
+ }
+}
