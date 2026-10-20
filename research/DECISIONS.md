@@ -154,3 +154,19 @@ Append-only. Newest at the bottom.
 - **K4 FAIL:** without a person, good A 40.4% / C 41.0%; sloppy A 25.1% / C 25.9%.
 - **Why:** contracts formed mostly on low-consequence information replies (workshop status, IT how-to) that v3 already automates. Judgement-heavy and higher-consequence types formed few or no pure, fully-sourced clauses.
 - REPORT-contracts.md was blocked for the sub-agent; its content was returned to the parent to save.
+
+## 2026-10-21 — playbooks round: drafting (before any task run)
+- **First drafting pass:** most of the 20 drafts came back empty (flash spent its 6,000-token budget reasoning) or as invalid JSON.
+- **Retry rule, fixed now, before approval or any run:** any failed draft is redrafted with `max_tokens` 16,000, up to 4 attempts in total. Every attempt's cost counts toward drafting cost.
+- **Data for the drafter:** each archetype's written policy rules and tool list, plus a short schema of the record collections and the specials the code exposes (`playbooks/author.py` SCHEMA). It sees no task data.
+
+## 2026-10-21 — round "core": operationalisations, logged before any scored run
+- Core is `core/policy_core.EngineCore`, a subclass of the v3 engine. Reviewer, spot-check, check-flag and incident models are identical across arms; only the trust rules differ.
+- **Promotion lookup:** for each consequence, the smallest total judged count whose 95% Wilson upper bound is at or under the bar, for 0–10 total serious mistakes (identical to the PREREG table). Promotion also needs ≥ 30 judged since the last level change. More than 10 mistakes: no promotion.
+- **Step-down lookup:** serious mistakes among judged actions since the last level change (deque of at most 50, cleared on every level change) ≥ C1 10, C2 6, C3 3. Incidents step down one level as in v3 (shared incident model).
+- **Core's version rule:** on a version change, judged, serious and incomplete counts are floor-halved, and the key drops to L1 if the table is no longer met. `core+carry-over` uses v3's carry rule (`carry_no_prev`, hidden pass ≥ 0.8; T2 streams use `version_pass_of` with the 10-test minimum, as in the 10x analysis).
+- **The multiple** = Σ manual minutes ÷ the engine's `minutes` counter (pre-reviews, spot-checks and canaries at 1.0 each). Steady state = actions from index ⌊2n/3⌋ on, minutes counted from the same point.
+- **Free arm** escapes per 100 = 100 × (true serious errors ÷ actions) on the same stream.
+- **Promotions deserved** and **regression latency** as in `analyze_v3.ref_t1/ref_t2` (T2 future = the key's later stream rows).
+- **Tool scope:** Core run on `good-scoped` and on `good-full` restricted to the same task ids, in `good-scoped` order; 20 seeds.
+- A one-seed crash check was run before this entry (it checked only that the code executes; no metrics were read).
