@@ -167,8 +167,10 @@ def matrix(rules: list[dict]) -> str:
             lines += ["", f"## {stage}", "", "| Rule | Tier | Strength | Status | Implementation | Tests |", "|---|---|---|---|---|---|"]
         tests = "<br>".join(f"`{t.split('::')[1]}`" for t in rule["tests"]) or ("**⚠ none**" if rule["strength"] == "MUST" else "none")
         link = f"[{rule['id']}](../{rule['file']}#{rule['id'].lower().replace('.', '')}-{slug(rule['title'])})"
+        # links in a rule are relative to spec/requirements/; rebase them for conformance/
+        implementation = re.sub(r"\]\(\.\./(?!spec/)", "](../spec/", rule.get("implementation") or "")
         lines.append(f"| {link} {rule['title']} | {rule.get('tier')} | {rule['strength']} | {rule['status']} | "
-                     f"{rule.get('implementation') or ''} | {tests} |")
+                     f"{implementation} | {tests} |")
     return "\n".join(lines) + "\n"
 
 

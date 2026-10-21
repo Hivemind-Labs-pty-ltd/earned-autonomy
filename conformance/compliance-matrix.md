@@ -162,7 +162,7 @@ MUST rules with no test yet (7): EA-1.7, EA-1.9, EA-4.2, EA-4.5, EA-6.12, EA-8.2
 | [EA-7.8](../spec/requirements/07-agent-interface.md#ea-78-every-write-tool-has-a-floor-consequence) Every write tool has a floor consequence | Standard | MUST | Tested | `models.py` `Policy.tool_floor`; `engine.py` `TrustEngine(tool_floor_function=...)` | `test_explicit_floor_override_and_argument_dependent_hook`<br>`test_tool_listed_by_capped_type_has_floor_c4`<br>`test_unlisted_write_tool_has_floor_c4` |
 | [EA-7.9](../spec/requirements/07-agent-interface.md#ea-79-dont-share-write-tools-across-consequence-levels) Don't share write tools across consequence levels | Standard | SHOULD | Tested | `models.py` `lint_shared_write_tools` | `test_shared_write_tool_lint` |
 | [EA-7.10](../spec/requirements/07-agent-interface.md#ea-710-every-action-comes-with-a-checks-result) Every action comes with a checks result | Core | MUST | Tested | `engine.py` `TrustEngine.decide` (`checks_missing`) | `test_checks_missing_or_failed_hold_at_every_level` |
-| [EA-7.11](../spec/requirements/07-agent-interface.md#ea-711-every-action-carries-a-version) Every action carries a version | Core | MUST | Tested | `models.py` `ProposedAction.agent_version`; [schema](../schema/proposed-action.schema.json) | `test_every_proposed_action_carries_a_version` |
+| [EA-7.11](../spec/requirements/07-agent-interface.md#ea-711-every-action-carries-a-version) Every action carries a version | Core | MUST | Tested | `models.py` `ProposedAction.agent_version`; [schema](../spec/schema/proposed-action.schema.json) | `test_every_proposed_action_carries_a_version` |
 
 ## 8. Multiple agents (preview)
 
