@@ -1,6 +1,6 @@
 # Research: the Trust Gym
 
-*Informative. The evidence behind the Earned Autonomy specification.*
+*Informative. The evidence behind the Earned Autonomy specification and guides.*
 
 The Trust Gym is the test bench used to check whether the framework's rules actually work, and whether common advice
 about deploying AI agents holds up. Every round was **pre-registered**: the hypotheses, metrics and pass thresholds were
@@ -44,16 +44,28 @@ No customer data was used.
 
 ## Rounds
 
-| Round | Date | Question | Pre-registration | Verdicts | Headline | Spend (USD) | Report |
-|---|---|---|---|---|---|---|---|
-| v0 | 15 Oct 2026 | Does earned trust work, and does the standard advice hold? | `research/prereg` | 8 pass · 8 fail · 5 mixed · 1 inconclusive | Earned trust let through 66–69% fewer serious mistakes than checks alone; narrow tools cut wrong actions 73%; several common recommendations failed | 8.55 | [REPORT.md](REPORT.md) · [PREREG.md](PREREG.md) |
-| v1 | 15 Oct 2026 | Do the revisions fix v0's failures? | `research/prereg-v1` | 2 pass · 2 mixed · 2 fail; peer routing split (1 pass, 1 fail) | Keeping trust across tested versions works (0% → 36% of task types promoted); pooling and risk-label thresholds made things worse | 0 | [REPORT-v1.md](REPORT-v1.md) · [PREREG-v1.md](PREREG-v1.md) |
-| v2 | 16 Oct 2026 | Do consequence levels, reviewer trust and knowledge-edit versions work? | `research/prereg-v2` | 1 pass · 1 mixed · 4 fail | Consequence levels work; evidence shouldn't fade; success is an alert, not a gate | 0 | [REPORT-v2.md](REPORT-v2.md) · [PREREG-v2.md](PREREG-v2.md) |
-| v3 | 16 Oct 2026 | Confirmation of v2's fixes on fresh seeds | `research/prereg-v3` | 2 pass · 1 fail | Reviewer trust and the 60-day re-entry rule confirmed; carry-over safe but only as good as the hidden tests. Reference numbers for the framework | 0 | [REPORT-v3.md](REPORT-v3.md) · [PREREG-v3.md](PREREG-v3.md) |
-| Platform | 18 Oct 2026 | Does a commercial agent platform's own safety layer add to it? | `research/prereg-10x` (+ `-d`, `-k`) | 1 pass · 2 mixed · 3 fail | The platform as-is did slightly worse than a minimal agent; adding narrow tools and the learning loop gave the safest agent measured (82–87% fewer serious mistakes) | 43.13 | [REPORT-10x.md](REPORT-10x.md) · [PREREG-10x.md](PREREG-10x.md) |
-| v4 | 18 Oct 2026 | Statistics under continuous checking, mis-tagging attacks, agents that behave only when watched | `research/prereg-v4` | 1 mixed · 4 fail (failures traced to a mis-specified metric and an incident channel that defeats the criterion) | Hidden, random spot-checks are essential; a tool floor blocks mis-tagging; a strict promotion bound is optional | 0.004 | [REPORT-v4.md](REPORT-v4.md) · [PREREG-v4.md](PREREG-v4.md) |
+Each round is labelled **trust** (does the framework measure, decide and oversee correctly?) or **implementation** (how
+to build agents that make fewer mistakes, outside the standard).
 
-Total new spend: about USD 51.7. Rounds marked 0 reused earlier data or ran in simulation only.
+| Round | Kind | Date | Question | Pre-registration | Verdicts | Headline | Spend (USD) | Report |
+|---|---|---|---|---|---|---|---|---|
+| v0 | Trust | 15 Oct 2026 | Does earned trust work, and does the standard advice hold? | `research/prereg` | 8 pass · 8 fail · 5 mixed · 1 inconclusive | Earned trust let through 66–69% fewer serious mistakes than checks alone; narrow tools cut wrong actions 73%; several common recommendations failed | 8.55 | [REPORT.md](REPORT.md) · [PREREG.md](PREREG.md) |
+| v1 | Trust | 15 Oct 2026 | Do the revisions fix v0's failures? | `research/prereg-v1` | 2 pass · 2 mixed · 2 fail; peer routing split (1 pass, 1 fail) | Keeping trust across tested versions works (0% → 36% of task types promoted); pooling and risk-label thresholds made things worse | 0 | [REPORT-v1.md](REPORT-v1.md) · [PREREG-v1.md](PREREG-v1.md) |
+| v2 | Trust | 16 Oct 2026 | Do consequence levels, reviewer trust and knowledge-edit versions work? | `research/prereg-v2` | 1 pass · 1 mixed · 4 fail | Consequence levels work; evidence shouldn't fade; success is an alert, not a gate | 0 | [REPORT-v2.md](REPORT-v2.md) · [PREREG-v2.md](PREREG-v2.md) |
+| v3 | Trust | 16 Oct 2026 | Confirmation of v2's fixes on fresh seeds | `research/prereg-v3` | 2 pass · 1 fail | Reviewer trust and the 60-day re-entry rule confirmed; carry-over safe but only as good as the hidden tests. Reference numbers for the framework | 0 | [REPORT-v3.md](REPORT-v3.md) · [PREREG-v3.md](PREREG-v3.md) |
+| Production harness | Implementation | 18 Oct 2026 | Does a production agent harness's own safety layer add to the framework? | `research/prereg-10x` (+ `-d`, `-k`) | 1 pass · 2 mixed · 3 fail | The harness as-is did slightly worse than a minimal agent; adding narrow tools and the learning loop gave the safest agent measured (82–87% fewer serious mistakes) | 43.13 | [REPORT-10x.md](REPORT-10x.md) · [PREREG-10x.md](PREREG-10x.md) |
+| v4 | Trust | 18 Oct 2026 | Statistics under continuous checking, mis-tagging attacks, agents that behave only when watched | `research/prereg-v4` | 1 mixed · 4 fail (failures traced to a mis-specified metric and an incident channel that defeats the criterion) | Hidden, random spot-checks are essential; a tool floor blocks mis-tagging; a strict promotion bound is optional | 0.004 | [REPORT-v4.md](REPORT-v4.md) · [PREREG-v4.md](PREREG-v4.md) |
+| Contracts | Implementation | 21 Oct 2026 | Do rules learned from an agent's behaviour cut human minutes? | `research/prereg-contracts` | 1 pass · 1 mixed · 2 fail | Learned rules promoted on agreement alone locked in the agent's bad habits; gated by human-judged evidence they were safe but saved no review time | 0 | [REPORT-contracts.md](REPORT-contracts.md) · [PREREG-contracts.md](PREREG-contracts.md) |
+| Core | Trust | 21 Oct 2026 | Can simple rules on lookup tables match the full framework? | `research/prereg-core` | 1 pass · 2 mixed · ablations reported | Eight simple rules (the seven Core rules plus planted test items for reviewers) matched the full framework on safety and on the multiple; the multiple was about 4.4–6.3 times; trust rules alone don't reach ten times | 0 | [REPORT-core.md](REPORT-core.md) · [PREREG-core.md](PREREG-core.md) |
+| Playbooks | Implementation | 21 Oct 2026 | Are approved playbooks (the process as code, signed off once) safer and lighter on human time? | `research/prereg-playbooks` | 2 pass · 3 fail · 1 descriptive | Zero serious mistakes and zero actions triggered by hidden instructions on 1,800 tasks; human time fell 31% only when approval counted towards trust; model cost didn't fall | 0.67 | [REPORT-playbooks.md](REPORT-playbooks.md) · [PREREG-playbooks.md](PREREG-playbooks.md) |
+| Calibration | Trust | Running | Do trust scores mean what they say? | to come | — | — | — | — |
+| Dial | Trust | Running | Does oversight that follows the trust score raise the multiple over a fixed ladder? | to come | — | — | — | — |
+
+Total new spend: about USD 52.4. Rounds marked 0 reused earlier data or ran in simulation only.
+
+The production-harness round's files keep their original names (`REPORT-10x.md`, `PREREG-10x.md`, tag
+`research/prereg-10x`), because pre-registrations and reports are never edited after the fact. They describe one
+commercial agent platform's internals; see Notes.
 
 ## Honest limits
 
@@ -83,6 +95,9 @@ guard).
 
 - [SPEC.md](SPEC.md) in this folder is a **historical snapshot** (v0.2) kept for the record. The current specification
   lives in [/spec](../spec/README.md).
-- The platform round ([REPORT-10x.md](REPORT-10x.md)) describes a commercial agent platform's internals. Public copies
-  will be sanitised; see the [launch checklist](../docs/launch-checklist.md).
+- The production-harness round describes a commercial agent platform's internals. Its original files are kept exactly
+  as written, to preserve the pre-registration record; public copies will be sanitised (see the
+  [launch checklist](../docs/launch-checklist.md)).
+- Implementation rounds inform the [implementation guide](../docs/implementation-guide.md), which is outside the
+  standard. Trust rounds inform the [specification](../spec/README.md).
 - Pre-registrations and reports are never edited after the fact. Corrections are added as new, dated entries.

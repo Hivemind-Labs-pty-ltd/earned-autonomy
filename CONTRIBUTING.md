@@ -8,7 +8,7 @@ Every rule in the specification follows the same template. A proposal fills it i
 
 | Field | What to write |
 |---|---|
-| **ID** | The rule's number (for a new rule, the next free number in its section) |
+| **ID** | `EA-<stage>.<n>`: the lifecycle stage (01 Measure, 02 Decide, 03 Oversee, 04 Learn, 05 Retire, 06 Govern, 07 Agent interface, 08 Multi-agent) and the next free number in it |
 | **Statement** | One testable sentence using MUST, SHOULD or MAY |
 | **Status** | Tested, Default or Open |
 | **Rationale** | Why the rule exists, in plain words (not normative) |
@@ -29,15 +29,26 @@ pytest
 The conformance suite is keyed to rule IDs; [conformance/compliance-matrix.md](conformance/compliance-matrix.md) shows
 which rules are covered.
 
+## Where a change belongs
+
+- **A rule about measuring, deciding, overseeing, learning, retiring or governing** goes in the specification, under its
+  lifecycle stage.
+- **Advice on choosing what to automate** goes in the [assessment guide](docs/assessment-guide.md).
+- **Advice on building agents** goes in the [implementation guide](docs/implementation-guide.md). It is outside the
+  standard: the framework must work for any agent, however it's built.
+- **Platform-neutral wording only.** Don't name or describe a specific agent platform in the specification or guides.
+
 ## Adding a research round
 
-1. Write `PREREG-<round>.md` in `research/`: questions, metrics, pass thresholds, data and seeds.
-2. **Commit and tag it before writing any code for the round:** `research/prereg-<round>`.
-3. Log every decision the pre-registration didn't settle in `research/DECISIONS.md` before seeing the results it
+1. Decide whether it is a **trust** round (tests the framework) or an **implementation** round (tests a way of building
+   agents), and say so in the pre-registration.
+2. Write `PREREG-<round>.md` in `research/`: questions, metrics, pass thresholds, data and seeds.
+3. **Commit and tag it before writing any code for the round:** `research/prereg-<round>`.
+4. Log every decision the pre-registration didn't settle in `research/DECISIONS.md` before seeing the results it
    affects.
-4. Write `REPORT-<round>.md` with every verdict, including failures, and label anything decided after seeing results
+5. Write `REPORT-<round>.md` with every verdict, including failures, and label anything decided after seeing results
    as *exploratory*.
-5. Never edit a pre-registration or report afterwards. Add a dated correction to the decisions log instead.
+6. Never edit a pre-registration or report afterwards. Add a dated correction to the decisions log instead.
 
 ## Style
 

@@ -7,6 +7,18 @@
 Earned Autonomy is maintained by **Hivemind Labs**. The maintainers decide what goes into the specification, the
 reference engine and the methodology documents.
 
+## Scope of the standard
+
+Earned Autonomy is organised as a lifecycle: **Assess → Build → Measure → Decide → Oversee → Learn → Retire**, with
+**Govern** throughout.
+
+- **Normative (the specification, version 0.7):** Measure, Decide, Oversee, Learn, Retire and Govern, plus the small
+  interface the framework needs from any agent (declared tools per task type, a checks result per action) and the
+  multi-agent preview.
+- **Informative (guides):** Assess ([assessment guide](docs/assessment-guide.md)) and Build
+  ([implementation guide](docs/implementation-guide.md)). How an agent is built is outside the standard; the framework
+  measures and governs any agent from its actions and evidence.
+
 ## How decisions are made
 
 - **Specification changes** need a written proposal (see [CONTRIBUTING.md](CONTRIBUTING.md)) and maintainer approval.
@@ -21,6 +33,7 @@ reference engine and the methodology documents.
 2. Run the study, logging every unplanned decision before seeing the results it affects.
 3. Publish the report with every verdict, including failures.
 4. Update the affected rules' status and evidence links, and record the change in the [CHANGELOG](CHANGELOG.md).
+   Implementation rounds update the implementation guide instead of the specification.
 
 Exploratory findings can suggest a change, but a rule only becomes *Tested* after a pre-registered confirmation.
 

@@ -1,11 +1,13 @@
 # Crosswalks
 
-*Informative. **Draft: every mapping here is to be verified before launch.** These map concepts between Earned
+*Informative. Version 0.7. **Draft: every mapping here is to be verified before launch.** These map concepts between Earned
 Autonomy and other frameworks. They are not claims that using Earned Autonomy makes anyone compliant with anything.*
 
 ## Cloud Security Alliance Agentic Trust Framework
 
 The closest related framework. It assigns maturity levels to whole agents and describes zero-trust controls for them.
+Earned Autonomy instead measures trust continuously per task type and sets autonomy from that measurement; its simple
+(Core) setting uses three levels, mapped below.
 
 | Agentic Trust Framework | Earned Autonomy | Note |
 |---|---|---|
@@ -21,16 +23,18 @@ The closest related framework. It assigns maturity levels to whole agents and de
 - **Evidence-backed thresholds.** Its promotion gates are described as illustrative; ours come from statistics and
   pre-registered tests.
 - **Scoped step-down.** A slip affects one task type, one level.
+- **A lifecycle, not a one-way ladder.** Trust is measured continuously and can lead to more autonomy, more oversight,
+  improvement, a pause or retirement.
 - **Runnable.** Ours ships a reference engine and conformance tests.
 
 ## NIST AI Risk Management Framework
 
-| NIST function | Where Earned Autonomy addresses it |
+| NIST function | Earned Autonomy lifecycle stage |
 |---|---|
-| Govern | Roles (AI owner, policy owner, reviewer, auditor), separation of duties, versioned policy, permanent record |
-| Map | Task-type catalogue, consequence levels, allowed tools per task type |
-| Measure | Judged outcomes, reason codes, worst-case error bounds, hidden tests, reviewer trust |
-| Manage | Promotion and step-down, pause, incidents, rollback, the learning loop |
+| Govern | **Govern** (throughout): roles (AI owner, policy owner, reviewer, auditor), separation of duties, versioned policy, permanent record |
+| Map | **Assess**: task-type catalogue, consequence levels, allowed tools per task type, the cost model |
+| Measure | **Measure**: trust score and profile per task type, judged outcomes, reason codes, hidden tests, reviewer trust |
+| Manage | **Decide, Oversee, Learn, Retire**: autonomy settings, spot-checks, alarms, pause, the learning loop, retiring automation |
 
 ## ISO/IEC 42001 (AI management systems)
 
