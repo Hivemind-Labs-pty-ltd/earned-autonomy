@@ -2,7 +2,7 @@
 
 - Corrections become tests and are split at random: about 2/3 training, 1/3 hidden.
 - Hidden suites can also be seeded when a version is created (authored scenarios), so carry-over can work for a
-  fast learner whose corrections dry up (Trust Gym 10x run: carry-over never fired without seeding).
+  fast learner whose corrections dry up (on the commercial-harness run, carry-over never fired without seeding).
 - Hidden tests are unreadable by the agent and by whoever improves it (the builder). Reads go through governance.
 """
 from __future__ import annotations

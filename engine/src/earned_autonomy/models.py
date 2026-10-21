@@ -8,20 +8,22 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
-# ---- levels (spec/levels.md) --------------------------------------------------------------------------------
+# ---- autonomy settings (spec/autonomy.md) --------------------------------------------------------------------------------
 L0, L1, L2, L3 = 0, 1, 2, 3
 LEVEL_NAMES = {L0: "Observe", L1: "Supervised", L2: "Trusted", L3: "Senior"}
 
-# ---- outcome labels and reason codes (EA-3.3, EA-5.3) ---------------------------------------------------------
+# ---- outcome labels and reason codes (EA-1.4, EA-3.6) ---------------------------------------------------------
 LABELS = ("approved", "cosmetic_edit", "material_edit", "rejected", "incomplete")
 SOURCES = ("pre_review", "spot_check", "incident", "canary")
+# evidence sources for the trust score (EA-1.17, EA-1.18). "human" = live human judgement (pre-reviews, spot-checks, incidents).
+EVIDENCE_SOURCES = ("human", "shadow", "replay", "test")
 SERIOUS_REASONS = ("wrong_fact", "wrong_amount", "wrong_record", "wrong_recipient", "unauthorised_action",
                    "promise_beyond_policy", "missing_info_not_asked", "followed_injected_instruction",
                    "policy_breach", "other_serious")
 COSMETIC_REASONS = ("tone", "wording", "formatting", "other_cosmetic")
 REASON_CODES = SERIOUS_REASONS + COSMETIC_REASONS
 
-# ---- consequence levels (EA-3.8, EA-3.11) ---------------------------------------------------------------------------------
+# ---- consequence levels (EA-1.5, EA-1.11) ---------------------------------------------------------------------------------
 CONSEQUENCE = {
     "C1": {"error_bar": 0.10, "success_min": 0.85},
     "C2": {"error_bar": 0.05, "success_min": 0.90},
@@ -41,7 +43,7 @@ def utcnow() -> datetime:
 
 
 def format_timestamp(moment: datetime) -> str:
-    """The one timestamp format written to the trust record and every model (EA-6.10):
+    """The one timestamp format written to the trust record and every model (EA-6.11):
     ISO 8601 in UTC, always milliseconds, always a `Z` suffix, e.g. `2026-10-19T03:20:00.123Z`.
     Sub-millisecond digits are truncated, not rounded. Naive datetimes are rejected: a moment without a timezone is
     ambiguous, and guessing would put local time into the record."""
@@ -66,13 +68,13 @@ def normalise_timestamp(text: str) -> str:
 
 
 def payload_hash(payload: Any) -> str:
-    """The record keeps a hash of the payload, never its content (EA-6.13)."""
+    """The record keeps a hash of the payload, never its content (EA-6.14)."""
     blob = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False, default=str)
     return "sha256:" + hashlib.sha256(blob.encode()).hexdigest()
 
 
 def is_serious(label: str, reason_code: str | None) -> bool:
-    """EA-3.3: material_edit or rejected with a non-cosmetic reason code. Incidents are serious by definition."""
+    """EA-1.4: material_edit or rejected with a non-cosmetic reason code. Incidents are serious by definition."""
     return label in ("material_edit", "rejected") and reason_code not in COSMETIC_REASONS
 
 
@@ -91,9 +93,9 @@ class ProposedAction:
     task_type: str | None = None                # set by the tagger (or by the caller)
     tag_confidence: float | None = None
     counterparty_id: str | None = None
-    parent_action_id: str | None = None         # delegation provenance (EA-7.2)
+    parent_action_id: str | None = None         # delegation provenance (EA-8.2)
     created_at: datetime = field(default_factory=utcnow)
-    # write tools this action will call (EA-1.14). Names only enter the record; arguments never do.
+    # write tools this action will call (EA-2.5). Names only enter the record; arguments never do.
     write_tools: list[str] = field(default_factory=list)
     write_tool_arguments: dict[str, Any] = field(default_factory=dict)
 
@@ -103,7 +105,7 @@ class ProposedAction:
 
     def to_dict(self) -> dict:
         """Interchange form (spec/schema/proposed-action.schema.json). Includes the payload and tool arguments, so it
-        is for passing an action between systems, never for the trust record (EA-6.13)."""
+        is for passing an action between systems, never for the trust record (EA-6.14)."""
         data = asdict(self)
         data["created_at"] = format_timestamp(self.created_at)
         return data
@@ -111,7 +113,7 @@ class ProposedAction:
 
 @dataclass
 class ChecksResult:
-    """Pre-send checks are run by the caller; the engine only reads the result (EA-2.3)."""
+    """Pre-send checks are run by the caller; the engine only reads the result (EA-2.6)."""
     passed: list[str] = field(default_factory=list)
     failed: list[str] = field(default_factory=list)
 
@@ -123,7 +125,7 @@ class ChecksResult:
 @dataclass
 class Decision:
     """spec/schema/decision.schema.json. `mode` is hold | act. A spot-check is drawn only after execution and is never shown to the agent,
-    so the agent-visible mode never says act_spot (EA-2.7, EA-2.8; see engine.mark_executed)."""
+    so the agent-visible mode never says act_spot (EA-2.23, EA-3.1; see engine.mark_executed)."""
     decision_id: str
     action_id: str
     trust_key: TrustKey
@@ -140,7 +142,7 @@ class Decision:
     agent_version: str
     payload_hash: str
     created_at: str
-    tool_floor: str | None = None               # highest floor of the action's write tools (EA-1.13)
+    tool_floor: str | None = None               # highest floor of the action's write tools (EA-7.8)
 
     @property
     def allowed(self) -> bool:
@@ -183,6 +185,9 @@ class TrustState:
     state_version: int = 0
     last_activity_at: str | None = None
     updated_at: str | None = None
+    # EA-1.18: non-human evidence by source -> [judged, serious]. Feeds the trust score only, never the decision (EA-1.21).
+    evidence: dict = field(default_factory=dict)
+    last_evidence_at: str | None = None
 
     def snapshot(self) -> dict:
         data = asdict(self)
@@ -192,7 +197,7 @@ class TrustState:
 
 @dataclass
 class TaskTypePolicy:
-    """A task-type catalogue entry (EA-1.1). The name is its key in `Policy.task_types`; it's only a key and has no
+    """A task-type catalogue entry (EA-7.1). The name is its key in `Policy.task_types`; it's only a key and has no
     effect on the trust maths. The tagger and reviewers work from `description` and `examples`."""
     consequence: str = "C2"
     error_bar: float | None = None                    # optional override; may only tighten the consequence bar
@@ -204,7 +209,7 @@ class TaskTypePolicy:
 
 @dataclass
 class Policy:
-    """Policy-as-code (spec/schema/policy.schema.json, EA-6.5). Immutable in use: every change produces a new version via governance."""
+    """Policy-as-code (spec/schema/policy.schema.json, EA-6.6). Immutable in use: every change produces a new version via governance."""
     policy_version: int = 1
     error_bar: float = 0.05                           # fallback when a type has no consequence level
     min_judged: int = 30
@@ -218,23 +223,32 @@ class Policy:
     carry_hidden_min: float = 0.8
     min_hidden_tests: int = 10
     tag_confidence_min: float = 0.8
-    alert_fraction: float = 0.8                 # alert when the rolling upper bound passes 80% of ε (EA-5.7)
+    alert_fraction: float = 0.8                 # alert when the rolling upper bound passes 80% of ε (EA-3.10)
     require_checks: bool = True
-    # reviewer trust (EA-5.9 to EA-5.11)
+    # reviewer trust (EA-3.11 to EA-3.13)
     reviewer_error_bar: float = 0.10
     reviewer_min_judged: int = 30
     reviewer_canary_rate: float = 0.05
     second_check_rate: dict = field(default_factory=lambda: {1: 0.25, 2: 0.05})
     task_types: dict[str, TaskTypePolicy] = field(default_factory=dict)
-    # EA-1.13 tool floor: explicit per-tool overrides (tool -> C1..C4). Otherwise a tool's floor is derived.
+    # EA-7.8 tool floor: explicit per-tool overrides (tool -> C1..C4). Otherwise a tool's floor is derived.
     tool_floors: dict[str, str] = field(default_factory=dict)
     # Tools known to write (for the shared-tool lint). Floors apply to whatever an action declares in write_tools.
     write_tools: list[str] = field(default_factory=list)
-    # EA-3.14 strict promotion: consequence levels ("C3") and/or task type names that use the anytime-valid bound.
+    # EA-2.19 strict promotion: consequence levels ("C3") and/or task type names that use the anytime-valid bound.
     strict_promotion: list[str] = field(default_factory=list)
+    # EA-2.15: "bound" (95% Wilson, the default) or "core_table" (the published lookup tables; same answers on whole counts)
+    promotion_rule: str = "bound"
+    # MEASURE (EA-1.13 to EA-1.21)
+    trust_prior: list = field(default_factory=lambda: [1.0, 1.0])     # Beta prior for the trust score
+    trust_score_threshold: float = 0.975        # score at which the evidence supports Trusted (matches the Wilson rule)
+    evidence_weights: dict = field(default_factory=lambda: {"human": 1.0, "shadow": 1.0, "replay": 1.0, "test": 0.75})
+    dial_gain: float = 5.0                      # EA-2.22: spot-check rate = clip(gain × (1 − score) + floor, floor, 1)
+    dial_floor: float = 0.02
+    human_evidence_min_share: float = 0.2       # alert when weighted human evidence is below this share (EA-1.20)
 
     def tool_floor(self, tool: str) -> str:
-        """EA-1.13: explicit override, else the highest consequence of any task type listing the tool,
+        """EA-7.8: explicit override, else the highest consequence of any task type listing the tool,
         else C4 (a write tool no task type lists)."""
         if tool in self.tool_floors:
             return self.tool_floors[tool]
@@ -293,7 +307,7 @@ class Policy:
 
 
 def lint_shared_write_tools(policy: Policy, write_tools: list[str] | None = None) -> list[str]:
-    """EA-1.15: warn when a write tool is listed by task types of different consequence levels.
+    """EA-7.9: warn when a write tool is listed by task types of different consequence levels.
     Its derived floor then pushes the lower-consequence types up, so they can never earn autonomy.
     Checks `write_tools` (or policy.write_tools); with neither, checks every listed tool. Explicit floors are noted."""
     tools = write_tools if write_tools is not None else (policy.write_tools or

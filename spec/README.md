@@ -1,23 +1,79 @@
 # Earned Autonomy specification
 
-**Version 0.6 · Public review draft · Private.** "Earned Autonomy" is a working name.
+**Version 0.7 · Public review draft · Private.** "Earned Autonomy" is a working name.
 
 This is the normative specification of the Earned Autonomy framework: the rules a platform must follow so that AI
 agents earn autonomy over their actions from evidence, under oversight and governance. It is product-neutral; any
 agent platform can implement it. `engine/` is the reference implementation, and `conformance/` checks a build against
 these rules.
 
+## The lifecycle, and what this specification covers
+
+An agent's working life runs through seven stages, with governance throughout:
+
+**ASSESS → BUILD → MEASURE → DECIDE → OVERSEE → LEARN → RETIRE**, and **GOVERN** throughout.
+
+| Stage | Question | In this specification |
+|---|---|---|
+| Assess | Which work suits an agent, and at what consequence? | Informative only: see [`../docs/`](../docs/). |
+| Build | How is the agent made, validated and improved? | **Not covered.** Only what the agent must provide: [7. Agent interface](requirements/07-agent-interface.md). |
+| Measure | How much can it be trusted with each task type? | [1. Measure](requirements/01-measure.md), [explainer](measure.md) |
+| Decide | Hold or act; how much autonomy; what to do about the agent | [2. Decide](requirements/02-decide.md), [autonomy settings](autonomy.md) |
+| Oversee | Who watches, how, and who watches them | [3. Oversee](requirements/03-oversee.md) |
+| Learn | What a change to the agent does to its trust | [4. Learn](requirements/04-learn.md) |
+| Retire | Narrowing, retiring and bringing back task types | [5. Retire](requirements/05-retire.md) |
+| Govern | Who is accountable; the permanent record | [6. Govern](requirements/06-govern.md) |
+
+**The specification covers trust only:** how trust is measured, what it allows, how it is overseen and recorded.
+How an agent is built and improved is up to its builders. [Multiple agents](requirements/08-multi-agent.md) is a
+preview.
+
+## Conformance tiers
+
+Every rule is tagged **Core**, **Standard** or **Advanced**. Each tier includes the one before it.
+
+### Core: eight requirements
+
+A team can run Core from a printed table, with no statistics code. Core is eight requirements; the rules that make
+each one testable are listed beside it.
+
+| # | Requirement | Rules |
+|---|---|---|
+| 1 | **Trust per task type.** Every action is tagged with a task type from a catalogue, and trust is kept per (organisation, agent, task type). | EA-1.1, EA-7.1, EA-7.5, EA-2.4 |
+| 2 | **Start supervised; promote by the lookup table.** New task types start with every action held; they move up when the judged evidence passes the table. Critical work never moves up. | EA-2.13, EA-2.14, EA-2.15, EA-2.9, EA-2.8, EA-2.1, EA-1.2 to EA-1.5 |
+| 3 | **A checks result is required, and a failed check is held,** at every level. | EA-7.10, EA-2.6, EA-2.7 |
+| 4 | **Tools are declared per task type.** | EA-7.7 |
+| 5 | **Random, hidden spot-checks** of the work the agent does alone. | EA-3.1, EA-3.2, EA-3.3, EA-2.23 |
+| 6 | **Step down by the table or on any incident,** one level at a time; anyone can report an incident. | EA-2.16, EA-2.17, EA-2.18, EA-3.7 |
+| 7 | **A named owner and a permanent record** of every decision and judgement, from which trust can be read at any time; a change to the agent is a new version. | EA-6.1, EA-6.2, EA-6.7, EA-2.12, EA-1.13, EA-4.1, EA-4.7, EA-7.11, EA-3.4, EA-3.5, EA-3.9, EA-2.2 |
+| 8 | **Canaries** in review queues, so missed errors show up. | EA-3.11 |
+
+### Standard
+
+Core, plus: the trust score and trust profile; carry-over of trust across versions with hidden tests; tool floors;
+reviewer trust; a tamper-evident record; review windows; and the remaining operating rules.
+
+### Advanced
+
+Standard, plus options that need more statistics or are less proven: the Wilson and strict bounds computed directly
+(EA-2.19), the dial (EA-2.22), re-entry after a long gap (EA-5.1), multiple agents (EA-8.x), and measured evidence
+weights for shadow, replay and test evidence (EA-1.17 to EA-1.20).
+
+An implementation states its tier: "compliant with v0.7 Core". The
+[compliance matrix](../conformance/compliance-matrix.md) counts rules by tier.
+
 ## What is normative
 
 | Normative (this folder) | Informative (everything else) |
 |---|---|
-| [`requirements/`](requirements/): the numbered rules | [`../PRINCIPLES.md`](../PRINCIPLES.md), [`../docs/primer.md`](../docs/primer.md) and [`../docs/guide.md`](../docs/guide.md): the principles, primer and practitioner guide |
-| [`levels.md`](levels.md): the trust ladder and consequence levels | [`examples.md`](examples.md): the worked example and the maths in plain language |
-| [`terminology.md`](terminology.md): the defined terms | [`api.md`](api.md): the reference engine's API |
-| [`schema/`](schema/): the data model (source of truth) | [`threats.md`](threats.md): threats and how the rules answer them |
+| [`requirements/`](requirements/): the numbered rules | [`../PRINCIPLES.md`](../PRINCIPLES.md) and [`../docs/`](../docs/): the principles, primer, guide and assessment |
+| [`autonomy.md`](autonomy.md): autonomy settings and consequence levels | [`measure.md`](measure.md): how the trust score works (its normative parts are marked) |
+| [`terminology.md`](terminology.md): the defined terms | [`examples.md`](examples.md): the worked example and the maths in plain language |
+| [`schema/`](schema/): the data model (source of truth) | [`api.md`](api.md): the reference engine's API |
+| | [`threats.md`](threats.md): threats and how the rules answer them |
 | | [`../research/`](../research/): the pre-registered evidence |
 
-Inside a rule, only the **Statement** is normative. Rationale, Evidence and Notes explain it.
+Inside a rule, only the **Statement** (and **Condition**) is normative. Rationale, Evidence and Notes explain it.
 
 ## Notation
 
@@ -28,14 +84,14 @@ described in [BCP 14](https://www.rfc-editor.org/info/bcp14) ([RFC 2119](https:/
 
 ## Compliance
 
-An implementation is **compliant** with a version of this specification when it meets **every MUST and MUST NOT**
-rule in that version. SHOULD rules are not required, but a compliant implementation reports which ones it doesn't
-follow and why. MAY rules are options.
+An implementation is **compliant at a tier** when it meets **every MUST and MUST NOT** rule of that tier and the
+tiers below it. SHOULD rules are not required, but a compliant implementation reports which ones it doesn't follow and
+why. MAY rules are options.
 
 The [conformance suite](../conformance/) tests the rules it can. The
-[compliance matrix](../conformance/compliance-matrix.md) shows, for every rule, its status, where the reference engine
-implements it and which tests check it. [`requirements.json`](requirements.json) is the same list, machine-readable.
-Both are generated by `scripts/build_requirements.py`; don't edit them by hand.
+[compliance matrix](../conformance/compliance-matrix.md) shows, for every rule, its tier, status, where the reference
+engine implements it and which tests check it. [`requirements.json`](requirements.json) is the same list,
+machine-readable. Both are generated by `scripts/build_requirements.py`; don't edit them by hand.
 
 ## Rule format
 
@@ -43,10 +99,12 @@ Every rule lives in one file under [`requirements/`](requirements/) and has the 
 
 | Field | Meaning |
 |---|---|
-| **ID** | `EA-<area>.<number>`, stable once published. Cite with the version: `v0.6-EA-3.4`. |
+| **ID** | `EA-<stage>.<number>`: 1 Measure, 2 Decide, 3 Oversee, 4 Learn, 5 Retire, 6 Govern, 7 Agent interface, 8 Multiple agents. Stable once published. Cite with the version: `v0.7-EA-2.14`. v0.6 IDs map to v0.7 in [`../CHANGELOG.md`](../CHANGELOG.md). |
 | **Statement** | One testable sentence using the key words above. Normative. |
 | **Condition** | Only for conditional rules: the situation the rule applies in. |
 | **Status** | How well the rule is evidenced (below). |
+| **Tier** | Core, Standard or Advanced (above). |
+| **Stability** | How stable the rule is (below). |
 | **Rationale** | Why the rule exists. Informative. |
 | **Evidence** | The research result behind it, with the effect size and the pre-registration tag. Informative. |
 | **Implementation** | Where the reference engine implements it. Informative. |
@@ -57,15 +115,15 @@ Every rule lives in one file under [`requirements/`](requirements/) and has the 
 
 | Status | Meaning |
 |---|---|
-| **Tested** | Backed by a pre-registered Trust Gym result; the Evidence field links to it. All evidence so far is synthetic. |
+| **Tested** | Backed by a pre-registered Trust Gym result or checked by a test of a structural property; the Evidence field says which. All research evidence so far is synthetic. |
 | **Default** | Our recommended choice. Reasoned, but not yet backed by a pre-registered result. |
 | **Open** | A research question, a known limitation or an optional practice. Implementations MAY differ. |
 
-### Lifecycle: how stable a rule is
+### Stability
 
-| Lifecycle | Meaning |
+| Stability | Meaning |
 |---|---|
-| **Development** | May change in any release. Every rule in v0.6 is Development. |
+| **Development** | May change in any release. Every rule in v0.7 is Development. |
 | **Stable** | Changes only through the versioning policy below. |
 | **Deprecated** | Still valid, scheduled for removal; the rule says what replaces it. |
 
@@ -73,25 +131,29 @@ Every rule lives in one file under [`requirements/`](requirements/) and has the 
 
 - The specification is versioned `MAJOR.MINOR`. Until 1.0, any release may change any rule.
 - From 1.0:
-  - Adding a MUST rule to a level, or changing a rule's meaning, is a **MAJOR** change.
+  - Adding a MUST rule to a tier, or changing a rule's meaning, is a **MAJOR** change.
   - Clarifications, new SHOULD or MAY rules, and new informative material are **MINOR**.
-- **A level's meaning never changes once it is Stable.** A system "at L2 under v1.0" means the same thing for as long
-  as v1.0 exists.
-- Rule IDs are never reused. A removed rule keeps its ID as Deprecated, then disappears in the next MAJOR version.
+- **An autonomy setting's meaning never changes once it is Stable.** A task type "Trusted under v1.0" means the same
+  thing for as long as v1.0 exists.
+- Rule IDs are never reused within a major version. A removed rule keeps its ID as Deprecated, then disappears in the
+  next MAJOR version. (v0.7 renumbered every rule by lifecycle stage; this is the last renumbering before 1.0.)
 - Every release is recorded in [`../CHANGELOG.md`](../CHANGELOG.md).
 
 ## Contents
 
 - [Terminology](terminology.md)
-- [Levels](levels.md): Supervised, Trusted, Senior, and the consequence levels C1 to C4
+- [Autonomy settings](autonomy.md): the Core ladder (Supervised, Trusted, Senior), the Advanced dial, and the
+  consequence levels C1 to C4
+- [Measure explainer](measure.md): the trust score, the trust profile and evidence sources
 - Requirements:
-  1. [Task types](requirements/01-task-types.md)
-  2. [The decision](requirements/02-decision.md)
-  3. [Trust calculation](requirements/03-trust-calculation.md)
-  4. [Versions and learning](requirements/04-versions-and-learning.md)
-  5. [Oversight and reviewers](requirements/05-oversight-and-reviewers.md)
-  6. [Governance and the trust record](requirements/06-governance-and-record.md)
-  7. [Multiple agents (preview)](requirements/07-multi-agent.md)
+  1. [Measure](requirements/01-measure.md)
+  2. [Decide](requirements/02-decide.md)
+  3. [Oversee](requirements/03-oversee.md)
+  4. [Learn](requirements/04-learn.md)
+  5. [Retire](requirements/05-retire.md)
+  6. [Govern](requirements/06-govern.md)
+  7. [Agent interface](requirements/07-agent-interface.md)
+  8. [Multiple agents (preview)](requirements/08-multi-agent.md)
 - [Threats](threats.md)
 - [Schema](schema/)
 - [Reference API](api.md)
@@ -99,7 +161,7 @@ Every rule lives in one file under [`requirements/`](requirements/) and has the 
 
 ## Evidence base
 
-Every Tested rule links to a pre-registered report in [`../research/`](../research/). The hypotheses and pass bars
-were committed and tagged before any data was produced, e.g. tag `research/prereg-v1`. All evidence so far is
-synthetic: simulated organisations, 6,000 generated tasks done by real AI agents, a public benchmark (τ²-bench) and a
-run on a commercial agent harness. A real-world pilot is the next step.
+Every Tested rule links to a pre-registered report in [`../research/`](../research/) or to a structural test. The
+hypotheses and pass bars were committed and tagged before any data was produced, e.g. tag `research/prereg-v1`. All
+evidence so far is synthetic: simulated organisations, 6,000 generated tasks done by real AI agents, a public benchmark
+(τ²-bench) and a run on a commercial agent harness. A real-world pilot is the next step.

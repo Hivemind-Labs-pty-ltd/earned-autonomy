@@ -1,4 +1,4 @@
-"""Engine objects validate against the normative JSON Schemas in spec/schema/ (rule EA-6.14).
+"""Engine objects validate against the normative JSON Schemas in spec/schema/ (rule EA-6.15).
 
 Uses `jsonschema` when it is installed; otherwise a small validator covering the keywords these schemas use.
 """
@@ -99,7 +99,7 @@ def trust_engine():
     return busy_engine(seed=7, n=1200)
 
 
-@pytest.mark.covers("EA-6.14")
+@pytest.mark.covers("EA-6.15")
 def test_engine_objects_validate_against_the_schemas(trust_engine):
     entries = list(trust_engine.record.entries())
     decisions = [entry.body for entry in entries if entry.type == "decision"]
@@ -132,7 +132,7 @@ def test_engine_objects_validate_against_the_schemas(trust_engine):
     assert not action_errors, action_errors
 
 
-@pytest.mark.covers("EA-6.14", "EA-6.10")
+@pytest.mark.covers("EA-6.15", "EA-6.11")
 def test_record_entries_validate_against_the_schema(trust_engine):
     schema = load("record-entry")
     entries = list(trust_engine.record.entries())

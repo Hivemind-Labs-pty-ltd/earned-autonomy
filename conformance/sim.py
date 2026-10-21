@@ -1,4 +1,4 @@
-"""Replay a committed Trust Gym T1 stream subset through the engine (rule EA-3.4, EA-3.5: Trust Gym parity).
+"""Replay a committed Trust Gym T1 stream subset through the engine (rule EA-2.14, EA-2.17: Trust Gym parity).
 
 The fixture holds 12 T1 worlds (seeds 90 000–90 011, the v3 reference seeds) with each action's true error, check
 flag, consequence level, true error rate and day. The reviewer model, incident model and metrics are ported from the

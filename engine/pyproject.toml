@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "earned-autonomy"
-version = "0.6.0"
+version = "0.7.0"
 description = "Reference trust engine for the Earned Autonomy Framework: AI agents earn autonomy like employees."
 readme = "README.md"
 requires-python = ">=3.11"

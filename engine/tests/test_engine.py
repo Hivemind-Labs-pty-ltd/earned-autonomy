@@ -14,21 +14,21 @@ def level(trust_engine, task_type="customer_service.status.update", agent="custo
 
 
 # ---- decide order (EA-2.1) ----------------------------------------------------------------------------------
-@pytest.mark.covers("EA-1.2", "EA-1.3", "EA-2.6")
+@pytest.mark.covers("EA-1.1", "EA-2.13", "EA-2.9")
 def test_new_type_starts_supervised():
     trust_engine = engine()
     decision = trust_engine.decide(act(), OK)
     assert (decision.mode, decision.why, decision.level) == ("hold", "level_L1", L1)
 
 
-@pytest.mark.covers("EA-1.9", "EA-1.10")
+@pytest.mark.covers("EA-2.3", "EA-2.4")
 def test_unknown_type_and_low_confidence_hold():
     trust_engine = engine()
     assert trust_engine.decide(act("customer_service.unknown.thing"), OK).why == "unknown_type"
     assert trust_engine.decide(act(tag_confidence=0.5), OK).why == "low_confidence"
 
 
-@pytest.mark.covers("EA-1.8")
+@pytest.mark.covers("EA-7.5")
 def test_tagger_used_when_type_missing():
     tagger = RuleTagger([(lambda action: action.kind == "tool.call", "customer_service.status.update")])
     trust_engine = engine(tagger=tagger)
@@ -44,7 +44,7 @@ def test_tagger_used_when_type_missing():
     assert e2.decide(ProposedAction("t2", "organisation", "customer_service_agent", "v1", "tool.call", {}), OK).why == "low_confidence"
 
 
-@pytest.mark.covers("EA-2.3", "EA-2.4")
+@pytest.mark.covers("EA-2.6", "EA-2.7", "EA-7.10")
 def test_checks_missing_or_failed_hold_at_every_level():
     trust_engine = engine()
     promote_to(trust_engine, L2)
@@ -53,7 +53,7 @@ def test_checks_missing_or_failed_hold_at_every_level():
     assert trust_engine.decide(act(), OK).mode == "act"
 
 
-@pytest.mark.covers("EA-3.4", "EA-3.8")
+@pytest.mark.covers("EA-2.14", "EA-1.5")
 def test_promotion_matches_consequence_floor():
     # C1 (ε 10%): first promotion after 35 clean judged actions
     trust_engine = engine()
@@ -63,7 +63,7 @@ def test_promotion_matches_consequence_floor():
     assert level(trust_engine) == L2
 
 
-@pytest.mark.covers("EA-2.5", "EA-3.8")
+@pytest.mark.covers("EA-2.8", "EA-1.5")
 def test_c4_never_promotes():
     trust_engine = engine()
     run_clean(trust_engine, 400, "customer_service.payment.release")
@@ -71,7 +71,7 @@ def test_c4_never_promotes():
     assert trust_engine.decide(act("customer_service.payment.release"), OK).why == "capped"
 
 
-@pytest.mark.covers("EA-3.5", "EA-3.6")
+@pytest.mark.covers("EA-2.17", "EA-2.16")
 def test_rolling_bound_steps_down_one_level():
     trust_engine = engine()
     promote_to(trust_engine, L3)
@@ -90,7 +90,7 @@ def test_rolling_bound_steps_down_one_level():
     assert "rolling_bound" in whys
 
 
-@pytest.mark.covers("EA-3.3", "EA-5.3")
+@pytest.mark.covers("EA-1.4", "EA-3.6")
 def test_cosmetic_and_incomplete_are_not_serious():
     assert not is_serious("cosmetic_edit", "tone")
     assert not is_serious("material_edit", "wording")
@@ -103,7 +103,7 @@ def test_cosmetic_and_incomplete_are_not_serious():
         trust_engine.record_outcome(action.action_id, "rejected", None, "pre_review", "reviewer")     # reason code required
 
 
-@pytest.mark.covers("EA-3.11")
+@pytest.mark.covers("EA-1.11")
 def test_success_alert_is_not_a_gate():
     trust_engine = engine()
     for _ in range(60):
@@ -115,8 +115,8 @@ def test_success_alert_is_not_a_gate():
     assert state_rows["level"] == L2                     # incomplete is harmless: it still earns trust
 
 
-# ---- re-entry (EA-3.13) ---------------------------------------------------------------------------------------
-@pytest.mark.covers("EA-3.13")
+# ---- re-entry (EA-5.1) ---------------------------------------------------------------------------------------
+@pytest.mark.covers("EA-5.1")
 def test_reentry_after_60_days_steps_down():
     trust_engine = engine()
     promote_to(trust_engine, L2)
@@ -126,7 +126,7 @@ def test_reentry_after_60_days_steps_down():
     assert trust_engine.level_changes()[-1]["why"] == "reentry_gap"
 
 
-@pytest.mark.covers("EA-3.13")
+@pytest.mark.covers("EA-5.1")
 def test_no_reentry_within_gap():
     trust_engine = engine()
     promote_to(trust_engine, L2)
@@ -180,8 +180,8 @@ def test_correction_tests_split_and_seeded_hidden():
     assert trust_engine.suites.hidden_count("customer_service.reply.send") == h + 2
 
 
-# ---- incidents (EA-3.7) -------------------------------------------------------------------------------------
-@pytest.mark.covers("EA-3.7", "EA-3.16")
+# ---- incidents (EA-2.18) -------------------------------------------------------------------------------------
+@pytest.mark.covers("EA-2.18", "EA-1.10")
 def test_incident_applies_to_the_actions_version():
     trust_engine = engine()
     promote_to(trust_engine, L2)
@@ -196,7 +196,7 @@ def test_incident_applies_to_the_actions_version():
 
 
 # ---- oversight (EA-5) ---------------------------------------------------------------------------------------
-@pytest.mark.covers("EA-2.2", "EA-5.6")
+@pytest.mark.covers("EA-2.2", "EA-3.9")
 def test_pause_and_resume_per_type_and_agent():
     trust_engine = engine()
     promote_to(trust_engine, L2)
@@ -208,7 +208,7 @@ def test_pause_and_resume_per_type_and_agent():
     assert trust_engine.decide(act("customer_service.reply.send"), OK).why == "paused"
 
 
-@pytest.mark.covers("EA-2.8", "EA-5.1")
+@pytest.mark.covers("EA-3.1", "EA-3.4")
 def test_spot_sampling_rate_and_queue():
     trust_engine = engine()
     promote_to(trust_engine, L2)
@@ -225,7 +225,7 @@ def test_spot_sampling_rate_and_queue():
     assert hits > 0
 
 
-@pytest.mark.covers("EA-5.10", "EA-5.11")
+@pytest.mark.covers("EA-3.12", "EA-3.13")
 def test_reviewer_trust_sorts_reviewers():
     trust_engine = engine()
     random_source = random.Random(1)
@@ -237,7 +237,7 @@ def test_reviewer_trust_sorts_reviewers():
     assert trust_engine.reviewer_level("organisation", "nobody", "customer_service.reply.send") == 1
 
 
-@pytest.mark.covers("EA-5.12")
+@pytest.mark.covers("EA-3.14")
 def test_reviewer_miss_on_incident_after_approval():
     trust_engine = engine()
     action = act()
@@ -249,8 +249,8 @@ def test_reviewer_miss_on_incident_after_approval():
     assert trust_engine.live_state()["reviewers"][reviewer_trust_key]["serious_error_count"] == 1
 
 
-# ---- policy (EA-3.9, EA-6.5)----------------------------------------------------------------------------------
-@pytest.mark.covers("EA-3.9")
+# ---- policy (EA-1.6, EA-6.6)----------------------------------------------------------------------------------
+@pytest.mark.covers("EA-1.6")
 def test_error_bar_can_only_tighten():
     trust_engine = engine()
     assert trust_engine.set_task_error_bar(POLICY_OWNER, "customer_service.reply.send", 0.03)
@@ -258,7 +258,7 @@ def test_error_bar_can_only_tighten():
         trust_engine.set_task_error_bar(POLICY_OWNER, "customer_service.reply.send", 0.08)
 
 
-@pytest.mark.covers("EA-6.5")
+@pytest.mark.covers("EA-6.6")
 def test_lowering_error_bar_reevaluates_trusted_keys():
     trust_engine = engine()
     promote_to(trust_engine, L2, "customer_service.reply.send")
@@ -266,13 +266,13 @@ def test_lowering_error_bar_reevaluates_trusted_keys():
     assert level(trust_engine, "customer_service.reply.send") == L1
 
 
-@pytest.mark.covers("EA-1.12")
+@pytest.mark.covers("EA-7.7")
 def test_tools_for_task_type():
     trust_engine = engine()
     assert trust_engine.tools_for("customer_service.refund.issue") == ["lookup_order", "issue_refund"]
 
 
-@pytest.mark.covers("EA-1.7", "EA-6.1")
+@pytest.mark.covers("EA-6.2", "EA-6.1")
 def test_catalogue_owned_by_ai_owner():
     trust_engine = engine()
     assert trust_engine.add_task_type(AI_OWNER, "customer_service.address.update", "C2")
@@ -281,8 +281,8 @@ def test_catalogue_owned_by_ai_owner():
     assert trust_engine.policy.task_types["customer_service.address.update"].consequence == "C3"
 
 
-# ---- multi-agent (EA-1.11, EA-7.1)-----------------------------------------------------------------------------
-@pytest.mark.covers("EA-7.1")
+# ---- multi-agent (EA-2.10, EA-8.1)-----------------------------------------------------------------------------
+@pytest.mark.covers("EA-8.1")
 def test_delegation_cap():
     trust_engine = engine()
     promote_to(trust_engine, L2, agent="billing")
@@ -293,7 +293,7 @@ def test_delegation_cap():
     assert decision.mode == "hold" and decision.why == "delegation_cap"
 
 
-@pytest.mark.covers("EA-1.11")
+@pytest.mark.covers("EA-2.10")
 def test_bundle_most_restrictive():
     trust_engine = engine()
     promote_to(trust_engine, L2)
@@ -301,9 +301,9 @@ def test_bundle_most_restrictive():
     assert [decision.mode for decision in decisions] == ["hold", "hold"]
 
 
-@pytest.mark.covers("EA-1.1")
+@pytest.mark.covers("EA-7.1")
 def test_task_type_catalogue_entry_keeps_description_and_examples():
-    """EA-1.1: a task type is a catalogue entry. Description and examples survive policy versioning."""
+    """EA-7.1: a task type is a catalogue entry. Description and examples survive policy versioning."""
     trust_engine = engine()
     assert trust_engine.add_task_type(
         AI_OWNER, "customer_service.address.update", "C2", tools=["update_address"],

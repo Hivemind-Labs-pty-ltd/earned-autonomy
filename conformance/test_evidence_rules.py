@@ -21,7 +21,7 @@ def state_of(trust_engine, task_type="customer_service.status.update", organisat
     return rows[0]
 
 
-@pytest.mark.covers("EA-3.1")
+@pytest.mark.covers("EA-1.2")
 def test_unjudged_autonomous_actions_are_not_evidence():
     trust_engine = engine(sampler=NeverSample())
     promote_to(trust_engine, L2)
@@ -33,7 +33,7 @@ def test_unjudged_autonomous_actions_are_not_evidence():
     assert state_of(trust_engine)["judged_count"] == before
 
 
-@pytest.mark.covers("EA-3.2")
+@pytest.mark.covers("EA-1.3")
 def test_spot_check_and_pre_review_outcomes_weigh_the_same():
     trust_engine = engine()
     held = act()
@@ -55,7 +55,7 @@ def test_spot_check_and_pre_review_outcomes_weigh_the_same():
     assert state_of(promoted)["judged_count"] - before == pre_review_step == 1
 
 
-@pytest.mark.covers("EA-3.12")
+@pytest.mark.covers("EA-1.8")
 def test_evidence_does_not_fade_with_time():
     trust_engine = engine()
     run_clean(trust_engine, 50, "customer_service.reply.send")
@@ -67,7 +67,7 @@ def test_evidence_does_not_fade_with_time():
     assert after["serious_error_count"] == before["serious_error_count"]
 
 
-@pytest.mark.covers("EA-5.2")
+@pytest.mark.covers("EA-3.5")
 def test_edits_and_rejections_need_a_reason_code():
     trust_engine = engine()
     for label in ("rejected", "material_edit"):
@@ -80,7 +80,7 @@ def test_edits_and_rejections_need_a_reason_code():
     trust_engine.record_outcome(action.action_id, "rejected", "wrong_fact", "pre_review", "reviewer")
 
 
-@pytest.mark.covers("EA-2.10")
+@pytest.mark.covers("EA-2.11")
 def test_the_newest_decision_applies_at_execution_time():
     trust_engine = engine()
     promote_to(trust_engine, L2)
@@ -93,7 +93,7 @@ def test_the_newest_decision_applies_at_execution_time():
         trust_engine.mark_executed(action.action_id)
 
 
-@pytest.mark.covers("EA-1.5")
+@pytest.mark.covers("EA-7.3")
 def test_the_task_type_name_has_no_effect_on_the_maths():
     def run(name):
         trust_engine = engine(policy=Policy(task_types={name: TaskTypePolicy("C2")}))
@@ -112,7 +112,7 @@ def test_the_task_type_name_has_no_effect_on_the_maths():
     assert run("customer_service.reply.send") == run("x") == run("a.very.different.name")
 
 
-@pytest.mark.covers("EA-4.1", "EA-4.9", "EA-4.13")
+@pytest.mark.covers("EA-4.1", "EA-4.9", "EA-4.12")
 def test_version_changes_apply_per_agent_across_organisations_including_rollback():
     trust_engine = engine()
     for organisation in ("organisation", "second_organisation"):
@@ -133,7 +133,7 @@ def test_version_changes_apply_per_agent_across_organisations_including_rollback
     assert state_of(trust_engine, "customer_service.reply.send")["judged_count"] == pytest.approx(halved * 0.5)
 
 
-@pytest.mark.covers("EA-4.12")
+@pytest.mark.covers("EA-1.12")
 def test_passing_tests_is_not_promotion_evidence():
     trust_engine = engine()
     run_clean(trust_engine, 20, "customer_service.reply.send")
@@ -146,7 +146,7 @@ def test_passing_tests_is_not_promotion_evidence():
     assert after["level"] == before["level"] == L1
 
 
-@pytest.mark.covers("EA-5.13")
+@pytest.mark.covers("EA-3.15")
 def test_a_second_check_updates_only_the_reviewer():
     trust_engine = engine()
     run_clean(trust_engine, 10, "customer_service.reply.send")

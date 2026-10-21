@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:earned-autonomy:v0.6:schema:trust-state.schema.json",
+  "$id": "urn:earned-autonomy:v0.7:schema:trust-state.schema.json",
   "title": "TrustState",
-  "description": "The derived state of one trust key. Always rebuildable by replaying the trust record (EA-6.8).",
+  "description": "The derived state of one trust key. Always rebuildable by replaying the trust record (EA-6.9).",
   "type": "object",
   "properties": {
     "trust_key": {
@@ -23,7 +23,7 @@
       ],
       "minItems": 3,
       "maxItems": 3,
-      "description": "The trust key: (organisation, agent, task type) (EA-1.2)."
+      "description": "The trust key: (organisation, agent, task type) (EA-1.1)."
     },
     "level": {
       "type": "integer",
@@ -54,7 +54,7 @@
           "integer"
         ]
       },
-      "description": "Serious flags of the last rolling_window judged actions, cleared on a level change (EA-3.5)."
+      "description": "Serious flags of the last rolling_window judged actions, cleared on a level change (EA-2.17)."
     },
     "agent_version": {
       "type": [
@@ -74,7 +74,7 @@
         {
           "type": "string",
           "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
-          "description": "ISO 8601 UTC with milliseconds and a Z suffix (EA-6.10)."
+          "description": "ISO 8601 UTC with milliseconds and a Z suffix (EA-6.11)."
         },
         {
           "type": "null"
@@ -86,12 +86,39 @@
         {
           "type": "string",
           "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
-          "description": "ISO 8601 UTC with milliseconds and a Z suffix (EA-6.10)."
+          "description": "ISO 8601 UTC with milliseconds and a Z suffix (EA-6.11)."
         },
         {
           "type": "null"
         }
       ]
+    },
+    "evidence": {
+      "type": "object",
+      "description": "Non-human evidence by source (shadow, replay, test) → [judged, serious]. Feeds the trust score only, never the autonomy setting (EA-1.18, EA-1.21).",
+      "additionalProperties": {
+        "type": "array",
+        "prefixItems": [
+          {
+            "type": "number",
+            "minimum": 0
+          },
+          {
+            "type": "number",
+            "minimum": 0
+          }
+        ],
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "last_evidence_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+      "description": "When the last evidence of any source arrived (EA-1.15 freshness)."
     }
   },
   "required": [

@@ -13,9 +13,12 @@ The defined terms used throughout the specification. Field names in the data mod
 | **Task type** | A catalogue entry describing one kind of action, with a name, a description, example requests, allowed tools and a consequence level. Trust is tracked per task type. |
 | **Task catalogue** | The set of task types an organisation's agents may perform. Part of the policy. |
 | **Trust key** | The triple (organisation, agent, task type). All trust state belongs to one trust key. |
-| **Trust level** | A trust key's position on the ladder: L1 Supervised, L2 Trusted or L3 Senior. See [levels](levels.md). |
+| **Autonomy setting** | How much a trust key may do alone and how much a person checks. In Core it is a trust level on the ladder; in Advanced it may be the dial. See [autonomy settings](autonomy.md). |
+| **Trust level** | A trust key's position on the Core ladder: L1 Supervised, L2 Trusted or L3 Senior. See [autonomy settings](autonomy.md). |
+| **Dial** | The Advanced autonomy setting: pre-review below a trust score of 0.975, then a spot-check rate that falls as the score rises. |
+| **Lookup table** | The published table of judged actions needed to promote, by serious errors so far, and the step-down counts. Core runs the ladder from it. |
 | **L0 Observe** | A deployment choice, not a level the engine assigns: the agent may tag and suggest but not propose actions. |
-| **Consequence level** | How costly a mistake in a task type would be: C1 Low, C2 Moderate, C3 High or C4 Critical. It sets the error bar. See [levels](levels.md). |
+| **Consequence level** | How costly a mistake in a task type would be: C1 Low, C2 Moderate, C3 High or C4 Critical. It sets the error bar. See [autonomy settings](autonomy.md). |
 | **Error bar (ε)** | The highest serious-error rate a task type may have and still be trusted, e.g. 0.05. Set by the consequence level. The field name is `error_bar`; ε is its symbol in formulas. |
 | **Checks** | Deterministic rules run on every proposed action before it happens, e.g. "the refund equals the order total". The caller runs them; the engine reads the result. |
 | **Decision** | The engine's answer for one proposed action: hold (a person reviews it first) or act (it goes ahead), with the reasons. |
@@ -31,6 +34,13 @@ The defined terms used throughout the specification. Field names in the data mod
 | **Spot-check** | A review, after the fact, of an action the agent took on its own, selected at random. |
 | **Canary** | A known-bad item placed in a review queue to check that reviewers catch it. |
 | **Second check** | A second reviewer's judgement of a first reviewer's decision, used to measure reviewers. |
+| **Lifecycle stage** | One of Assess, Build, Measure, Decide, Oversee, Learn and Retire, with Govern throughout. The specification covers Measure to Retire and Govern, and only the agent interface of Build. |
+| **Conformance tier** | Core, Standard or Advanced. Every rule belongs to one; each tier includes the ones below it. |
+| **Evidence source** | Where a judgement came from: `human` (live pre-review, spot-check or incident), `shadow`, `replay` or `test`. Each has a weight; human is 1.0. |
+| **Effective evidence** | The weighted count of judged actions across evidence sources. |
+| **Trust score** | The probability that a trust key's true serious-error rate is below its error bar, given the evidence. See [measure](measure.md). |
+| **Trust profile** | Everything measured about one trust key: error rate and interval, trust score, effective evidence by source, freshness, trend, and the actual and implied autonomy. |
+| **Trust summary** | The per-agent view: share of actions at each autonomy setting, incidents and trends. |
 | **Upper bound** | The highest error rate that still plausibly explains the evidence (95% confidence by default). Promotion needs it to be under the error bar. |
 | **Lower bound** | The lowest error rate that still plausibly explains recent evidence. A step-down happens when it is over the error bar. |
 | **Promotion** | Moving a trust key up one level. |
@@ -45,7 +55,8 @@ The defined terms used throughout the specification. Field names in the data mod
 | **Write tool** | A tool that changes something outside the agent. Tools that only read are not write tools. |
 | **Trust record** | The permanent, append-only, tamper-evident log of every proposed action, decision, outcome, incident, version, policy change and governance request. It holds references and labels, not customer content. |
 | **Sequence number** | An entry's position in the trust record's hash chain: the record's order of truth. |
-| **Policy** | The versioned rules an organisation applies: task catalogue, error bars, caps, sample rates and roles. |
+| **Policy** | The versioned rules an organisation applies: task catalogue, error bars, caps, sample rates, evidence weights and roles. |
+| **Retired task type** | A task type an agent no longer does: every new action is held, and its record is kept. |
 | **AI owner** | The business person accountable for the agents in an area, such as a team lead or department head. Owns the task catalogue and the consequence levels. |
 | **Policy owner** | Sets error bars, caps, tool scope and sample rates. |
 | **Reviewer** | Judges agents' actions. |

@@ -1,4 +1,4 @@
-"""Timestamps and ordering (EA-6.9, EA-6.10).
+"""Timestamps and ordering (EA-6.10, EA-6.11).
 
 One exact UTC format in the record (`YYYY-MM-DDTHH:MM:SS.sssZ`); the record's order of truth is the sequence number in
 the hash chain, never the timestamp.
@@ -17,7 +17,7 @@ from earned_autonomy import (SQLiteBackend, TrustRecord, format_timestamp, norma
 CANONICAL_SHAPE = r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$"
 
 
-@pytest.mark.covers("EA-6.10")
+@pytest.mark.covers("EA-6.11")
 def test_format_is_exact_even_at_zero_milliseconds():
     assert format_timestamp(datetime(2026, 10, 19, 3, 20, 0, tzinfo=timezone.utc)) == "2026-10-19T03:20:00.000Z"
     assert format_timestamp(datetime(2026, 10, 19, 3, 20, 0, 123456, tzinfo=timezone.utc)) == "2026-10-19T03:20:00.123Z"
@@ -25,7 +25,7 @@ def test_format_is_exact_even_at_zero_milliseconds():
     assert format_timestamp(datetime(2026, 10, 19, 14, 20, 0, tzinfo=melbourne)) == "2026-10-19T03:20:00.000Z"
 
 
-@pytest.mark.covers("EA-6.10")
+@pytest.mark.covers("EA-6.11")
 def test_round_trip():
     text = "2026-10-19T03:20:00.123Z"
     assert format_timestamp(parse_timestamp(text)) == text
@@ -33,14 +33,14 @@ def test_round_trip():
     assert parse_timestamp(format_timestamp(moment)) == moment
 
 
-@pytest.mark.covers("EA-6.10")
+@pytest.mark.covers("EA-6.11")
 def test_old_forms_normalise_to_the_canonical_string():
     assert normalise_timestamp("2026-10-19T03:20:00+00:00") == "2026-10-19T03:20:00.000Z"
     assert normalise_timestamp("2026-10-19T03:20:00.123456+00:00") == "2026-10-19T03:20:00.123Z"
     assert normalise_timestamp("2026-10-19T14:20:00+11:00") == "2026-10-19T03:20:00.000Z"
 
 
-@pytest.mark.covers("EA-6.10")
+@pytest.mark.covers("EA-6.11")
 def test_naive_datetimes_and_strings_are_rejected():
     with pytest.raises(ValueError):
         format_timestamp(datetime(2026, 10, 19, 3, 20))
@@ -48,7 +48,7 @@ def test_naive_datetimes_and_strings_are_rejected():
         parse_timestamp("2026-10-19T03:20:00")
 
 
-@pytest.mark.covers("EA-6.10")
+@pytest.mark.covers("EA-6.11")
 def test_every_record_timestamp_uses_the_canonical_format():
     trust_engine = engine()
     for _ in range(5):
@@ -78,7 +78,7 @@ class SkewedClock:
         return START + timedelta(minutes=self.calls) + timedelta(minutes=offset)
 
 
-@pytest.mark.covers("EA-6.9")
+@pytest.mark.covers("EA-6.10")
 def test_replay_follows_sequence_not_timestamps_under_clock_skew(tmp_path):
     path = str(tmp_path / "record.db")
     trust_engine = engine(clock=SkewedClock(), record=TrustRecord(SQLiteBackend(path)))
@@ -98,7 +98,7 @@ def test_replay_follows_sequence_not_timestamps_under_clock_skew(tmp_path):
     assert reopened.live_state() == trust_engine.live_state()
 
 
-@pytest.mark.covers("EA-6.7", "EA-6.10")
+@pytest.mark.covers("EA-6.8", "EA-6.11")
 def test_external_rehash_of_the_stored_record_matches_the_chain(tmp_path):
     """An auditor's check: read the raw rows, canonicalise and hash them with nothing from this package."""
     path = str(tmp_path / "record.db")

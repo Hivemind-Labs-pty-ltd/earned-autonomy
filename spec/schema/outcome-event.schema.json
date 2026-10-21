@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:earned-autonomy:v0.6:schema:outcome-event.schema.json",
+  "$id": "urn:earned-autonomy:v0.7:schema:outcome-event.schema.json",
   "title": "OutcomeEvent",
-  "description": "One judgement of one action: the evidence trust is built from (EA-3.1, EA-5.2).",
+  "description": "One judgement of one action: the evidence trust is built from (EA-1.2, EA-3.5).",
   "type": "object",
   "properties": {
     "event_id": {
@@ -35,7 +35,7 @@
       ],
       "minItems": 3,
       "maxItems": 3,
-      "description": "The trust key: (organisation, agent, task type) (EA-1.2)."
+      "description": "The trust key: (organisation, agent, task type) (EA-1.1)."
     },
     "agent_version": {
       "type": "string"
@@ -81,11 +81,11 @@
           "type": "null"
         }
       ],
-      "description": "Required for material_edit and rejected (EA-5.2, EA-5.3)."
+      "description": "Required for material_edit and rejected (EA-3.5, EA-3.6)."
     },
     "serious": {
       "type": "boolean",
-      "description": "EA-3.3"
+      "description": "EA-1.4"
     },
     "actor_id": {
       "type": "string"
@@ -99,7 +99,7 @@
     "created_at": {
       "type": "string",
       "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
-      "description": "ISO 8601 UTC with milliseconds and a Z suffix (EA-6.10)."
+      "description": "ISO 8601 UTC with milliseconds and a Z suffix (EA-6.11)."
     }
   },
   "required": [

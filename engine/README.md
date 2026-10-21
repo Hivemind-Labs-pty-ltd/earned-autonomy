@@ -2,18 +2,24 @@
 
 AI agents earn autonomy over their actions the way a new employee does: they start supervised, every human
 judgement becomes evidence, and each task type climbs (Supervised → Trusted → Senior) or steps down on that evidence.
-This package is the reference implementation of the [specification](../spec/README.md) v0.6. Docstrings and tests cite
-rule IDs (`EA-x.y`); [`conformance/compliance-matrix.md`](../conformance/compliance-matrix.md) maps every rule to its code and tests.
+This package is the reference implementation of the [specification](../spec/README.md) v0.7. Docstrings and tests cite
+rule IDs (`EA-<stage>.<n>`, stages 1 Measure · 2 Decide · 3 Oversee · 4 Learn · 5 Retire · 6 Govern · 7 Agent interface · 8 Multi-agent); [`conformance/compliance-matrix.md`](../conformance/compliance-matrix.md) maps every rule to its code and tests.
 Stdlib only, Python 3.11+.
 
 What it gives you:
 
 - **`decide()`**: hold or act for every proposed action (EA-2.1). Order: paused → unknown type or low tag
   confidence → tool floor → checks → capped/C4 → level.
-- **Tool floors** (EA-1.13, EA-1.14): every write tool carries a floor consequence, so an action mis-tagged as a
+- **Tool floors** (EA-7.8, EA-2.5): every write tool carries a floor consequence, so an action mis-tagged as a
   low-consequence task can't borrow that task's trust when it calls a riskier write tool.
-- **Strict promotion** (EA-3.14, optional): an anytime-valid confidence sequence for C3 work or weak agents.
-- **The trust maths** (EA-3.x): Wilson bounds, consequence levels C1–C4, one-level step-down, the 60-day re-entry
+- **Strict promotion** (EA-2.19, optional): an anytime-valid confidence sequence for C3 work or weak agents.
+- **Measure** (EA-1.13 to EA-1.21): `trust_report()` gives every task type a trust profile (trust score, estimated
+  error rate with interval, effective evidence by source, freshness, trend, implied autonomy) and the agent a summary;
+  `record_evidence()` adds shadow, replay and test evidence at policy-set weights. It never moves the ladder.
+- **Core lookup tables** (EA-2.15, optional): `Policy(promotion_rule="core_table")` runs the ladder from the published
+  tables, which give the same decisions as the bound.
+- **Retire** (EA-5.4 to EA-5.6): `retire()` holds a task type; `reactivate()` brings it back supervised.
+- **The trust maths** (EA-2.14 to EA-2.18): Wilson bounds, consequence levels C1–C4, one-level step-down, the 60-day re-entry
   rule, and versions that keep their trust only when they pass hidden tests (EA-4.6).
 - **A tamper-evident trust record**: append-only and hash-chained, with `verify()` detecting any edit, deletion or
   reorder. It holds references and labels only, never customer content. Backends: in-memory and SQLite.
@@ -24,8 +30,8 @@ What it gives you:
   - pause and resume;
   - incidents;
   - a review queue;
-  - reviewer trust, where people earn trust too (EA-5.10).
-- **Governance** (EA-6.1 to EA-6.5): roles (AI owner, policy owner, reviewer, auditor, builder, agent), separation of duties,
+  - reviewer trust, where people earn trust too (EA-3.12).
+- **Governance** (EA-6.1 to EA-6.6): roles (AI owner, policy owner, reviewer, auditor, builder, agent), separation of duties,
   policy-as-code versions, and every request logged.
 - **A conformance suite** in [`../conformance/`](../conformance/), including parity with the Trust Gym's published
   results, and schema validation against [`../spec/schema/`](../spec/schema/).
@@ -80,6 +86,7 @@ engine.report_incident("action_125", "high", actor_id="ops")    # found later: s
 
 print(engine.get_state("acme", "customer_service_agent"))                  # levels, bounds, alerts, plain-English explanation
 print(engine.explain("action_123"))                             # why it was held or allowed, under which policy
+print(engine.trust_report("acme", "customer_service_agent"))      # trust profile per task type + agent summary
 assert engine.record.verify().ok                             # the record hasn't been tampered with
 ```
 
@@ -111,23 +118,6 @@ never published is treated as untested and discounted.
 
 ## Integration notes
 
-**Any agent framework**: see below.
-
-### Internal: 10x integration (remove before any public release)
-
-Description only; nothing in 10x is changed by this package.
-- The natural hook is post-generation routing (`Services/post_generation_routing.route_response`), after the
-  pre-send checks (`message_checks.run_checks` → `ChecksResult`) and before delivery. `decide()` replaces the
-  per-agent `response_mode` switch with a per-task-type decision. `hold` maps to the existing pending-approval path
-  (`set_pending_approval` / approval items). `act` maps to send.
-- The approve, edit and reject handlers (`approve_invocation`, `reject_invocation`, `action_item`) call
-  `record_outcome`. They need a reason code on reject and edit; today reject takes no reason.
-- Bundle publishes (`agent_definitions.publish_version`) call `on_version_published` with the test runner's
-  training and hidden pass rates. Knowledge edits count as new versions (EA-4.1).
-- Tool scope: filter the bundle's tool grants with `engine.tools_for(task_type)`. This is what `ToolGrant.when`
-  intends; it isn't enforced today.
-- 10x has no task-type key yet. A tagging step (rules first, a named LLM call second) is the first thing to add.
-
 ### Any agent framework
 
 (LangGraph, the OpenAI Agents SDK, the Claude Agent SDK, MCP servers):
@@ -140,10 +130,10 @@ Description only; nothing in 10x is changed by this package.
 
 | Module | Contents |
 |---|---|
-| `models.py` | Data model, consequence levels, reason codes ([schema](../spec/schema/), EA-3.8, EA-5.3) |
+| `models.py` | Data model, consequence levels, reason codes ([schema](../spec/schema/), EA-1.5, EA-3.6) |
 | `engine.py` | `TrustEngine` ([API](../spec/api.md)) and the deterministic reducer |
-| `record.py` | Hash-chained trust record, memory and SQLite backends (EA-6.6 to EA-6.13) |
-| `stats.py` | `BoundStrategy`, `WilsonBound` and `ConfidenceSequenceBound` (EA-3.4, EA-3.14) |
-| `governance.py` | Roles, separation of duties, request log (EA-6.1 to EA-6.4) |
+| `record.py` | Hash-chained trust record, memory and SQLite backends (EA-6.7 to EA-6.14) |
+| `stats.py` | `BoundStrategy`, `WilsonBound`, `ConfidenceSequenceBound`, trust score, Core tables, dial rate (EA-1.14, EA-2.14, EA-2.15, EA-2.19, EA-2.22) |
+| `governance.py` | Roles, separation of duties, request log (EA-6.1 to EA-6.5) |
 | `suites.py` | Training and hidden suites; hidden tests are readable only by the policy owner and auditor (EA-4.3, EA-4.4) |
-| `tagging.py` | `Tagger` protocol and `RuleTagger` (EA-1.8) |
+| `tagging.py` | `Tagger` protocol and `RuleTagger` (EA-7.5) |

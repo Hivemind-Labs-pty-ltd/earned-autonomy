@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:earned-autonomy:v0.6:schema:policy.schema.json",
+  "$id": "urn:earned-autonomy:v0.7:schema:policy.schema.json",
   "title": "Policy",
-  "description": "An organisation's versioned rules (EA-6.5): the task catalogue, error bars, sample rates and thresholds.",
+  "description": "An organisation's versioned rules (EA-6.6): the task catalogue, error bars, sample rates and thresholds.",
   "type": "object",
   "properties": {
     "policy_version": {
@@ -18,7 +18,7 @@
     "min_judged": {
       "type": "integer",
       "minimum": 1,
-      "description": "EA-3.4 (default 30)"
+      "description": "EA-2.14 (default 30)"
     },
     "confidence": {
       "type": "number",
@@ -28,17 +28,17 @@
     "rolling_window": {
       "type": "integer",
       "minimum": 1,
-      "description": "EA-3.5 (default 50)"
+      "description": "EA-2.17 (default 50)"
     },
     "rolling_window_min": {
       "type": "integer",
       "minimum": 1,
-      "description": "EA-3.5 (default 10)"
+      "description": "EA-2.17 (default 10)"
     },
     "reentry_gap_days": {
       "type": "number",
       "minimum": 0,
-      "description": "EA-3.13 (default 60)"
+      "description": "EA-5.1 (default 60)"
     },
     "spot_rate": {
       "type": "object",
@@ -50,7 +50,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Spot-check rate by level (EA-2.8): 2 → 0.25, 3 → 0.05."
+      "description": "Spot-check rate by level (EA-3.1): 2 → 0.25, 3 → 0.05."
     },
     "canary_rate": {
       "type": "number",
@@ -78,34 +78,34 @@
       "type": "number",
       "minimum": 0,
       "maximum": 1,
-      "description": "EA-1.9 (default 0.8)"
+      "description": "EA-2.3 (default 0.8)"
     },
     "alert_fraction": {
       "type": "number",
       "minimum": 0,
       "maximum": 1,
-      "description": "EA-5.7 (default 0.8)"
+      "description": "EA-3.10 (default 0.8)"
     },
     "require_checks": {
       "type": "boolean",
-      "description": "EA-2.4"
+      "description": "EA-2.7"
     },
     "reviewer_error_bar": {
       "type": "number",
       "minimum": 0,
       "maximum": 1,
-      "description": "EA-5.10 (default 0.10)"
+      "description": "EA-3.12 (default 0.10)"
     },
     "reviewer_min_judged": {
       "type": "integer",
       "minimum": 1,
-      "description": "EA-5.10 (default 30)"
+      "description": "EA-3.12 (default 30)"
     },
     "reviewer_canary_rate": {
       "type": "number",
       "minimum": 0,
       "maximum": 1,
-      "description": "EA-5.9 (default 0.05)"
+      "description": "EA-3.11 (default 0.05)"
     },
     "second_check_rate": {
       "type": "object",
@@ -117,13 +117,13 @@
         }
       },
       "additionalProperties": false,
-      "description": "Second-check rate by reviewer level (EA-5.11): 1 → 0.25, 2 → 0.05."
+      "description": "Second-check rate by reviewer level (EA-3.13): 1 → 0.25, 2 → 0.05."
     },
     "task_types": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "description": "A task-type catalogue entry (EA-1.1).",
+        "description": "A task-type catalogue entry (EA-7.1).",
         "properties": {
           "consequence": {
             "enum": [
@@ -140,7 +140,7 @@
             ],
             "minimum": 0,
             "maximum": 1,
-            "description": "May only tighten the consequence level's error bar (EA-3.9)."
+            "description": "May only tighten the consequence level's error bar (EA-1.6)."
           },
           "capped": {
             "type": "boolean"
@@ -177,7 +177,7 @@
           "C4"
         ]
       },
-      "description": "Explicit tool floors (EA-1.13)."
+      "description": "Explicit tool floors (EA-7.8)."
     },
     "write_tools": {
       "type": "array",
@@ -190,7 +190,56 @@
       "items": {
         "type": "string"
       },
-      "description": "Consequence levels and/or task types that use strict promotion (EA-3.14)."
+      "description": "Consequence levels and/or task types that use strict promotion (EA-2.19)."
+    },
+    "promotion_rule": {
+      "enum": [
+        "bound",
+        "core_table"
+      ],
+      "description": "How promotion and step-down are computed: the 95% Wilson bounds, or the published Core lookup tables (EA-2.15)."
+    },
+    "trust_prior": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "exclusiveMinimum": 0
+      },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "Beta prior for the trust score (EA-1.14). Default [1, 1]."
+    },
+    "trust_score_threshold": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "description": "Trust score at which the evidence supports Trusted (EA-1.14). Default 0.975, which matches the Wilson promotion rule."
+    },
+    "evidence_weights": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "description": "Weight of each evidence source in the trust score (EA-1.17, EA-1.18). Defaults: human 1.0, shadow 1.0, replay 1.0, test 0.75."
+    },
+    "human_evidence_min_share": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Alert when weighted human evidence is below this share of all evidence (EA-1.20)."
+    },
+    "dial_gain": {
+      "type": "number",
+      "minimum": 0,
+      "description": "The dial's spot-check gain (EA-2.22). Default 5."
+    },
+    "dial_floor": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "The dial's minimum spot-check rate (EA-2.22). Default 0.02."
     }
   },
   "required": [

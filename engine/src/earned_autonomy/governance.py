@@ -1,4 +1,4 @@
-"""Governance guard (EA-6.1 to EA-6.4). Roles, separation of duties, every request logged (allowed or not).
+"""Governance guard (EA-6.1 to EA-6.5). Roles, separation of duties, every request logged (allowed or not).
 
 Roles: ai_owner, policy_owner, reviewer, auditor, builder, agent.
 """
@@ -16,7 +16,7 @@ ALLOWED: dict[str, set] = {
     "set_cap": {"policy_owner"},
     "set_spot_rate": {"policy_owner"},
     "set_tools": {"policy_owner"},
-    # catalogue (EA-1.7: the AI owner maintains task types and assigns consequence levels)
+    # catalogue (EA-6.2: the AI owner maintains task types and assigns consequence levels)
     "add_task_type": {"ai_owner"},
     "set_consequence": {"ai_owner"},
     # levels
@@ -24,7 +24,10 @@ ALLOWED: dict[str, set] = {
     "demote": {"policy_owner", "ai_owner", "reviewer"},
     "pause": {"policy_owner", "ai_owner", "reviewer"},
     "resume": {"policy_owner", "ai_owner"},
-    # tests and checks (EA-4.14: the agent and any improver never edit these)
+    # retire and reactivate a task type (EA-5.4, EA-5.6)
+    "retire": {"policy_owner", "ai_owner"},
+    "reactivate": {"policy_owner", "ai_owner"},
+    # tests and checks (EA-4.13: the agent and any improver never edit these)
     "edit_tests": {"policy_owner"},
     "edit_checks": {"policy_owner"},
     "read_hidden_tests": {"policy_owner", "auditor"},
@@ -37,7 +40,7 @@ ALLOWED: dict[str, set] = {
 
 # Ops that loosen or bypass the rules for a specific agent: its builder may never do these (separation of duties).
 SEPARATION_OF_DUTIES_OPERATIONS = frozenset({"promote", "set_error_bar", "set_cap", "set_spot_rate", "set_tools", "edit_tests", "edit_checks",
-                     "read_hidden_tests", "set_consequence", "set_policy", "resume"})
+                     "read_hidden_tests", "set_consequence", "set_policy", "resume", "reactivate"})
 
 
 @dataclass
@@ -68,7 +71,7 @@ class GovernanceGuard:
         if operation not in ALLOWED:
             return GovernanceResult(False, "unknown_op")
         if actor.agent_id is not None or "agent" in actor.roles:
-            # an agent may read its own record and nothing else (EA-6.2, EA-5.14)
+            # an agent may read its own record and nothing else (EA-6.3, EA-3.3)
             if operation == "read_record" and (target_agent is None or target_agent == actor.agent_id):
                 return GovernanceResult(True, "ok")
             return GovernanceResult(False, "agent_cannot_govern")

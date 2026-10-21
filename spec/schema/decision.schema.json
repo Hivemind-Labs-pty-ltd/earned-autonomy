@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:earned-autonomy:v0.6:schema:decision.schema.json",
+  "$id": "urn:earned-autonomy:v0.7:schema:decision.schema.json",
   "title": "Decision",
-  "description": "The engine's answer for one proposed action, written to the trust record (EA-2.1, EA-2.11).",
+  "description": "The engine's answer for one proposed action, written to the trust record (EA-2.1, EA-2.12).",
   "type": "object",
   "properties": {
     "decision_id": {
@@ -29,14 +29,14 @@
       ],
       "minItems": 3,
       "maxItems": 3,
-      "description": "The trust key: (organisation, agent, task type) (EA-1.2)."
+      "description": "The trust key: (organisation, agent, task type) (EA-1.1)."
     },
     "mode": {
       "enum": [
         "hold",
         "act"
       ],
-      "description": "Never says whether the action will be spot-checked (EA-2.7)."
+      "description": "Never says whether the action will be spot-checked (EA-2.23)."
     },
     "why": {
       "enum": [
@@ -49,7 +49,8 @@
         "capped",
         "level_L1",
         "delegation_cap",
-        "trusted"
+        "trusted",
+        "retired"
       ]
     },
     "level": {
@@ -89,7 +90,7 @@
           "type": "null"
         }
       ],
-      "description": "The effective consequence: the highest of the task type's level and its write tools' floors (EA-1.14)."
+      "description": "The effective consequence: the highest of the task type's level and its write tools' floors (EA-2.5)."
     },
     "tool_floor": {
       "anyOf": [
@@ -148,7 +149,7 @@
     "created_at": {
       "type": "string",
       "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
-      "description": "ISO 8601 UTC with milliseconds and a Z suffix (EA-6.10)."
+      "description": "ISO 8601 UTC with milliseconds and a Z suffix (EA-6.11)."
     }
   },
   "required": [

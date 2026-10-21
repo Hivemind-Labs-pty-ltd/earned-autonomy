@@ -1,19 +1,19 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:earned-autonomy:v0.6:schema:record-entry.schema.json",
+  "$id": "urn:earned-autonomy:v0.7:schema:record-entry.schema.json",
   "title": "RecordEntry",
-  "description": "One entry of the append-only, hash-chained trust record (EA-6.6 to EA-6.10).",
+  "description": "One entry of the append-only, hash-chained trust record (EA-6.7 to EA-6.11).",
   "type": "object",
   "properties": {
     "sequence": {
       "type": "integer",
       "minimum": 0,
-      "description": "The record's order of truth (EA-6.9)."
+      "description": "The record's order of truth (EA-6.10)."
     },
     "timestamp": {
       "type": "string",
       "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
-      "description": "ISO 8601 UTC with milliseconds and a Z suffix (EA-6.10)."
+      "description": "ISO 8601 UTC with milliseconds and a Z suffix (EA-6.11)."
     },
     "type": {
       "enum": [
@@ -31,12 +31,15 @@
         "canary",
         "second_check_sample",
         "version_published",
-        "version_unannounced"
+        "version_unannounced",
+        "evidence",
+        "retire",
+        "reactivate"
       ]
     },
     "body": {
       "type": "object",
-      "description": "Type-specific content: references, labels and hashes only, never customer content (EA-6.13). A decision body follows decision.schema.json plus routing fields; an outcome body follows outcome-event.schema.json."
+      "description": "Type-specific content: references, labels and hashes only, never customer content (EA-6.14). A decision body follows decision.schema.json plus routing fields; an outcome body follows outcome-event.schema.json."
     },
     "previous_hash": {
       "type": "string"
@@ -44,7 +47,7 @@
     "hash": {
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$",
-      "description": "SHA-256 over the canonical JSON of sequence, timestamp, type, body and previous_hash (EA-6.7)."
+      "description": "SHA-256 over the canonical JSON of sequence, timestamp, type, body and previous_hash (EA-6.8)."
     }
   },
   "required": [
