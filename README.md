@@ -8,7 +8,7 @@ they can't answer this question. So most teams pick one setting and never change
 - **Check everything:** Safe, but the agent saves little time.
 - **Switch to automatic:** Fast, but mistakes reach customers.
 
-**The better way is how we treat new staff:** freedom is earned, and lost when they slip.
+**The better way is how we treat new staff:** freedom is earned by trust, and lost when mistakes creep in.
 
 ## The principles
 
