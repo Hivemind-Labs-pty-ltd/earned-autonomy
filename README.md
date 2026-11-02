@@ -10,8 +10,8 @@ Guardrails stop the mistakes you can predict. They can't answer this question.
 
 So most teams pick one of two settings, and never change it:
 
-- **Check everything:** safe, but the agent saves little time.
-- **Switch to automatic:** fast, but mistakes the guardrails miss reach customers.
+- **Check everything:** Safe, but the agent saves little time.
+- **Switch to automatic:** Fast, but mistakes reach customers.
 
 **There's a better way, and it's how we treat new staff:** more freedom as they prove themselves, less when they slip.
 
