@@ -2,15 +2,11 @@
 
 > **Status:** private working draft, version 0.7. "Earned Autonomy" is a working name.
 
-## The problem
+## When can an AI agent work without a person checking?
 
 AI agents now answer customers, issue refunds and update records.
 
-Guardrails stop the mistakes you can predict. They can't tell you:
-
-### When can an AI agent work without a person checking?
-
-So most teams guess, once:
+Guardrails stop the mistakes you can predict. They can't answer this question, so most teams guess, once:
 
 - **Check everything:** safe, but the agent saves little time.
 - **Switch to automatic:** fast, but the polite, on-policy, wrong reply slips through.
