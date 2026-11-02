@@ -4,14 +4,16 @@
 
 ## The problem
 
-AI agents now answer customers, issue refunds and update records. Every business using one has to answer two
-questions:
+AI agents now answer customers, issue refunds and update records. Most businesses using one already have safety
+controls: guardrails, filters, an approval step. Those stop the mistakes you can predict. They don't answer the
+question that decides whether the agent is worth having:
 
-1. **Which work is worth handing to an agent?**
-2. **When can the agent do it without a person checking first?**
+**When can this agent do this work without a person checking first?**
 
-Most teams answer once, on gut feel. Either a person checks everything forever, which is safe but slow, or the agent is
-switched to "automatic", which is fast but risky. Neither answer changes as the agent gets better or worse.
+Without a real answer, teams decide once, on gut feel. Either a person approves everything forever, which is safe but
+saves little time, or the agent is switched to "automatic" and the guardrails are left to catch mistakes they were
+never built for, like a reply that's polite and follows the rules but is simply wrong. Neither choice changes as the
+agent gets better or worse.
 
 We already know a better way, because it's how we treat new staff: give them more freedom as they prove themselves,
 keep an eye on their work, and pull back when things slip. Earned Autonomy does the same for AI agents.
