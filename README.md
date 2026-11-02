@@ -8,7 +8,7 @@ AI agents now answer customers, issue refunds and update records. Most businesse
 controls: guardrails, filters, an approval step. Those stop the mistakes you can predict. They don't answer the
 question that decides whether the agent is worth having:
 
-**When can this agent do this work without a person checking first?**
+> ## When can an AI agent work without a person checking?
 
 Without a real answer, teams decide once, on gut feel. Either a person approves everything forever, which is safe but
 saves little time, or the agent is switched to "automatic" and the guardrails are left to catch mistakes they were
