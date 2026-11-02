@@ -1,19 +1,14 @@
 # Earned Autonomy
 
-> **Status:** private working draft, version 0.7. "Earned Autonomy" is a working name.
-
 ## When can an AI agent work without a person checking?
 
-AI agents now answer customers, issue refunds and update records.
-
-Guardrails stop the mistakes you can predict. They can't answer this question.
-
-So most teams pick one of two settings, and never change it:
+AI agents now answer customers, issue refunds and update records. Guardrails stop the mistakes you can predict, but
+they can't answer this question. So most teams pick one setting and never change it:
 
 - **Check everything:** Safe, but the agent saves little time.
 - **Switch to automatic:** Fast, but mistakes reach customers.
 
-**There's a better way, and it's how we treat new staff:** more freedom as they prove themselves, less when they slip.
+**The better way is how we treat new staff:** freedom is earned, and lost when they slip.
 
 ## The principles
 
@@ -59,4 +54,4 @@ engineers, and the [research](research/README.md) behind it all. Want to help? S
 
 ---
 
-Maintained by Hivemind Labs. Private until launch.
+Maintained by Hivemind Labs. Private working draft, version 0.7. "Earned Autonomy" is a working name.
