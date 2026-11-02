@@ -1,87 +1,63 @@
 # Earned Autonomy
 
-> **Status:** private working draft. "Earned Autonomy" is a working name. Specification v0.7, public review draft.
-
-**AI agents should earn the right to act on their own the way a new employee does.** Choose the work worth delegating,
-measure continuously how far the agent can be trusted on each kind of task, decide what it may do alone from that
-measurement, keep watching, keep improving, and know when to stop.
-
-The aim is to **raise the multiple**: the work done per hour of human time, compared with doing it by hand, without
-letting more serious mistakes through. Trust can't be shortcut, but it can be made cheaper to earn.
+> **Status:** private working draft, version 0.7. "Earned Autonomy" is a working name.
 
 ## The problem
 
-Businesses deploying AI agents hit two questions: *which work is worth automating?* and *when can this agent act without
-a person checking?* Today both are answered once, on gut feel. Existing frameworks define autonomy levels but don't say
-how an agent earns them, and don't publish evidence that their levels work.
+AI agents now answer customers, issue refunds and update records. Every business using one has to answer two
+questions:
 
-## The lifecycle
+1. **Which work is worth handing to an agent?**
+2. **When can the agent do it without a person checking first?**
 
-```mermaid
-flowchart LR
-    A[Assess] --> B[Build]
-    B --> M[Measure]
-    M --> D[Decide]
-    D --> O[Oversee]
-    O --> L[Learn]
-    L --> M
-    O --> M
-    D --> R[Retire]
-    R -.-> A
-```
+Most teams answer once, on gut feel. Either a person checks everything forever, which is safe but slow, or the agent is
+switched to "automatic", which is fast but risky. Neither answer changes as the agent gets better or worse.
 
-**Govern** runs through every stage: a named owner, clear roles, versioned rules and a permanent record.
+We already know a better way, because it's how we treat new staff: give them more freedom as they prove themselves,
+keep an eye on their work, and pull back when things slip. Earned Autonomy does the same for AI agents.
 
-| Stage | In one line |
-|---|---|
-| **Assess** | Is this task worth automating, and when will it pay back? |
-| **Build** | Implement the agent. Outside the standard: any agent can be measured and governed |
-| **Measure** | A trust score per task type, updated continuously from evidence |
-| **Decide** | Autonomy and oversight follow the measurement: a simple three-level ladder, or a dial |
-| **Oversee** | Random hidden spot-checks, alarms, pause, review windows |
-| **Learn** | Corrections become rules and tests; every new version is measured again |
-| **Retire** | Stop automating work that's rare, critical or no longer pays |
+## The principles
 
-## What's different here
+1. **Keep measuring trust.** For each kind of task, always know how sure you are that the agent does it well enough.
+   Every reviewed piece of work updates that answer.
 
-- **Trust per task type, not per agent.** An agent can be trusted with order updates and still supervised on refunds.
-- **Measured, not certified.** Trust is a score that keeps updating, not a one-off sign-off.
-- **Thresholds backed by evidence.** The rules come from statistics and were tested in pre-registered experiments,
-  failures included. A simple version runs on lookup tables.
-- **Scoped step-down.** A slip affects that one task type, one level, not the whole agent.
-- **Runnable, not just written.** A reference trust engine and a conformance test suite ship with the specification.
+2. **Let the measurement decide.** How much the agent may do alone follows a clear rule based on that measurement,
+   not on a feeling, a demo or a sales pitch.
 
-## Start here
+3. **Trust comes only from checked work.** A person's review, a comparison with what staff actually did, or past
+   cases. Complaints show up after the damage is done, so they can lower trust but never raise it.
 
-| You are… | Read |
-|---|---|
-| A leader deciding whether to adopt it | [PRINCIPLES.md](PRINCIPLES.md): one page |
-| New to the idea | [docs/primer.md](docs/primer.md): concepts and why it works |
-| Choosing what to automate | [docs/assessment-guide.md](docs/assessment-guide.md): the cost model and verdicts |
-| Running agents day to day | [docs/guide.md](docs/guide.md): the practitioner guide, by lifecycle stage |
-| Building agents | [docs/implementation-guide.md](docs/implementation-guide.md): building agents that earn trust fast |
-| An engineer building the machinery | [spec/README.md](spec/README.md), then [engine/README.md](engine/README.md) and [conformance/](conformance/) |
-| Checking the evidence | [research/README.md](research/README.md): every pre-registered experiment and how to verify it |
+4. **Trust is per task, not per agent.** An agent can be trusted to update orders and still need approval for refunds.
 
-## Repository map
+5. **The bigger the risk, the higher the bar.** Costly mistakes need more proof first. Some actions, like moving money
+   or deleting records, are never handed over.
 
-| Path | What it is | Normative? |
-|---|---|---|
-| [PRINCIPLES.md](PRINCIPLES.md) | The principles on one page | No |
-| [docs/primer.md](docs/primer.md) | Introduction for first-time readers | No |
-| [docs/assessment-guide.md](docs/assessment-guide.md) | Assess: choosing what to automate | No |
-| [docs/guide.md](docs/guide.md) | Practitioner guide, by lifecycle stage | No |
-| [docs/implementation-guide.md](docs/implementation-guide.md) | Build: advice on building agents (outside the standard) | No |
-| [docs/launch-checklist.md](docs/launch-checklist.md) | What must happen before this goes public | No |
-| [spec/](spec/README.md) | The specification, organised by lifecycle stage | **Yes** |
-| [engine/](engine/README.md) | Reference trust engine (Python) | Reference implementation |
-| [conformance/](conformance/) | Conformance tests and the [compliance matrix](conformance/compliance-matrix.md) | Tests the specification |
-| [research/](research/README.md) | The Trust Gym: pre-registrations, reports, code and data | No (evidence) |
-| [CROSSWALKS.md](CROSSWALKS.md) | How this maps to other frameworks and standards (draft) | No |
-| [CHANGELOG.md](CHANGELOG.md) · [GOVERNANCE.md](GOVERNANCE.md) · [CONTRIBUTING.md](CONTRIBUTING.md) | Project housekeeping | No |
+6. **Checking never stops.** Even trusted work is spot-checked at random. Checks get rarer as trust grows, but never
+   stop, and the agent never knows which work is checked.
 
-Only the files under `spec/` are normative. Everything else explains, guides or provides evidence.
+7. **Every fix is a lesson.** When a person corrects the agent, the fix becomes a rule or a test. Any change to the
+   agent means its trust is measured again.
+
+8. **Reviewers earn trust too.** People who check the agent's work are measured the same way. A reviewer who misses
+   mistakes gets checked more.
+
+9. **A named person is responsible.** Every agent has an owner, nobody approves their own agent, and every action is
+   recorded permanently.
+
+10. **Know when to stop.** Some work is too rare, too risky or too varied to be worth automating. Say so, and switch
+    off automation that no longer pays its way.
+
+**The goal:** get more work done for each hour of people's time, without letting more serious mistakes through.
+
+## Next
+
+- **New to the idea?** Read the [primer](docs/primer.md). It takes about ten minutes.
+- **Building an agent?** Read the [implementation guide](docs/implementation-guide.md).
+
+Going deeper: the [practitioner guide](docs/guide.md) for running agents day to day, the
+[assessment guide](docs/assessment-guide.md) for choosing what to automate, the [specification](spec/README.md) for
+engineers, and the [research](research/README.md) behind it all. Want to help? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
-Maintained by Hivemind Labs. Private until launch; see the [launch checklist](docs/launch-checklist.md).
+Maintained by Hivemind Labs. Private until launch.

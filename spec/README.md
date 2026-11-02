@@ -66,7 +66,7 @@ An implementation states its tier: "compliant with v0.7 Core". The
 
 | Normative (this folder) | Informative (everything else) |
 |---|---|
-| [`requirements/`](requirements/): the numbered rules | [`../PRINCIPLES.md`](../PRINCIPLES.md) and [`../docs/`](../docs/): the principles, primer, guide and assessment |
+| [`requirements/`](requirements/): the numbered rules | [`../README.md`](../README.md) and [`../docs/`](../docs/): the principles, primer, guide and assessment |
 | [`autonomy.md`](autonomy.md): autonomy settings and consequence levels | [`measure.md`](measure.md): how the trust score works (its normative parts are marked) |
 | [`terminology.md`](terminology.md): the defined terms | [`examples.md`](examples.md): the worked example and the maths in plain language |
 | [`schema/`](schema/): the data model (source of truth) | [`api.md`](api.md): the reference engine's API |

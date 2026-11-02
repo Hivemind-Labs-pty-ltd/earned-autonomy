@@ -3,7 +3,7 @@
 *Working name. Version 0.7, October 2026. Hivemind Labs.*
 
 This guide is for the people who run AI agents in a business: team leads, department heads, operations and compliance
-staff. It explains how to apply the [principles](../PRINCIPLES.md) day to day, stage by stage. It doesn't depend on any
+staff. It explains how to apply the [principles](../README.md#the-principles) day to day, stage by stage. It doesn't depend on any
 particular agent platform. Engineers building the machinery should read the [specification](../spec/README.md).
 
 This guide is informative. Where it describes a rule, the binding wording is in the specification, under the same
