@@ -11,9 +11,9 @@
 
 ## Licences and citation
 
-- [ ] Add `LICENSE` (Apache-2.0) for the engine, conformance tests and research code.
-- [ ] Add `LICENSE-docs` (CC BY 4.0) for the principles, guide, primer, specification and reports.
-- [ ] State in the README which licence covers which folder.
+- [x] Add `LICENSE` (Apache-2.0) for the engine, conformance tests and research code.
+- [x] Add `LICENSE-docs` (CC BY 4.0) for the principles, guide, primer, specification and reports.
+- [x] State in the README which licence covers which folder.
 - [ ] Add `CITATION.cff` so the research can be cited.
 
 ## Research reports
