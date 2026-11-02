@@ -12,7 +12,7 @@ they can't answer this question. So most teams pick one setting and never change
 
 ## The principles
 
-Ten rules for giving an agent freedom the way you would a new hire: earned slowly, watched always, taken back when needed.
+The ten ways of thinking that guide how we work with Earned Autonomy.
 
 | # | Principle |
 |:-:|---|
