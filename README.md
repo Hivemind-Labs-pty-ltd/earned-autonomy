@@ -12,6 +12,8 @@ they can't answer this question. So most teams pick one setting and never change
 
 ## The principles
 
+Ten rules for giving an agent freedom the way you would a new hire: earned slowly, watched always, taken back when needed.
+
 | # | Principle |
 |:-:|---|
 | 1 | **A named person is responsible**<br>Every agent has an owner, nobody approves their own agent, and every action is recorded permanently. |
