@@ -1,5 +1,10 @@
 # Earned Autonomy
 
+[![tests](https://github.com/Hivemind-Labs-pty-ltd/earned-autonomy/actions/workflows/tests.yml/badge.svg)](https://github.com/Hivemind-Labs-pty-ltd/earned-autonomy/actions/workflows/tests.yml)
+[![spec](https://img.shields.io/badge/spec-v0.7-blue)](spec/README.md)
+[![status](https://img.shields.io/badge/status-draft-orange)](CHANGELOG.md)
+[![python](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](engine/README.md)
+
 **A methodology for deciding how much freedom to give AI agents, and when.**
 
 ## When can an AI agent work without a person checking?
