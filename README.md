@@ -18,7 +18,7 @@ they can't answer this question. So most teams pick one setting and never change
 | 2 | **Let the measurement decide**<br>How much the agent may do alone follows a clear rule based on that measurement, not on a feeling, a demo or a sales pitch. |
 | 3 | **Trust comes only from checked work**<br>Reviews, staff comparisons and past cases count. Complaints come too late: they can lower trust, never raise it. |
 | 4 | **Trust is per task, not per agent**<br>An agent can be trusted to update orders and still need approval for refunds. |
-| 5 | **The bigger the risk, the higher the bar**<br>Costly mistakes need more proof first. Some actions, like moving money or deleting records, are never handed over. |
+| 5 | **The bigger the risk, the higher the bar**<br>Costly mistakes need more proof first. Some actions may never be handed over. |
 | 6 | **Checking never stops**<br>Even trusted work is spot-checked at random. Checks get rarer as trust grows, but never stop, and the agent never knows which work is checked. |
 | 7 | **Every fix is a lesson**<br>When a person corrects the agent, the fix becomes a rule or a test. Any change to the agent means its trust is measured again. |
 | 8 | **Reviewers earn trust too**<br>People who check the agent's work are measured the same way. A reviewer who misses mistakes gets checked more. |
