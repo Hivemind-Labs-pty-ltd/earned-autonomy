@@ -1,5 +1,7 @@
 # Earned Autonomy
 
+**A methodology for deciding how much freedom to give AI agents, and when.**
+
 ## When can an AI agent work without a person checking?
 
 AI agents now answer customers, issue refunds and update records. Guardrails stop the mistakes you can predict, but
@@ -28,6 +30,17 @@ Earned Autonomy is a way of working, not just a piece of technology. These ten p
 | 10 | **Know when to stop**<br>Some work is too rare, too risky or too varied to be worth automating. Switch off automation that no longer pays its way. |
 
 **The goal:** get more work done for each hour of people's time, without letting more serious mistakes through.
+
+## Common questions
+
+- **Who is it for?** Anyone running AI agents in a business: owners, team leads and the people who build them.
+- **Does it replace our safety controls?** No. It works alongside them and decides when they're enough.
+- **Do we need special software?** No. It works with any agent, built any way. A [reference engine](engine/README.md)
+  is there if you want one.
+- **Does it work?** It has been tested in simulated experiments, failures included. A real-world pilot is next.
+  [See the research](research/README.md).
+- **How does it fit with other frameworks?** It maps onto standards like the NIST AI RMF and ISO 42001.
+  [See the crosswalks](CROSSWALKS.md).
 
 ## Next
 
