@@ -6,7 +6,9 @@
 
 AI agents now answer customers, issue refunds and update records.
 
-Guardrails stop the mistakes you can predict. They can't answer this question, so most teams guess, once:
+Guardrails stop the mistakes you can predict. They can't answer this question.
+
+So most teams pick one of two settings, and never change it:
 
 - **Check everything:** safe, but the agent saves little time.
 - **Switch to automatic:** fast, but the polite, on-policy, wrong reply slips through.
