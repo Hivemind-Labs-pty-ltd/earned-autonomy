@@ -12,7 +12,7 @@ they can't answer this question. So most teams pick one setting and never change
 
 ## The principles
 
-The ten ways of thinking that guide how we work with Earned Autonomy.
+Earned Autonomy is a way of working, not just a piece of technology. These ten principles are the heart of it: every tool, rule and decision follows from them.
 
 | # | Principle |
 |:-:|---|
