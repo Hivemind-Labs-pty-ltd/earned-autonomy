@@ -23,7 +23,7 @@ they can't answer this question. So most teams pick one setting and never change
 | 7 | **Checking never stops**<br>Even trusted work is spot-checked at random. Checks get rarer as trust grows, but never stop, and the agent never knows which work is checked. |
 | 8 | **Learn from feedback**<br>Have a clear, simple way to turn corrections into better instructions. Any change means trust is measured again. |
 | 9 | **Reviewers earn trust too**<br>People who check the agent's work are measured the same way. A reviewer who misses mistakes gets checked more. |
-| 10 | **Know when to stop**<br>Some work is too rare, too risky or too varied to be worth automating. Say so, and switch off automation that no longer pays its way. |
+| 10 | **Know when to stop**<br>Some work is too rare, too risky or too varied to be worth automating. Switch off automation that no longer pays its way. |
 
 **The goal:** get more work done for each hour of people's time, without letting more serious mistakes through.
 
