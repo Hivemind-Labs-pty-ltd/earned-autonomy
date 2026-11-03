@@ -1,7 +1,5 @@
 # Assessment guide: choosing what to automate
 
-*Informative. The Assess stage of the Earned Autonomy lifecycle. Version 0.7, October 2026.*
-
 Earning trust takes human effort: documenting the process, reviewing the agent's work until it's trusted, and checking
 it afterwards. That effort only pays off for some tasks. This guide helps you decide, **before spending anything**,
 which task types are worth automating, how long they'll take to earn trust, and when they'll pay back.
@@ -40,16 +38,8 @@ From these:
 | **Evidence mode available** (shadow comparison, past cases, or supervised review only) | Whether staff work leaves a digital trace, and whether past cases are recorded |
 | **Setup effort** | Estimated, then timed |
 
-### Judged actions needed to earn autonomy (no mistakes along the way)
-
-| Consequence | Judged actions |
-|---|--:|
-| C1 Low | 35 |
-| C2 Moderate | 73 |
-| C3 High | 189 |
-| C4 Critical | Never acts alone |
-
-Each mistake along the way adds more. See the full tables in the [practitioner guide](guide.md).
+**Judged actions needed to earn autonomy:** about 35 (C1), 73 (C2) or 189 (C3) with no mistakes, more with each
+mistake. Critical work never acts alone. Full tables: [practitioner guide](practitioner-guide.md#4-decide).
 
 ---
 
@@ -100,10 +90,8 @@ It stops paying off when:
 
 From the pre-registered Trust Gym rounds ([research/README.md](../research/README.md)):
 
-- **The multiple from trust rules is about 4.4 to 6.3 times over a whole run,** up to about 7.9 times once tasks have
-  earned trust. Reviewing everything already gives about 3.6 to 4 times, because reviewing is quicker than doing.
-- **Trust rules alone don't reach ten times.** Getting further needs cheaper evidence (shadow comparison, replay),
-  faster reviews (batch review by exception) and better agents (see the [implementation guide](implementation-guide.md)).
+- **Plan on a multiple of about 4 to 6 times,** up to about 8 once tasks have earned trust. Reviewing everything
+  already gives about 3.6 to 4 times, because reviewing is quicker than doing.
 - **Rare tasks don't pay back.** Keep them supervised or manual.
 - **Judgement-heavy work escalates by design.** Complaints, compensation and unusual cases go to people; plan for that
   in the forecast rather than counting them as automated.

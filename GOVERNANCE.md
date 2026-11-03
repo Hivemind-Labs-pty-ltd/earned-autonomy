@@ -7,18 +7,6 @@
 Earned Autonomy is maintained by **Hivemind Labs**. The maintainers decide what goes into the specification, the
 reference engine and the methodology documents.
 
-## Scope of the standard
-
-Earned Autonomy is organised as a lifecycle: **Assess → Build → Measure → Decide → Oversee → Learn → Retire**, with
-**Govern** throughout.
-
-- **Normative (the specification, version 0.7):** Measure, Decide, Oversee, Learn, Retire and Govern, plus the small
-  interface the framework needs from any agent (declared tools per task type, a checks result per action) and the
-  multi-agent preview.
-- **Informative (guides):** Assess ([assessment guide](docs/assessment-guide.md)) and Build
-  ([implementation guide](docs/implementation-guide.md)). How an agent is built is outside the standard; the framework
-  measures and governs any agent from its actions and evidence.
-
 ## How decisions are made
 
 - **Specification changes** need a written proposal (see [CONTRIBUTING.md](CONTRIBUTING.md)) and maintainer approval.
@@ -37,12 +25,7 @@ Earned Autonomy is organised as a lifecycle: **Assess → Build → Measure → 
 
 Exploratory findings can suggest a change, but a rule only becomes *Tested* after a pre-registered confirmation.
 
-## Versioning
+## Scope and versioning
 
-- The **specification** and the **reference engine** use semantic versioning (major.minor.patch).
-- **Adding a requirement to an existing level, or tightening one, is a major change.** Organisations that met a level
-  must not silently stop meeting it.
-- **A level's meaning never changes once the specification is Stable.** A level can be retired and replaced, not
-  redefined.
-- **Clarifications** that don't change what a compliant build must do are patch changes.
-- Until version 1.0 the specification is a public review draft, and breaking changes may happen in minor versions.
+What the standard covers, what's binding, and how versions work are set out once, in the
+[specification](spec/README.md#versioning). The reference engine follows the specification's version.

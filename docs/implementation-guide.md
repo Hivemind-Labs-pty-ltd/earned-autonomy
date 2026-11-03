@@ -1,13 +1,8 @@
 # Implementation guide: building agents that earn trust fast
 
-*Informative. The Build stage of the Earned Autonomy lifecycle. Version 0.7, October 2026.*
+What our research found about building agents that make fewer mistakes, and so earn trust faster and cheaper.
 
-**This guide is outside the standard.** Earned Autonomy measures and governs any agent, however it's built: it only
-sees the agent's actions and the evidence they produce. How you build the agent is your choice. But a well-built agent
-makes fewer mistakes, so it earns trust in fewer reviews, costs less to run and raises the multiple. This guide
-collects what our research found about building agents that way.
-
-The framework asks only two things of any agent: **declare the tools each task type may use**, and **supply a checks
+The standard asks only two things of an agent: **declare the tools each task type may use**, and **supply a checks
 result for every proposed action**. Everything else here is advice.
 
 ---

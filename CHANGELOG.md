@@ -5,6 +5,36 @@ Changes to the Earned Autonomy specification and its reference engine. The forma
 (see [`spec/README.md`](spec/README.md#versioning)); the engine package follows the specification's version.
 Research results behind each change are in [`research/`](research/README.md).
 
+## [Unreleased]
+
+### Changed
+- **Docs simplified for non-technical readers.** The README now holds the problem and the principles
+  (`PRINCIPLES.md` folded in). Each idea lives in one place: concepts and results in the primer, day-to-day practice in
+  the practitioner guide, rules and versioning in the specification. `docs/guide.md` is now
+  [`docs/practitioner-guide.md`](docs/practitioner-guide.md).
+- Added licences (`LICENSE` Apache-2.0 for code, `LICENSE-docs` CC BY 4.0 for docs), a code of conduct, a security
+  policy and automated tests on every pull request.
+
+### Removed
+- **The top-level `SPEC.md` pointer.** Older research reports cite its sections; they map to the current
+  specification as follows:
+
+| Was (SPEC.md v0.5) | Now |
+|---|---|
+| §1–3 Core idea, definitions, architecture | [`spec/README.md`](spec/README.md), [`spec/terminology.md`](spec/terminology.md) |
+| §4 Task types | [`spec/requirements/07-agent-interface.md`](spec/requirements/07-agent-interface.md), [`spec/requirements/01-measure.md`](spec/requirements/01-measure.md) |
+| §5 Data model | [`spec/schema/`](spec/schema/), rules EA-6.7 to EA-6.15 |
+| §6 The decision | [`spec/requirements/02-decide.md`](spec/requirements/02-decide.md) |
+| §7 Trust calculation | [`spec/requirements/01-measure.md`](spec/requirements/01-measure.md), [`spec/requirements/02-decide.md`](spec/requirements/02-decide.md), [`spec/autonomy.md`](spec/autonomy.md), [`spec/measure.md`](spec/measure.md) |
+| §8 Versions and learning | [`spec/requirements/04-learn.md`](spec/requirements/04-learn.md) |
+| §9 Oversight | [`spec/requirements/03-oversee.md`](spec/requirements/03-oversee.md) |
+| §10 Governance | [`spec/requirements/06-govern.md`](spec/requirements/06-govern.md) |
+| §11 Multi-agent | [`spec/requirements/08-multi-agent.md`](spec/requirements/08-multi-agent.md) |
+| §12 API | [`spec/api.md`](spec/api.md) |
+| §13 Conformance | [`conformance/`](conformance/), [`conformance/compliance-matrix.md`](conformance/compliance-matrix.md) |
+| §14 Worked example | [`spec/examples.md`](spec/examples.md) |
+| §15–16 Decisions and clarifications | Folded into the rules; history in [`CHANGELOG.md`](CHANGELOG.md) |
+
 ## [0.7] - 2026-10-21 · Public review draft (private)
 
 ### Changed

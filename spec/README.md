@@ -1,17 +1,10 @@
 # Earned Autonomy specification
 
-**Version 0.7 · Public review draft · Private.** "Earned Autonomy" is a working name.
-
-This is the normative specification of the Earned Autonomy framework: the rules a platform must follow so that AI
-agents earn autonomy over their actions from evidence, under oversight and governance. It is product-neutral; any
-agent platform can implement it. `engine/` is the reference implementation, and `conformance/` checks a build against
+**Version 0.7, public review draft.** The binding rules any agent platform must follow to give agents autonomy from
+evidence. New to the ideas? Read the [primer](../docs/primer.md) first. `engine/` is the reference implementation, and `conformance/` checks a build against
 these rules.
 
 ## The lifecycle, and what this specification covers
-
-An agent's working life runs through seven stages, with governance throughout:
-
-**ASSESS → BUILD → MEASURE → DECIDE → OVERSEE → LEARN → RETIRE**, and **GOVERN** throughout.
 
 | Stage | Question | In this specification |
 |---|---|---|
@@ -73,7 +66,8 @@ An implementation states its tier: "compliant with v0.7 Core". The
 | | [`threats.md`](threats.md): threats and how the rules answer them |
 | | [`../research/`](../research/): the pre-registered evidence |
 
-Inside a rule, only the **Statement** (and **Condition**) is normative. Rationale, Evidence and Notes explain it.
+Inside a rule, only the **Statement** (and **Condition**) is normative. Rationale, Evidence and Notes explain it. If a
+guide and a rule ever disagree, the rule wins.
 
 ## Notation
 
@@ -161,7 +155,5 @@ Every rule lives in one file under [`requirements/`](requirements/) and has the 
 
 ## Evidence base
 
-Every Tested rule links to a pre-registered report in [`../research/`](../research/) or to a structural test. The
-hypotheses and pass bars were committed and tagged before any data was produced, e.g. tag `research/prereg-v1`. All
-evidence so far is synthetic: simulated organisations, 6,000 generated tasks done by real AI agents, a public benchmark
-(τ²-bench) and a run on a commercial agent harness. A real-world pilot is the next step.
+Every Tested rule links to a pre-registered report in [`../research/`](../research/) or to a structural test. All
+evidence so far is synthetic; a real-world pilot is next.
