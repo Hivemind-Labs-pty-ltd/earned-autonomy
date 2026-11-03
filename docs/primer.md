@@ -23,7 +23,7 @@ slips.**
 | Side | Question | Where |
 |---|---|---|
 | **Choosing what to automate** | Which task types will pay back the effort, and how fast? | [Assessment guide](assessment-guide.md) |
-| **Earning trust** | How far can this agent be trusted on this task right now, and what should happen next? | [Practitioner guide](guide.md) and the [specification](../spec/README.md) |
+| **Earning trust** | How far can this agent be trusted on this task right now, and what should happen next? | [Practitioner guide](practitioner-guide.md) and the [specification](../spec/README.md) |
 
 ## The lifecycle
 
@@ -117,6 +117,6 @@ real-world pilot is the next step. Details: [research/README.md](../research/REA
 ## Where to go next
 
 - Choosing what to automate: [the assessment guide](assessment-guide.md)
-- Running agents day to day: [the practitioner guide](guide.md)
+- Running agents day to day: [the practitioner guide](practitioner-guide.md)
 - Building agents that earn trust fast: [the implementation guide](implementation-guide.md)
 - Building the machinery: [the specification](../spec/README.md) and the [reference engine](../engine/README.md)

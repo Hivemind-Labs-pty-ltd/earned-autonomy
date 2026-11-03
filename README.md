@@ -53,7 +53,7 @@ Earned Autonomy is a way of working, not just a piece of technology. These ten p
 - **New to the idea?** Read the [primer](docs/primer.md). It takes about ten minutes.
 - **Building an agent?** Read the [implementation guide](docs/implementation-guide.md).
 
-Going deeper: the [practitioner guide](docs/guide.md) for running agents day to day, the
+Going deeper: the [practitioner guide](docs/practitioner-guide.md) for running agents day to day, the
 [assessment guide](docs/assessment-guide.md) for choosing what to automate, the [specification](spec/README.md) for
 engineers, and the [research](research/README.md) behind it all. Want to help? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
