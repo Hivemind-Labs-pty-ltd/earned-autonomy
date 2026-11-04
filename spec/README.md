@@ -109,7 +109,7 @@ Every rule lives in one file under [`requirements/`](requirements/) and has the 
 
 | Status | Meaning |
 |---|---|
-| **Tested** | Backed by a pre-registered Trust Gym result or checked by a test of a structural property; the Evidence field says which. All research evidence so far is synthetic. |
+| **Tested** | Backed by a pre-registered Trust Gym result **in simulation or on generated tasks**, or checked by a test of a structural property; the Evidence field says which. *Tested* does **not** mean tested in production: no rule has production evidence yet (see [Limitations](#limitations)). |
 | **Default** | Our recommended choice. Reasoned, but not yet backed by a pre-registered result. |
 | **Open** | A research question, a known limitation or an optional practice. Implementations MAY differ. |
 
@@ -157,3 +157,22 @@ Every rule lives in one file under [`requirements/`](requirements/) and has the 
 
 Every Tested rule links to a pre-registered report in [`../research/`](../research/) or to a structural test. All
 evidence so far is synthetic; a real-world pilot is next.
+
+## Limitations
+
+Read the evidence with these in mind:
+
+- **No production evidence.** Every study ran on simulated organisations, generated tasks or a public benchmark
+  (τ²-bench). Earned autonomy is only meaningful once it is tested where the agent actually works. A sandbox or
+  production pilot with a deploying organisation is the next step, and we're looking for partners.
+- **One team.** The same team (Hivemind Labs) wrote the hypotheses, the code, the grader and the reports. Nothing has
+  been independently replicated.
+- **AI-assisted.** Studies and much of this text were written with AI coding agents. An AI model grades outcomes in
+  the generated-task studies, and some reviewer behaviour is modelled, not observed (for example the canary result in
+  EA-3.11).
+- **One study ran on our own platform.** The 10x round ([`../research/REPORT-10x.md`](../research/REPORT-10x.md)) ran
+  on Hivemind's commercial agent platform. See the conflict-of-interest note in [`../GOVERNANCE.md`](../GOVERNANCE.md).
+- **Known gaps.** A pause that reaches sub-agents (EA-3.19), incident response (EA-3.20), silent model changes
+  (EA-4.14) and provider–deployer accountability (EA-6.16) are Open rules, not answers.
+- **Thresholds are defaults.** The consequence levels, error bars and lookup tables are reasoned choices, checked in
+  simulation. They haven't been validated against real loss data.

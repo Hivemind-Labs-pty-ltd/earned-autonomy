@@ -7,7 +7,19 @@ Research results behind each change are in [`research/`](research/README.md).
 
 ## [Unreleased]
 
+### Added
+- **Expert review pack.** [`REVIEWERS.md`](REVIEWERS.md): what EA is and isn't, the state of the evidence, five
+  questions for reviewers, and a reading path.
+- **[Limitations](spec/README.md#limitations)** in the specification, and a **conflict-of-interest** section in
+  [`GOVERNANCE.md`](GOVERNANCE.md).
+- **Open rules for known gaps:** EA-3.19 a pause reaches delegated work, EA-3.20 incident response, EA-4.14 upstream
+  model changes are new versions, EA-6.16 provider and deployer. All Open, Standard, SHOULD.
+- Threats: sub-agents outliving a pause; silent model changes.
+
 ### Changed
+- **Status "Tested" is defined more strictly:** simulation, generated tasks or a structural test, never production.
+- `research/README.md` explains why pre-registration, code and report commits are minutes apart, and that the check
+  shows order, not independence.
 - **Docs simplified for non-technical readers.** The README now holds the problem and the principles
   (`PRINCIPLES.md` folded in). Each idea lives in one place: concepts and results in the primer, day-to-day practice in
   the practitioner guide, rules and versioning in the specification. `docs/guide.md` is now

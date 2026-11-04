@@ -25,6 +25,25 @@ reference engine and the methodology documents.
 
 Exploratory findings can suggest a change, but a rule only becomes *Tested* after a pre-registered confirmation.
 
+## Conflicts of interest
+
+Hivemind Labs maintains this specification **and** has a commercial interest in it:
+
+- We build and sell an agent platform (10xAgent) that implements these rules, and one research round ran on it
+  ([`research/REPORT-10x.md`](research/REPORT-10x.md)).
+- We intend to offer training and certification against the specification.
+
+What we do about it:
+
+- The methodology is open: CC BY 4.0 for the documents and Apache-2.0 for the reference engine. Anyone may implement
+  it, and no rule requires our products.
+- Rule status is set by pre-registered evidence, with failures published (above), not by what suits our platform.
+- Before 1.0 we want independent reviewers and replication, and we will consider moving stewardship of the
+  specification to a neutral body once others depend on it.
+
+Reviewers who see a rule that favours our platform over other implementations: please tell us. We'll treat it as a
+defect.
+
 ## Scope and versioning
 
 What the standard covers, what's binding, and how versions work are set out once, in the

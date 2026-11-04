@@ -29,6 +29,12 @@ git show --stat research/prereg-v1      # the tagged commit holds only the pre-r
 The research was merged into this repository with its full history, so these commands work here. The files sat at
 the top level before the merge, which is why the paths above have no `research/` prefix.
 
+**Why the times are minutes apart:** each round was designed, run and written up by one team with AI coding agents,
+usually in a single working session. The check is about **order**, not elapsed time: the pre-registration and its
+thresholds were committed before any code or data for that round, so the thresholds couldn't be tuned to the results.
+What this does not give you is independence. The same team wrote the hypotheses, the code, the grader and the report.
+Independent replication is the main thing we are asking reviewers to help with.
+
 **Limit of this check:** commit dates are set by the machine that made the commit. Independent timestamping is on the
 [launch checklist](../docs/launch-checklist.md).
 

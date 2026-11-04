@@ -8,6 +8,8 @@
 
 **A methodology for deciding how much freedom to give AI agents, and when.**
 
+> Reviewing v0.7? Start with the [note for reviewers](REVIEWERS.md).
+
 ## When can an AI agent work without a person checking?
 
 AI agents now answer customers, issue refunds and update records. Guardrails stop the mistakes you can predict, but

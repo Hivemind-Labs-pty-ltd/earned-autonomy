@@ -183,3 +183,25 @@ How people watch agents while they work: review, spot-checks, incidents, pausing
 - **Evidence:** none; structural.
 - **Implementation:** `engine.py` `TrustEngine.may_execute`, `TrustEngine.mark_executed`
 - **Test:** `engine/tests/test_measure.py::test_held_action_never_runs_without_a_reviewer`
+
+## EA-3.19 A pause reaches delegated work (known gap)
+- **Statement:** Pausing an agent or a task type SHOULD also hold every not-yet-executed action that the paused agent delegated, including actions by agents it started.
+- **Status:** Open
+- **Tier:** Standard
+- **Stability:** Development
+- **Rationale:** A stop button that stops the principal but not the sub-agents it spawned isn't a stop button. Provenance on delegated actions (EA-8.2) makes this checkable.
+- **Evidence:** none yet. Raised by reviewers of agentic governance practice (sub-agents outliving a kill switch).
+- **Implementation:** none yet; `TrustEngine.pause` covers the paused agent's own actions only.
+- **Test:** none yet
+- **Notes:** Open question: should a pause reach agents in another organisation that accepted delegated work?
+
+## EA-3.20 Incident response (known gap)
+- **Statement:** When an incident is reported (EA-3.7), the organisation SHOULD record against it the containment taken, who was notified, the root cause and the remediation, and SHOULD link any rule, check or test changed because of it.
+- **Status:** Open
+- **Tier:** Standard
+- **Stability:** Development
+- **Rationale:** Today an incident steps the task type down at once (EA-2.18), but the specification says nothing about handling the incident itself. Buyers and regulators expect a documented process.
+- **Evidence:** none yet.
+- **Implementation:** none yet; incidents are recorded and step down the task type.
+- **Test:** none yet
+- **Notes:** Notification duties under privacy or sector law are outside this specification.
