@@ -1,6 +1,6 @@
 # Governance
 
-*Private draft.*
+*Version 0.7, invite-only review draft.*
 
 ## Maintainers
 

@@ -127,7 +127,7 @@ def build(check: bool) -> int:
                                               "strength", "keywords", "status", "tier", "stability", "rationale",
                                               "evidence", "implementation", "tests", "notes")} for rule in rules]
     (ROOT / "spec" / "requirements.json").write_text(
-        json.dumps({"specification": "Earned Autonomy", "version": VERSION, "status": "Public review draft",
+        json.dumps({"specification": "Earned Autonomy", "version": VERSION, "status": "Invite-only review draft",
                     "generated_by": "scripts/build_requirements.py", "rules": output}, indent=2, ensure_ascii=False) + "\n")
     (ROOT / "conformance" / "compliance-matrix.md").write_text(matrix(rules))
     for problem in problems:

@@ -47,7 +47,7 @@ Research results behind each change are in [`research/`](research/README.md).
 | §14 Worked example | [`spec/examples.md`](spec/examples.md) |
 | §15–16 Decisions and clarifications | Folded into the rules; history in [`CHANGELOG.md`](CHANGELOG.md) |
 
-## [0.7] - 2026-10-21 · Public review draft (private)
+## [0.7] - 2026-10-21 · Invite-only review draft
 
 ### Changed
 - **Rules are grouped by lifecycle stage and renumbered** `EA-<stage>.<n>`: 1 Measure, 2 Decide, 3 Oversee, 4 Learn,
@@ -195,7 +195,7 @@ Research results behind each change are in [`research/`](research/README.md).
 | EA-7.4 | EA-8.4 | Keep consequential peer work supervised | Advanced |
 | EA-7.5 | EA-8.5 | Reviewer agents earn trust as their own task type | Advanced |
 
-## [0.6] - 2026-10-19 · Public review draft (private)
+## [0.6] - 2026-10-19 · Private draft
 
 ### Changed
 - **The specification is restructured into [`spec/`](spec/README.md):**

@@ -3,7 +3,7 @@
 [![tests](https://github.com/Hivemind-Labs-pty-ltd/earned-autonomy/actions/workflows/tests.yml/badge.svg)](https://github.com/Hivemind-Labs-pty-ltd/earned-autonomy/actions/workflows/tests.yml)
 [![spec](https://img.shields.io/badge/spec-v0.7-blue)](spec/README.md)
 [![licence](https://img.shields.io/badge/licence-CC%20BY%204.0%20%2B%20Apache--2.0-lightgrey)](#licence)
-[![status](https://img.shields.io/badge/status-draft-orange)](CHANGELOG.md)
+[![status](https://img.shields.io/badge/status-invite--only%20review-orange)](CHANGELOG.md)
 [![python](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](engine/README.md)
 
 **A methodology for deciding how much freedom to give AI agents, and when.**
@@ -71,4 +71,4 @@ engineers, and the [research](research/README.md) behind it all. Want to help? S
 <a id="licence"></a>Maintained by Hivemind Labs. The methodology and docs are licensed under [CC BY 4.0](LICENSE-docs); the code
 (`engine/`, `conformance/`, `research/` code and `scripts/`) under [Apache-2.0](LICENSE). Please read our
 [code of conduct](CODE_OF_CONDUCT.md) and [security policy](SECURITY.md).
-Private working draft, version 0.7. "Earned Autonomy" is a working name.
+Invite-only review draft, version 0.7. "Earned Autonomy" is a working name. Please don't share it without asking us first.

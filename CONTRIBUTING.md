@@ -1,6 +1,6 @@
 # Contributing
 
-*Private draft. Contributions are currently from Hivemind Labs and invited collaborators.*
+*Version 0.7, invite-only review draft. Contributions are currently from Hivemind Labs and invited reviewers and collaborators.*
 
 > [!IMPORTANT]
 > **Help wanted: mapping EA to the standards.** [CROSSWALKS.md](CROSSWALKS.md) has first-cut mappings that need expert

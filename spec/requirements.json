@@ -1,7 +1,7 @@
 {
   "specification": "Earned Autonomy",
   "version": "0.7",
-  "status": "Public review draft",
+  "status": "Invite-only review draft",
   "generated_by": "scripts/build_requirements.py",
   "rules": [
     {

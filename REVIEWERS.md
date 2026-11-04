@@ -1,6 +1,6 @@
 # Note for reviewers
 
-*Earned Autonomy v0.7 · confidential review draft · November 2026 · Hivemind Labs*
+*Earned Autonomy v0.7 · invite-only review draft · November 2026 · Hivemind Labs*
 
 Thank you for reading this. Please don't share it beyond your own organisation without asking us first.
 
@@ -28,7 +28,7 @@ available to share, we'd value doing that with you.
   must provide.
 - **Not a data-protection standard.** What data an agent uses, where it is stored and whether it trains a model are
   for the provider to answer. EA's record holds references and labels, never customer content.
-- **Not a finished methodology or specification.** v0.7 is a working draft: rules will change, some are open
+- **Not a finished methodology or specification.** v0.7 is an invite-only review draft: rules will change, some are open
   questions, and the evidence behind them is still being built. That's why we're asking for review now.
 
 ## The honest state of the evidence

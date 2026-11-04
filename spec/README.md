@@ -1,6 +1,6 @@
 # Earned Autonomy specification
 
-**Version 0.7, public review draft.** The binding rules any agent platform must follow to give agents autonomy from
+**Version 0.7, invite-only review draft.** The binding rules any agent platform must follow to give agents autonomy from
 evidence. New to the ideas? Read the [primer](../docs/primer.md) first. `engine/` is the reference implementation, and `conformance/` checks a build against
 these rules.
 
