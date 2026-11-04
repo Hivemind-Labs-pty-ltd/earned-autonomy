@@ -17,8 +17,10 @@ The intern analogy is close: minimal scope first, more as trust is earned, and t
 checked too.
 
 EA is a **technical-layer** specification: testable rules for the platform that runs agents. It sits under
-enterprise frameworks such as AI6, ISO/IEC 42001 and the Gradient Institute's Agentic AI Governance Code of Practice,
-and is meant to produce the evidence those frameworks ask for ([CROSSWALKS.md](CROSSWALKS.md)).
+enterprise frameworks such as AI6 and ISO/IEC 42001, and is meant to produce the evidence those frameworks ask for.
+[CROSSWALKS.md](CROSSWALKS.md) has first-cut mappings to AI6, ISO/IEC 42001 and the NAIC buyer questions, and lists
+the gaps. We haven't been able to map the Gradient Institute's Agentic AI Governance Code of Practice. If it's
+available to share, we'd value doing that with you.
 
 ## What it isn't
 
