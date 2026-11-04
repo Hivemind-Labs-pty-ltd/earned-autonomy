@@ -7,6 +7,11 @@ Research results behind each change are in [`research/`](research/README.md).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-04 · Invite-only review (pre-release)
+
+First release shared with invited reviewers. Specification version 0.7; reference engine 0.7.0. Builds on the 0.7
+draft of 21 October below.
+
 ### Added
 - **Expert review pack.** [`REVIEWERS.md`](REVIEWERS.md): what EA is and isn't, the state of the evidence, five
   questions for reviewers, and a reading path.
@@ -51,7 +56,7 @@ Research results behind each change are in [`research/`](research/README.md).
 | §14 Worked example | [`spec/examples.md`](spec/examples.md) |
 | §15–16 Decisions and clarifications | Folded into the rules; history in [`CHANGELOG.md`](CHANGELOG.md) |
 
-## [0.7] - 2026-10-21 · Invite-only review draft
+## [0.7] - 2026-10-21 · Internal draft
 
 ### Changed
 - **Rules are grouped by lifecycle stage and renumbered** `EA-<stage>.<n>`: 1 Measure, 2 Decide, 3 Oversee, 4 Learn,
