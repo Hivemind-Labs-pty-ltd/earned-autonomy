@@ -28,7 +28,8 @@ available to share, we'd value doing that with you.
   must provide.
 - **Not a data-protection standard.** What data an agent uses, where it is stored and whether it trains a model are
   for the provider to answer. EA's record holds references and labels, never customer content.
-- **Not proven in production.** Read this first.
+- **Not a finished methodology or specification.** v0.7 is a working draft: rules will change, some are open
+  questions, and the evidence behind them is still being built. That's why we're asking for review now.
 
 ## The honest state of the evidence
 
