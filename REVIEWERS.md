@@ -52,8 +52,11 @@ Any of these, in any form:
 
 1. **Evidence.** What would a sandbox or production pilot have to show before you'd believe the lookup-table
    thresholds? Would you help design one, or run the tests on your own agents?
-2. **The bars.** Are the consequence levels (C1 to C4) and error bars (10%, 5%, 2%) sensible? Who should set them:
-   the deployer, the provider or a regulator?
+2. **The bars.** Each AI owner sets the consequence level for every task type, so the bar follows the task and what
+   a mistake would cost. They can also tighten a task type's error bar further. The published bars (10%, 5% and 2%
+   for C1 to C3; C4 is never handed over) are the defaults and the loosest allowed. Is that the right balance of
+   flexibility and safety? Are the defaults sensible starting points, and what guidance would help an AI owner choose
+   a consequence level?
 3. **Oversight.** People take the path of least resistance. Do random hidden spot-checks, canaries and measuring
    the reviewers add up to *meaningful* human oversight? Which failure modes are we missing?
 4. **Two organisations.** When provider and deployer are different parties, where should accountability, access to
