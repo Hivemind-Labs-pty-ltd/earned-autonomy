@@ -15,8 +15,12 @@ Research results behind each change are in [`research/`](research/README.md).
 - **Open rules for known gaps:** EA-3.19 a pause reaches delegated work, EA-3.20 incident response, EA-4.14 upstream
   model changes are new versions, EA-6.16 provider and deployer. All Open, Standard, SHOULD.
 - Threats: sub-agents outliving a pause; silent model changes.
+- **What we're researching next** in [`research/README.md`](research/README.md#what-were-researching-next): a production
+  pilot, and reinforcement learning from the trust record (not yet pre-registered).
 
 ### Changed
+- **`spec/README.md` rewritten to be shorter** (about 25% fewer words). Each idea is stated once: scope, tiers, how to
+  read a rule, versioning and limitations. No rule changed.
 - **Status "Tested" is defined more strictly:** simulation, generated tasks or a structural test, never production.
 - `research/README.md` explains why pre-registration, code and report commits are minutes apart, and that the check
   shows order, not independence.

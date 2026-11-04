@@ -84,6 +84,23 @@ commercial agent platform's internals; see Notes.
 - **Simulated reviewers** follow an assumed model of attention and complacency.
 - **Exploratory findings** (labelled in each report) need a pre-registered confirmation before they count as tested.
 
+## What we're researching next
+
+1. **A production pilot.** A sandbox or live pilot with a deploying organisation, to test the rules where an agent
+   actually works. This is the biggest gap above, and we're looking for partners.
+2. **Reinforcement learning from the trust record.** Every judged action in the record is a labelled example: an
+   approval, a rejection or an edit, with its reason. The question is whether an agent can be improved by learning
+   from that record offline, from work already done and never by experimenting on customers, while its trust stays
+   honest. What we want to find out:
+   - Does it lower the serious-error rate, measured by the same hidden spot-checks?
+   - Does the agent learn to please its reviewers rather than do the work? (See *Gaming the tests* in
+     [threats](../spec/threats.md), EA-4.3 and EA-4.13.)
+   - A trained update is a new version (EA-4.1). How much earned trust should carry over to it?
+   - Can the autonomy ladder be the safety gate, so a learned policy acts alone only where it already holds trust?
+
+   None of this is pre-registered yet. Each question will be pre-registered before any code is written, as with every
+   study so far.
+
 ## Re-running
 
 The code is plain Python 3.11. From this folder, the simulation tier runs for free in a few minutes:
