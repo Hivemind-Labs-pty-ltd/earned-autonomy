@@ -8,6 +8,13 @@
 
 **A methodology for deciding how much freedom to give AI agents, and when.**
 
+<a href="https://demo.hivemind.au">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/explainer-banner-dark.svg">
+    <img src="docs/assets/explainer-banner-light.svg" alt="Visual explainer: AI can do the work. It can't yet be trusted to. See how an agent earns autonomy at demo.hivemind.au" width="100%">
+  </picture>
+</a>
+
 > Reviewing v0.7? Start with the [note for reviewers](REVIEWERS.md).
 
 ## When can an AI agent work without a person checking?

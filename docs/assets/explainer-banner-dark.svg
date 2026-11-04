@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-label="Visual explainer: how AI agents earn autonomy. Open demo.hivemind.au">
+  <rect x="0.5" y="0.5" width="1199" height="299" rx="20" fill="#1c1915" stroke="#3a342c"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="56" y="70" font-size="15" font-weight="600" letter-spacing="2.5" fill="#EE850D">VISUAL EXPLAINER</text>
+    <text x="56" y="124" font-size="38" font-weight="700" fill="#fbf8f2">AI can do the work.</text>
+    <text x="56" y="170" font-size="38" font-weight="700" fill="#fbf8f2">It can't yet be trusted to.</text>
+    <text x="56" y="212" font-size="19" fill="#c3b6a0">See how an agent earns autonomy, one task type at a time.</text>
+    <rect x="56" y="234" width="252" height="40" rx="20" fill="#EE850D"/>
+    <text x="182" y="260" font-size="16" font-weight="600" fill="#1c1915" text-anchor="middle">demo.hivemind.au  →</text>
+  </g>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="600">
+    <line x1="760" y1="250" x2="1140" y2="250" stroke="#3a342c" stroke-width="2"/>
+    <rect x="770" y="190" width="104" height="60" rx="8" fill="#2a251f" stroke="#3a342c"/>
+    <text x="822" y="226" fill="#c3b6a0" text-anchor="middle">Supervised</text>
+    <rect x="890" y="140" width="104" height="110" rx="8" fill="#2a251f" stroke="#3a342c"/>
+    <text x="942" y="200" fill="#fbf8f2" text-anchor="middle">Trusted</text>
+    <rect x="1010" y="80" width="104" height="170" rx="8" fill="#EE850D"/>
+    <text x="1062" y="170" fill="#1c1915" text-anchor="middle">Senior</text>
+    <path d="M822 176 C 860 120, 900 110, 942 124 S 1020 70, 1062 62" fill="none" stroke="#EE850D" stroke-width="2.5" stroke-dasharray="6 6"/>
+    <circle cx="1062" cy="62" r="5" fill="#EE850D"/>
+    <text x="760" y="278" font-weight="400" font-size="13" fill="#c3b6a0">evidence earned →</text>
+  </g>
+</svg>
