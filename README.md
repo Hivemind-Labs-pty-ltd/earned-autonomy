@@ -4,6 +4,7 @@
 [![spec](https://img.shields.io/badge/spec-v0.7-blue)](spec/README.md)
 [![licence](https://img.shields.io/badge/licence-CC%20BY%204.0%20%2B%20Apache--2.0-lightgrey)](#licence)
 [![status](https://img.shields.io/badge/status-invite--only%20review-orange)](CHANGELOG.md)
+[![human review](https://img.shields.io/badge/human%20review-13%2F61%20docs%20(21%25)-b8791e)](#responsible-use-of-ai)
 [![python](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](engine/README.md)
 
 **A methodology for deciding how much freedom to give AI agents, and when.**
@@ -15,7 +16,8 @@
   </picture>
 </a>
 
-> Reviewing v0.7? Start with the [note for reviewers](REVIEWERS.md).
+> Reviewing v0.7? Start with the [note for reviewers](REVIEWERS.md). This project was written with AI assistance, and
+> people are reviewing every page: see [responsible use of AI](#responsible-use-of-ai) for what's been signed off.
 
 ## When can an AI agent work without a person checking?
 
@@ -65,6 +67,33 @@ Earned Autonomy is a way of working, not just a piece of technology. These ten p
 Going deeper: the [practitioner guide](docs/practitioner-guide.md) for running agents day to day, the
 [assessment guide](docs/assessment-guide.md) for choosing what to automate, the [specification](spec/README.md) for
 engineers, and the [research](research/README.md) behind it all. Want to help? See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Responsible use of AI
+
+**How we used AI.** AI coding agents helped write the reference engine, run the studies and draft much of this text.
+In the generated-task studies, the agents being studied are AI agents and an AI model grades their outcomes. No
+customer data was used.
+
+**Who is accountable.** Hivemind Labs is responsible for every word published here, whoever or whatever drafted it.
+Before we ask anyone to rely on a page, a person at Hivemind Labs reads it in full and signs it off.
+
+**Human review: 13 of 61 documents (21%).** All seven "start here" pages are done. The rules, guides and research
+reports are next.
+
+These pages have been read in full by a person at Hivemind Labs, and **we stand by them in full** (v0.7, 4 November
+2026):
+
+| Area | Reviewed pages |
+|---|---|
+| Start here | [README](README.md) and its explainer banner · [Note for reviewers](REVIEWERS.md) · [Specification overview](spec/README.md) · [Threats](spec/threats.md) · [Crosswalks](CROSSWALKS.md) · [Governance](GOVERNANCE.md) |
+| Guides | [Primer](docs/primer.md) |
+| Research | [Research overview](research/README.md) |
+| Project | [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Licences](LICENSE) ([docs](LICENSE-docs)) |
+
+Every other page is an AI-assisted draft that hasn't been signed off yet. Treat it as work in progress. Research
+pre-registrations and logs are kept exactly as committed, whatever their review status, so the record stays intact.
+
+Spotted a claim we can't support? Tell us at hello@hivemind.au.
 
 ---
 
