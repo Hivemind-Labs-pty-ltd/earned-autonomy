@@ -162,3 +162,14 @@ Throughout the lifecycle: who is accountable, who may change what, and the perma
 - **Evidence:** none; structural.
 - **Implementation:** `models.py` (`to_dict` on each model)
 - **Test:** `conformance/test_schema.py::test_engine_objects_validate_against_the_schemas`, `conformance/test_schema.py::test_record_entries_validate_against_the_schema`
+
+## EA-6.16 Provider and deployer (known gap)
+- **Statement:** When the agent's provider and the organisation deploying it are different parties, the roles in EA-6.1 SHOULD be assigned to a named person in each party in writing, and both parties SHOULD be able to read the record for the agent's actions in the deploying organisation.
+- **Status:** Open
+- **Tier:** Standard
+- **Stability:** Development
+- **Rationale:** The specification treats the organisation as one party. In B2B deployments the hardest question is who owns what when an agent acts across both parties' systems; it must be settled before the agent acts, not after an incident.
+- **Evidence:** none yet.
+- **Implementation:** none yet
+- **Test:** none yet
+- **Notes:** Open questions: who may pause (EA-3.9), who sets consequence levels, and whether trust earned with one deployer may inform another (EA-1.1 says no).

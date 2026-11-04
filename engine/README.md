@@ -1,8 +1,6 @@
 # earned-autonomy: reference trust engine
 
-AI agents earn autonomy over their actions the way a new employee does: they start supervised, every human
-judgement becomes evidence, and each task type climbs (Supervised → Trusted → Senior) or steps down on that evidence.
-This package is the reference implementation of the [specification](../spec/README.md) v0.7. Docstrings and tests cite
+The reference implementation of the [specification](../spec/README.md) v0.7. Docstrings and tests cite
 rule IDs (`EA-<stage>.<n>`, stages 1 Measure · 2 Decide · 3 Oversee · 4 Learn · 5 Retire · 6 Govern · 7 Agent interface · 8 Multi-agent); [`conformance/compliance-matrix.md`](../conformance/compliance-matrix.md) maps every rule to its code and tests.
 Stdlib only, Python 3.11+.
 

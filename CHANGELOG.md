@@ -5,7 +5,53 @@ Changes to the Earned Autonomy specification and its reference engine. The forma
 (see [`spec/README.md`](spec/README.md#versioning)); the engine package follows the specification's version.
 Research results behind each change are in [`research/`](research/README.md).
 
-## [0.7] - 2026-10-21 · Public review draft (private)
+## [Unreleased]
+
+### Added
+- **Expert review pack.** [`REVIEWERS.md`](REVIEWERS.md): what EA is and isn't, the state of the evidence, five
+  questions for reviewers, and a reading path.
+- **[Limitations](spec/README.md#limitations)** in the specification, and a **conflict-of-interest** section in
+  [`GOVERNANCE.md`](GOVERNANCE.md).
+- **Open rules for known gaps:** EA-3.19 a pause reaches delegated work, EA-3.20 incident response, EA-4.14 upstream
+  model changes are new versions, EA-6.16 provider and deployer. All Open, Standard, SHOULD.
+- Threats: sub-agents outliving a pause; silent model changes.
+- **What we're researching next** in [`research/README.md`](research/README.md#what-were-researching-next): a production
+  pilot, and reinforcement learning from the trust record (not yet pre-registered).
+
+### Changed
+- **`spec/README.md` rewritten to be shorter** (about 25% fewer words). Each idea is stated once: scope, tiers, how to
+  read a rule, versioning and limitations. No rule changed.
+- **Status "Tested" is defined more strictly:** simulation, generated tasks or a structural test, never production.
+- `research/README.md` explains why pre-registration, code and report commits are minutes apart, and that the check
+  shows order, not independence.
+- **Docs simplified for non-technical readers.** The README now holds the problem and the principles
+  (`PRINCIPLES.md` folded in). Each idea lives in one place: concepts and results in the primer, day-to-day practice in
+  the practitioner guide, rules and versioning in the specification. `docs/guide.md` is now
+  [`docs/practitioner-guide.md`](docs/practitioner-guide.md).
+- Added licences (`LICENSE` Apache-2.0 for code, `LICENSE-docs` CC BY 4.0 for docs), a code of conduct, a security
+  policy and automated tests on every pull request.
+
+### Removed
+- **The top-level `SPEC.md` pointer.** Older research reports cite its sections; they map to the current
+  specification as follows:
+
+| Was (SPEC.md v0.5) | Now |
+|---|---|
+| §1–3 Core idea, definitions, architecture | [`spec/README.md`](spec/README.md), [`spec/terminology.md`](spec/terminology.md) |
+| §4 Task types | [`spec/requirements/07-agent-interface.md`](spec/requirements/07-agent-interface.md), [`spec/requirements/01-measure.md`](spec/requirements/01-measure.md) |
+| §5 Data model | [`spec/schema/`](spec/schema/), rules EA-6.7 to EA-6.15 |
+| §6 The decision | [`spec/requirements/02-decide.md`](spec/requirements/02-decide.md) |
+| §7 Trust calculation | [`spec/requirements/01-measure.md`](spec/requirements/01-measure.md), [`spec/requirements/02-decide.md`](spec/requirements/02-decide.md), [`spec/autonomy.md`](spec/autonomy.md), [`spec/measure.md`](spec/measure.md) |
+| §8 Versions and learning | [`spec/requirements/04-learn.md`](spec/requirements/04-learn.md) |
+| §9 Oversight | [`spec/requirements/03-oversee.md`](spec/requirements/03-oversee.md) |
+| §10 Governance | [`spec/requirements/06-govern.md`](spec/requirements/06-govern.md) |
+| §11 Multi-agent | [`spec/requirements/08-multi-agent.md`](spec/requirements/08-multi-agent.md) |
+| §12 API | [`spec/api.md`](spec/api.md) |
+| §13 Conformance | [`conformance/`](conformance/), [`conformance/compliance-matrix.md`](conformance/compliance-matrix.md) |
+| §14 Worked example | [`spec/examples.md`](spec/examples.md) |
+| §15–16 Decisions and clarifications | Folded into the rules; history in [`CHANGELOG.md`](CHANGELOG.md) |
+
+## [0.7] - 2026-10-21 · Invite-only review draft
 
 ### Changed
 - **Rules are grouped by lifecycle stage and renumbered** `EA-<stage>.<n>`: 1 Measure, 2 Decide, 3 Oversee, 4 Learn,
@@ -153,7 +199,7 @@ Research results behind each change are in [`research/`](research/README.md).
 | EA-7.4 | EA-8.4 | Keep consequential peer work supervised | Advanced |
 | EA-7.5 | EA-8.5 | Reviewer agents earn trust as their own task type | Advanced |
 
-## [0.6] - 2026-10-19 · Public review draft (private)
+## [0.6] - 2026-10-19 · Private draft
 
 ### Changed
 - **The specification is restructured into [`spec/`](spec/README.md):**

@@ -1,122 +1,99 @@
 # Primer
 
-*Informative. Start here if you're new to Earned Autonomy.*
-
-## The problem
-
-AI agents now answer customers, process refunds, update records and book appointments. Every business that deploys
-one faces two questions:
-
-1. **Which work is worth handing to an agent at all?**
-2. **When can the agent do that work without a person checking first?**
-
-Most teams answer both once, by gut feel, for the whole agent: either everything is checked forever, which is safe but
-slow, or the agent is switched to "automatic", which is fast but risky. Neither answer changes as the agent gets better
-or worse, or as the work changes.
-
-Earned Autonomy answers them the way we answer them for people: **choose the work that's worth delegating, then let
-trust be earned from a record of good work, one kind of task at a time, measured continuously, and lost when it
-slips.**
-
-## Two sides
-
-| Side | Question | Where |
-|---|---|---|
-| **Choosing what to automate** | Which task types will pay back the effort, and how fast? | [Assessment guide](assessment-guide.md) |
-| **Earning trust** | How far can this agent be trusted on this task right now, and what should happen next? | [Practitioner guide](guide.md) and the [specification](../spec/README.md) |
+The core ideas of Earned Autonomy in about ten minutes. For why it matters, start with the [README](../README.md).
 
 ## The lifecycle
 
 ```mermaid
 flowchart LR
-    A[Assess<br/>worth automating?] --> B[Build<br/>implement the agent]
-    B --> M[Measure<br/>trust score per task]
-    M --> D[Decide<br/>autonomy and oversight]
+    A[Assess<br/>worth automating?] --> B[Build<br/>make the agent]
+    B --> M[Measure<br/>trust per task]
+    M --> D[Decide<br/>how much it does alone]
     D --> O[Oversee<br/>spot-checks, alarms, pause]
-    O --> L[Learn<br/>corrections, new versions]
+    O --> L[Learn<br/>fixes, new versions]
     L --> M
     O --> M
     D --> R[Retire<br/>stop when it doesn't pay]
 ```
 
-**Govern** runs through every stage: a named owner, clear roles, versioned rules and a permanent record nobody can alter.
+**Govern** runs through every stage: a named owner, clear roles, versioned rules and a permanent record.
 
-Build is deliberately outside the standard: any agent, built any way, can be measured and governed. The
-[implementation guide](implementation-guide.md) collects advice on building agents that earn trust quickly.
+Build is outside the standard: any agent, built any way, can be measured and governed.
 
-## Core concepts
+## Core ideas
 
-**Action.** Anything an agent does that changes something: sending a reply, issuing a refund, updating a record,
-booking a time. Reading information isn't an action.
+**Action.** Anything an agent does that changes something: sending a reply, issuing a refund, updating a record.
+Reading information isn't an action.
 
-**Task type.** A named kind of action, such as `customer_service.refund.issue`. Each task type is an entry in a
-**catalogue** with a description, a few example requests, the tools it may use, and a consequence level. Trust is
-tracked per task type.
+**Task type.** A named kind of action, such as "issue a refund". Each one sits in a **task catalogue** with a
+description, a few example requests, the tools it may use and a consequence level. Trust is tracked per task type.
 
-**Consequence level.** How much a mistake on that task type would cost. It sets the bar:
+**Consequence level.** How much a mistake would cost. It sets how good the agent must prove to be:
 
-| Level | Typical work | Maximum serious-mistake rate |
+| Level | Typical work | Highest acceptable serious-mistake rate |
 |---|---|---|
-| Low (C1) | Internal notes, tagging, answers to common questions | 10% |
-| Moderate (C2) | Customer replies, bookings, record updates | 5% |
-| High (C3) | Commitments, small refunds, access changes | 2% |
-| Critical (C4) | Money, deletions, legal or irreversible actions | Never acts alone |
+| **C1 Low** | Internal notes, tagging, common questions | 10% |
+| **C2 Moderate** | Customer replies, bookings, record updates | 5% |
+| **C3 High** | Commitments, small refunds, access changes | 2% |
+| **C4 Critical** | Whatever your organisation decides must never be handed over | Never acts alone |
 
-**Trust score.** For each task type: how confident we are that the agent's true serious-mistake rate is under the bar.
-For example, "97% confident the agent's error rate on invoice queries is under 5%". It updates continuously, behind a
-profile showing the estimated rate, the evidence and its sources, freshness and trend.
+The level sets the bar; it doesn't predict how good the agent is. In testing, "simple" work was often where agents made
+the most mistakes.
 
-**Autonomy setting.** What the measurement allows. In the simple version (Core), three levels:
+**Serious mistake.** A wrong or unauthorised action, a made-up fact or amount, a promise the policy doesn't allow, or
+obeying an instruction hidden in a message. Wording and tone changes don't count.
 
-- **Supervised:** a person approves every action before it happens. Everything starts here.
-- **Trusted:** the agent acts alone; about one in four actions is checked afterwards.
-- **Senior:** the agent acts alone; about one in twenty actions is checked afterwards.
+**Trust score.** For each task type: how confident we are that the agent's real serious-mistake rate is under the bar.
+For example, "97% confident it's under 5% on invoice queries". It updates with every judged action.
 
-**AI owner.** The business person accountable for the agents in an area, usually a team lead or department head.
+**Autonomy setting.** What the trust score allows. The simple version has three levels:
 
-**The multiple.** Work done per hour of human time, compared with doing it by hand. Raising it, without letting more
-serious mistakes through, is the point of the whole framework.
+- **Supervised:** a person approves every action first. Everything starts here.
+- **Trusted:** the agent acts alone; about 1 in 4 actions is checked afterwards.
+- **Senior:** the agent acts alone; about 1 in 20 is checked afterwards.
 
-## Why worst-case evidence?
+**AI owner.** The business person accountable for the agents in an area, usually a team lead.
 
-If an agent handles five refunds correctly, its error rate so far is zero, but five is too few to know anything: it
-could really be getting one in three wrong and have been lucky. So the framework doesn't ask "what's the error rate?".
-It asks: **"what's the highest error rate that could still plausibly explain what we've seen?"**
+**The multiple.** Work done per hour of people's time, compared with doing it by hand. Raising it without letting more
+mistakes through is the point.
 
-That worst case shrinks as clean work builds up. A useful rule of thumb: with no mistakes, the worst case is roughly
-**4 ÷ the number of judged actions**. To be confident the error rate is under 5%, an agent needs about **73 clean
-judged actions**. One mistake along the way raises that to about 110.
+## Why judge on the worst case?
 
-- **Give more autonomy when even the worst case looks good.**
-- **Take it back when even the best case looks bad.** For example, six serious mistakes in the last fifty judged
-  actions.
+Five correct refunds prove little: the agent could really be getting one in three wrong and have been lucky. So the
+question isn't "what's the error rate?" but **"what's the highest error rate that could still explain what we've
+seen?"**
 
-So trust is slow to gain and quick to lose, and checking never stops. Teams that don't want the statistics can use
-lookup tables that give the same answers.
+That worst case shrinks as clean work builds up. Rule of thumb: with no mistakes, it's about **4 ÷ the number of judged
+actions**. To be confident an agent is under 5%, it needs about **73 clean judged actions**. One mistake raises that to
+about 110.
+
+- **Give more freedom when even the worst case looks good.**
+- **Take it back when even the best case looks bad.**
+
+So trust is slow to gain, quick to lose, and checking never stops. No statistics needed: lookup tables give the same
+answers.
 
 ## Where evidence comes from
 
-Only from judged work, gathered before anything can go wrong: a person's review, a **shadow comparison** with what staff
-actually did, or **past cases**. Complaints and reversals only appear after the harm is done, so they act as alarms that
-lower trust, never as evidence that raises it.
+Only from work judged before anything can go wrong: a person's review, a comparison with what staff actually did, or
+past cases. Complaints arrive after the harm is done, so they lower trust but never raise it.
 
-## What the evidence shows
+## Does it work?
 
-Pre-registered experiments on simulated organisations, 6,000 generated tasks done by real AI agents, and a public
-customer-service benchmark found:
+Pre-registered experiments on simulated organisations, 6,000 tasks done by real AI agents, and a public benchmark:
 
-- **83–94% fewer serious mistakes** than letting an agent act freely;
-- **93–100% of promotions were deserved**, and slips were caught within about **14 actions**;
-- **every autonomous action could be explained**;
-- **the multiple** was about 4.4 to 6.3 times. Trust rules alone don't reach ten times; better agents and cheaper
+- **83–94% fewer serious mistakes** than letting an agent act freely, and 77–91% fewer than automatic checks alone.
+- **About the same safety as checking everything,** with a fifth to a third less review work.
+- **93–100% of promotions were deserved,** and slips were caught within about 14 actions.
+- **The multiple was about 4.4 to 6.3 times.** Trust rules alone don't reach ten times; better agents and cheaper
   evidence are the next levers.
 
-Some recommendations failed their tests and were dropped; the reports say which. All of this is synthetic so far. A
-real-world pilot is the next step. Details: [research/README.md](../research/README.md).
+Some recommendations failed and were dropped. All evidence so far is simulated; a real-world pilot is next. Details:
+[research](../research/README.md).
 
 ## Where to go next
 
-- Choosing what to automate: [the assessment guide](assessment-guide.md)
-- Running agents day to day: [the practitioner guide](guide.md)
-- Building agents that earn trust fast: [the implementation guide](implementation-guide.md)
-- Building the machinery: [the specification](../spec/README.md) and the [reference engine](../engine/README.md)
+- Choosing what to automate: [assessment guide](assessment-guide.md)
+- Running agents day to day: [practitioner guide](practitioner-guide.md)
+- Building agents that earn trust fast: [implementation guide](implementation-guide.md)
+- Building the machinery: [specification](../spec/README.md) and [reference engine](../engine/README.md)

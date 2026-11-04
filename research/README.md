@@ -29,6 +29,12 @@ git show --stat research/prereg-v1      # the tagged commit holds only the pre-r
 The research was merged into this repository with its full history, so these commands work here. The files sat at
 the top level before the merge, which is why the paths above have no `research/` prefix.
 
+**Why the times are minutes apart:** each round was designed, run and written up by one team with AI coding agents,
+usually in a single working session. The check is about **order**, not elapsed time: the pre-registration and its
+thresholds were committed before any code or data for that round, so the thresholds couldn't be tuned to the results.
+What this does not give you is independence. The same team wrote the hypotheses, the code, the grader and the report.
+Independent replication is the main thing we are asking reviewers to help with.
+
 **Limit of this check:** commit dates are set by the machine that made the commit. Independent timestamping is on the
 [launch checklist](../docs/launch-checklist.md).
 
@@ -77,6 +83,23 @@ commercial agent platform's internals; see Notes.
   the corrected ones, and the correction is logged in [DECISIONS.md](DECISIONS.md).
 - **Simulated reviewers** follow an assumed model of attention and complacency.
 - **Exploratory findings** (labelled in each report) need a pre-registered confirmation before they count as tested.
+
+## What we're researching next
+
+1. **A production pilot.** A sandbox or live pilot with a deploying organisation, to test the rules where an agent
+   actually works. This is the biggest gap above, and we're looking for partners.
+2. **Reinforcement learning from the trust record.** Every judged action in the record is a labelled example: an
+   approval, a rejection or an edit, with its reason. The question is whether an agent can be improved by learning
+   from that record offline, from work already done and never by experimenting on customers, while its trust stays
+   honest. What we want to find out:
+   - Does it lower the serious-error rate, measured by the same hidden spot-checks?
+   - Does the agent learn to please its reviewers rather than do the work? (See *Gaming the tests* in
+     [threats](../spec/threats.md), EA-4.3 and EA-4.13.)
+   - A trained update is a new version (EA-4.1). How much earned trust should carry over to it?
+   - Can the autonomy ladder be the safety gate, so a learned policy acts alone only where it already holds trust?
+
+   None of this is pre-registered yet. Each question will be pre-registered before any code is written, as with every
+   study so far.
 
 ## Re-running
 

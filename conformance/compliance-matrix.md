@@ -9,14 +9,14 @@ For every rule: its strength, its evidence status, where the reference engine im
 | Strength | Tested | Default | Open | Total |
 |---|--:|--:|--:|--:|
 | MUST | 48 | 40 | 3 | 91 |
-| SHOULD | 6 | 8 | 5 | 19 |
+| SHOULD | 6 | 8 | 9 | 23 |
 | MAY | 0 | 1 | 1 | 2 |
-| **All** | 54 | 49 | 9 | 112 |
+| **All** | 54 | 49 | 13 | 116 |
 
 | Tier | Tested | Default | Open | Total |
 |---|--:|--:|--:|--:|
 | Core | 23 | 16 | 0 | 39 |
-| Standard | 26 | 30 | 1 | 57 |
+| Standard | 26 | 30 | 5 | 61 |
 | Advanced | 5 | 3 | 8 | 16 |
 
 MUST rules with no test yet (7): EA-1.7, EA-1.9, EA-4.2, EA-4.5, EA-6.12, EA-8.2, EA-8.5.
@@ -98,6 +98,8 @@ MUST rules with no test yet (7): EA-1.7, EA-1.9, EA-4.2, EA-4.5, EA-6.12, EA-8.2
 | [EA-3.16](../spec/requirements/03-oversee.md#ea-316-slowly-degrading-reviewers-known-limitation) Slowly degrading reviewers (known limitation) | Advanced | MAY | Open | none | none |
 | [EA-3.17](../spec/requirements/03-oversee.md#ea-317-review-windows) Review windows | Standard | SHOULD | Open | none | none |
 | [EA-3.18](../spec/requirements/03-oversee.md#ea-318-no-action-on-timeout) No action on timeout | Standard | MUST | Tested | `engine.py` `TrustEngine.may_execute`, `TrustEngine.mark_executed` | `test_held_action_never_runs_without_a_reviewer` |
+| [EA-3.19](../spec/requirements/03-oversee.md#ea-319-a-pause-reaches-delegated-work-known-gap) A pause reaches delegated work (known gap) | Standard | SHOULD | Open | none yet; `TrustEngine.pause` covers the paused agent's own actions only. | none |
+| [EA-3.20](../spec/requirements/03-oversee.md#ea-320-incident-response-known-gap) Incident response (known gap) | Standard | SHOULD | Open | none yet; incidents are recorded and step down the task type. | none |
 
 ## 4. Learn
 
@@ -116,6 +118,7 @@ MUST rules with no test yet (7): EA-1.7, EA-1.9, EA-4.2, EA-4.5, EA-6.12, EA-8.2
 | [EA-4.11](../spec/requirements/04-learn.md#ea-411-batch-changes-into-releases) Batch changes into releases | Standard | SHOULD | Default | none (an operating practice) | none |
 | [EA-4.12](../spec/requirements/04-learn.md#ea-412-rollback-is-a-new-version) Rollback is a new version | Standard | MUST | Default | `engine.py` `TrustEngine.on_version_published` | `test_version_changes_apply_per_agent_across_organisations_including_rollback` |
 | [EA-4.13](../spec/requirements/04-learn.md#ea-413-the-agent-cant-change-what-its-judged-by) The agent can't change what it's judged by | Standard | MUST | Tested | `governance.py` `GovernanceGuard` | `test_c5_governance_attacks_blocked_and_logged` |
+| [EA-4.14](../spec/requirements/04-learn.md#ea-414-upstream-model-changes-are-new-versions-known-gap) Upstream model changes are new versions (known gap) | Standard | SHOULD | Open | none yet | none |
 
 ## 5. Retire
 
@@ -147,6 +150,7 @@ MUST rules with no test yet (7): EA-1.7, EA-1.9, EA-4.2, EA-4.5, EA-6.12, EA-8.2
 | [EA-6.13](../spec/requirements/06-govern.md#ea-613-the-record-is-kept-permanently) The record is kept permanently | Standard | MUST | Default | none needed (no deletion path) | `test_c5_record_has_no_edit_api` |
 | [EA-6.14](../spec/requirements/06-govern.md#ea-614-references-and-labels-not-customer-content) References and labels, not customer content | Standard | MUST | Default | `models.py` `payload_hash`; `record.py` | `test_record_holds_no_customer_content`<br>`test_tool_floor_decisions_replay_and_keep_args_out_of_the_record` |
 | [EA-6.15](../spec/requirements/06-govern.md#ea-615-records-follow-the-schema) Records follow the schema | Standard | MUST | Default | `models.py` (`to_dict` on each model) | `test_engine_objects_validate_against_the_schemas`<br>`test_record_entries_validate_against_the_schema` |
+| [EA-6.16](../spec/requirements/06-govern.md#ea-616-provider-and-deployer-known-gap) Provider and deployer (known gap) | Standard | SHOULD | Open | none yet | none |
 
 ## 7. Agent interface
 

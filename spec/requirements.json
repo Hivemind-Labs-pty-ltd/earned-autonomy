@@ -1,7 +1,7 @@
 {
   "specification": "Earned Autonomy",
   "version": "0.7",
-  "status": "Public review draft",
+  "status": "Invite-only review draft",
   "generated_by": "scripts/build_requirements.py",
   "rules": [
     {
@@ -1458,6 +1458,48 @@
       "notes": null
     },
     {
+      "id": "EA-3.19",
+      "cite": "v0.7-EA-3.19",
+      "title": "A pause reaches delegated work (known gap)",
+      "stage": "3. Oversee",
+      "file": "spec/requirements/03-oversee.md",
+      "statement": "Pausing an agent or a task type SHOULD also hold every not-yet-executed action that the paused agent delegated, including actions by agents it started.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Open",
+      "tier": "Standard",
+      "stability": "Development",
+      "rationale": "A stop button that stops the principal but not the sub-agents it spawned isn't a stop button. Provenance on delegated actions (EA-8.2) makes this checkable.",
+      "evidence": "none yet. Raised by reviewers of agentic governance practice (sub-agents outliving a kill switch).",
+      "implementation": "none yet; `TrustEngine.pause` covers the paused agent's own actions only.",
+      "tests": [],
+      "notes": "Open question: should a pause reach agents in another organisation that accepted delegated work?"
+    },
+    {
+      "id": "EA-3.20",
+      "cite": "v0.7-EA-3.20",
+      "title": "Incident response (known gap)",
+      "stage": "3. Oversee",
+      "file": "spec/requirements/03-oversee.md",
+      "statement": "When an incident is reported (EA-3.7), the organisation SHOULD record against it the containment taken, who was notified, the root cause and the remediation, and SHOULD link any rule, check or test changed because of it.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Open",
+      "tier": "Standard",
+      "stability": "Development",
+      "rationale": "Today an incident steps the task type down at once (EA-2.18), but the specification says nothing about handling the incident itself. Buyers and regulators expect a documented process.",
+      "evidence": "none yet.",
+      "implementation": "none yet; incidents are recorded and step down the task type.",
+      "tests": [],
+      "notes": "Notification duties under privacy or sector law are outside this specification."
+    },
+    {
       "id": "EA-4.1",
       "cite": "v0.7-EA-4.1",
       "title": "Any change is a new version",
@@ -1753,6 +1795,27 @@
         "conformance/test_conformance.py::test_c5_governance_attacks_blocked_and_logged"
       ],
       "notes": null
+    },
+    {
+      "id": "EA-4.14",
+      "cite": "v0.7-EA-4.14",
+      "title": "Upstream model changes are new versions (known gap)",
+      "stage": "4. Learn",
+      "file": "spec/requirements/04-learn.md",
+      "statement": "A change to the model an agent runs on, including one its provider makes without notice, SHOULD be treated as a new agent version (EA-4.1), and an implementation SHOULD detect it wherever the provider exposes a model identifier.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Open",
+      "tier": "Standard",
+      "stability": "Development",
+      "rationale": "Trust is earned by a specific version. A silent model swap is a version change nobody recorded, so the record would credit the new model with the old model's evidence.",
+      "evidence": "none yet.",
+      "implementation": "none yet",
+      "tests": [],
+      "notes": "Input-distribution drift (the work changing, not the agent) is caught only indirectly, by continuous spot-checks (EA-3.1) and step-down (EA-2.17)."
     },
     {
       "id": "EA-5.1",
@@ -2250,6 +2313,27 @@
         "conformance/test_schema.py::test_record_entries_validate_against_the_schema"
       ],
       "notes": null
+    },
+    {
+      "id": "EA-6.16",
+      "cite": "v0.7-EA-6.16",
+      "title": "Provider and deployer (known gap)",
+      "stage": "6. Govern",
+      "file": "spec/requirements/06-govern.md",
+      "statement": "When the agent's provider and the organisation deploying it are different parties, the roles in EA-6.1 SHOULD be assigned to a named person in each party in writing, and both parties SHOULD be able to read the record for the agent's actions in the deploying organisation.",
+      "condition": null,
+      "strength": "SHOULD",
+      "keywords": [
+        "SHOULD"
+      ],
+      "status": "Open",
+      "tier": "Standard",
+      "stability": "Development",
+      "rationale": "The specification treats the organisation as one party. In B2B deployments the hardest question is who owns what when an agent acts across both parties' systems; it must be settled before the agent acts, not after an incident.",
+      "evidence": "none yet.",
+      "implementation": "none yet",
+      "tests": [],
+      "notes": "Open questions: who may pause (EA-3.9), who sets consequence levels, and whether trust earned with one deployer may inform another (EA-1.1 says no)."
     },
     {
       "id": "EA-7.1",

@@ -1,6 +1,19 @@
 # Contributing
 
-*Private draft. Contributions are currently from Hivemind Labs only.*
+*Version 0.7, invite-only review draft. Contributions are currently from Hivemind Labs and invited reviewers and collaborators.*
+
+> [!IMPORTANT]
+> **Help wanted: mapping EA to the standards.** [CROSSWALKS.md](CROSSWALKS.md) has first-cut mappings that need expert
+> eyes:
+>
+> - **ISO/IEC 42001** — mapped without the purchased text; every row is unverified.
+> - **ISO/IEC TR 24028** (trustworthiness in AI) — not mapped yet. It leaves *levels* of trustworthiness out of scope,
+>   which is the part EA tries to supply.
+> - **AI6 (Guidance for AI Adoption)** and the **NAIC buyer questions** — first cut, not reviewed.
+> - **Gradient Institute's Agentic AI Governance Code of Practice** — not mapped; we couldn't find a public copy.
+>
+> If you work with any of these, a correction, a missing clause or "this row is wrong" is exactly what we need. Open an
+> issue, or email hello@hivemind.au.
 
 ## Proposing a rule change
 

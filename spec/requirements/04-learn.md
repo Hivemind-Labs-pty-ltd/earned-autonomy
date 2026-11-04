@@ -133,3 +133,14 @@ What happens to trust when an agent changes. How an agent improves is up to its 
 - **Evidence:** All 28 self-promotion and rule-loosening attempts were blocked, with all 8 legitimate requests allowed ([research/REPORT.md](../../research/REPORT.md), G4).
 - **Implementation:** `governance.py` `GovernanceGuard`
 - **Test:** `conformance/test_conformance.py::test_c5_governance_attacks_blocked_and_logged`
+
+## EA-4.14 Upstream model changes are new versions (known gap)
+- **Statement:** A change to the model an agent runs on, including one its provider makes without notice, SHOULD be treated as a new agent version (EA-4.1), and an implementation SHOULD detect it wherever the provider exposes a model identifier.
+- **Status:** Open
+- **Tier:** Standard
+- **Stability:** Development
+- **Rationale:** Trust is earned by a specific version. A silent model swap is a version change nobody recorded, so the record would credit the new model with the old model's evidence.
+- **Evidence:** none yet.
+- **Implementation:** none yet
+- **Test:** none yet
+- **Notes:** Input-distribution drift (the work changing, not the agent) is caught only indirectly, by continuous spot-checks (EA-3.1) and step-down (EA-2.17).
